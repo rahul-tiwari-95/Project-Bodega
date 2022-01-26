@@ -16,7 +16,7 @@ class MetaUser(models.Model):
 
 
     def __str__(self):
-        #returns username & modified_at
+        #returns username & ID
 
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
