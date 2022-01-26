@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'trill.wsgi.application'
 DATABASES = {
     'default':{
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'trillmeta',
+        'NAME':'trillmeta_db',
         'USER': 'postgres',
         'PASSWORD': '043074',
         'HOST' : '127.0.0.1',
@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'EST'
 
 USE_I18N = True
 
