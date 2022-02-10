@@ -1,8 +1,12 @@
+
 from password_generator import PasswordGenerator
 from django.contrib.postgres.fields import ArrayField
 import hashlib
 from django.apps import apps
 from django.db import models
+from django.utils import timezone
+import datetime
+
 
 pg = PasswordGenerator() #initiating PG exec
 pg.maxlen = 30
@@ -20,11 +24,9 @@ pg2.minlen = 10
 
 class MetaUser(models.Model):
     meta_username = models.TextField( default='username_not_defined', unique=True)
-    password = models.TextField( unique=True)
+    password = models.TextField( unique=True, default='Go for easy 4-digit numeric code - which is not obvious.')
     hashkey = models.TextField( default=hashlib.sha512(str(pg2.generate()).encode()).hexdigest(), unique=True)
-    first_name = models.TextField()
-    last_name = models.TextField()
-    email = models.EmailField( default='you@you.com')
+    email = models.EmailField( default='fakeemailaddress@somewebsite.com')
     created_at = models.DateField() ##the date when this user was created.
     modified_at = models.DateTimeField()  ##the timezone when the user_data was modified
 
@@ -44,7 +46,10 @@ class User_Address(models.Model):
     address_state = models.TextField()
     city = models.TextField()
     postal_code = models.TextField()
-    country = models.TextField()
+    country = models.TextField(choices=[
+        ('INDIA', 'IN'),
+        ('USA', 'US'),
+    ]) #Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
     planet = models.TextField( default='Earth') #What if aliens wanna buy muay thai shorts??
     cell_phone = models.TextField(default='0000')
     created_at = models.DateField()
@@ -62,19 +67,20 @@ class User_Address(models.Model):
 
 class User_Payment(models.Model):
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    payment_type = models.TextField( default='Credit / Debit Card')
+    payment_type = models.TextField( choices=[
+        ('DEBIT/CREDIT-CARD', 'DEBIT/CREDIT-CARD'),
+        ('PAYPAL', 'PAYPAL'),
+        ('CRYPTO(BETA)', 'CRYPTO(BETA)')
+    ])
     payment_provider = models.TextField( default='STRIPE')
-    payment_status = models.BooleanField(default=False) #We will toggle this from the frontend via status '200' - will add protection
+    payment_status = models.BooleanField(default=False) #We will toggle this from the frontend via status '200' - will add CASCADEion
     total_money_out = models.FloatField(default=0.00)
     total_money_in = models.FloatField(default=0.0)
     user_payment_profile_status = models.BooleanField(default=False)
 
+
     #code for routing money to users - whether they're producing or consuming
-    if user_payment_profile_status:
-        #IF TRUE, we need User payment details like bank account etc etc?
-        pass
-    else:
-        pass
+    #we need to verify bank connection via Plaid and then use Stripe Connect
 
     created_at = models.DateField()
     modified_at = models.DateTimeField()
@@ -95,10 +101,11 @@ class User_Type(models.Model):
     user_role = models.TextField( default='User')
     created_at = models.DateField()
     modified_at = models.DateTimeField()
-    login_password = models.TextField( default='\xafJ@\n,\xebyc\xa4$\xd9\xcf7y\x17\\\x8d%\x8f\xac\xf8\xa3\x1e\xe8\xbc\x19I\xdc\x06\x0e\x10\xe6')
     #we have to implement hashing & security here via a function. but I dont know how to
     #we can use a 3rd party to do auth - via 3 factor authentication
     #we can add wallet option - connect MetaMask with this.
+
+    
     
     #1. how humanity behaves digitally anonymously -- should include computation on likes, shares, comments, purchases & people they follow
     #what you have liked or engaged with?
@@ -129,22 +136,76 @@ class User_Type(models.Model):
     # and also, what they say is factually correct and not a subjective opinion.
 
     #what you will do in the future?
-
     digital_future_personality = ArrayField(base_field=models.TextField(), size=8)
-    human_race = models.TextField( default='Libyan')
-    question_gender = models.BooleanField(default=False)
-    question_god = models.BooleanField(default=False)
-    question_society = models.BooleanField(default=False)
-    is_life_random = models.BooleanField(default=False)
-    one_humanity = models.BooleanField(default=False) #Do you beleive that humanity should be together?
-    is_internet_a_happy_place = models.BooleanField(default=True)
+    about_you_belief = models.TextField(choices=[ #your cornerstones
+        ('1', 'I believe that people or organizations cant be trusted with anything'),
+        ('2', 'I believe that nowadays, free will is fucking hard.'),
+        ('3', 'I believe that anonymity gives me power to create wihout fear of failure.'),
+        ('4', 'I believe that we all are special in some way - Genetic mutations'),
+        ('5', 'I believe that our society is all about conformism & accumulation of material-shit'),
+        ('6', 'I believe that I do not mildy resonate with any subjective statements above.')
+    ])
+    about_you_belief2 = models.TextField(choices=[
+        ('1', 'I believe that people or organizations cant be trusted with anything'),
+        ('2', 'I believe that nowadays, free will is fucking hard.'),
+        ('3', 'I believe that anonymity gives me power to create wihout fear of failure.'),
+        ('4', 'I believe that we all are special in some way - Genetic mutations'),
+        ('5', 'I believe that our society is all about conformism & accumulation of material-shit'),
+        ('6', 'I believe that I do not mildy resonate with any subjective statements above.')
+    ])
+    about_you_disbelief = models.TextField(choices=[
+        ('1', 'I dont belief in the concept of banks, goverments, race, color, religion because these myths stop us from questioning who we truly are'),
+        ('2', 'I dont belief that any government cares about the Libyan slavery crisis'),
+        ('3', 'I dont belief in Mars colonization, I think we should all work to fix mother earth.'),
+        ('4', 'I dont belief in the concept of monogamous relationships'),
+        ('5', 'I dont belief that people understand others perspectives.'),
+        ('6', 'I dont belief in anything.')
+    ])
+    why_did_you_join_bodega = models.TextField(choices=[
+        ('Anonymity', 'Anonymity'),
+        ('Creative-Freedom', 'Creative-Freedom'),
+        ('Create-Digital-Art', 'Create-Digital-Art'),
+        ('Connect-With-Global-Audience', 'Connect-With-Global-Audience'),
+        ('All-of-the-above', 'All-of-the-above'),
+        ('Just-Browsing', 'Just-Browsing'),
+
+    ])
+
+    explore_bodega_preferences = models.TextField(choices=[
+        ('Exploring-Fashion/Music', 'Exploring-Fashion/Music'),
+        ('Exploring-Digital-Art', 'Exploring-Digital-Art'),
+        ('Surprise-Me', 'Suprise-Me') #show random content
+
+
+    ])
+
+    member_feedback_preferences = models.TextField(default='Cant find what you love? Type away and we will get to work!')
+
+    #How do you feel after experiencing Bodega?
+    #this will give us live anonymous NPS Score
+    feedback_bodega = models.TextField(choices=[
+        ('ITS-CONFUSING', 'ITS-CONFUSING'),
+        ('NO-OPINION-YET', 'NO-OPINION-YET'),
+        ('IT-EXCITES-ME', 'IT-EXCITES-ME'),
+
+    ])
+
+
+
+    describe_yourself = ArrayField(base_field=models.TextField(), size=10)
+    shoe_size = models.FloatField(default=11.5)
+    waist_size = models.TextField(default='[XL, 36]')
+    chest_size = models.TextField(default='[XL, 30Inch]')
+
+
+    
 
 
 
 
     def __str__(self):
         #returns user_type 
-        return 'You are a/an %s' % (self.user_type)
+        return 'Your feedback on Bodega:  %s' % (self.feedback_bodega)
 
 
 #Engineering secure chat room - can be used for 1-1 or 1-x or x-x communication - secure because read my code mofo
@@ -176,15 +237,15 @@ class Chat_Room(models.Model):
 class Particpants(models.Model):
     #Particpant_ID will be created automaticaly
     #one user_ID can have multiple particpantIDs
-    #one room can have multiple particpants
+    #one room can have multiple particpants - multiple users can have multiple participantID but same chat_room_ID for group chat
 
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    chat_room_ID = models.ForeignKey(Chat_Room, on_delete=models.PROTECT)
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    chat_room_ID = models.ForeignKey(Chat_Room, on_delete=models.CASCADE)
 
     def __str__(self):
         #returns nothing
 
-        return ('Nothing to see here.')
+        return ('Initializing-Particpants')
 
 
 #what a message will look like or what traits will it have
@@ -192,7 +253,7 @@ class Message(models.Model):
 
     #message_ID will be automatically be generated
     chat_room_ID = models.ForeignKey(Chat_Room, on_delete=models.CASCADE)
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     message_body = models.TextField()
     upload_file = models.FileField(upload_to='user_meta_key/message/files')
     created_at = models.DateField()
@@ -204,12 +265,6 @@ class Message(models.Model):
         return 'Chat Room ID: %s ' % (self.chat_room_ID)
 
     
-
-
-    
-
-
-
 
 
 
@@ -232,7 +287,7 @@ class Product_Category(models.Model):
     category_desc = models.TextField(default='Describe your creation.')
     created_at = models.DateField() #when was it created
     modified_at = models.DateTimeField() #when was it last modfied
-    category_image1 = models.FileField(upload_to='category/category_image1')
+    category_image1 = models.FileField(upload_to='category/category_image1') #set default to Bodega's image
     category_image2 = models.FileField(upload_to='category/category_image2')
     category_image3 = models.FileField(upload_to='category/category_image3')
 
@@ -270,7 +325,7 @@ class Product_Themes(models.Model):
 class Discount(models.Model):
     discount_name = models.TextField()
     discount_desc = models.TextField()
-    disocunt_percent = models.FloatField(default=0.0)
+    discount_percent = models.FloatField(default=0.0)
     active_status = models.BooleanField(default=False)
     created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #which user created this
     created_at = models.DateField()
@@ -279,47 +334,18 @@ class Discount(models.Model):
     def __str__(self):
         #returns Discount code and Discount %
 
-        return 'Code: %s -- %-Discount: %s' % (self.discount_name, self.disocunt_percent)
+        return 'Code: %s' % (self.discount_name)
 
 
-#Collaboration model allows all types of users to collaborate on any asset on the TRILL ecosystem and do business
-#many creators can collaborate with many products. but one product / asset at one time can have only one ownership / collab ID
-class Collaboration(models.Model):
-    collab_name = models.TextField( default='Your campaign definition')
-    collab_desc = models.TextField(default='Describe your campaign')
-    collab_type = models.TextField(choices=[ #the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
-        ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
-        ('COMMISSION-%-ON-SALES','COMMISSION-%-ON-SALES'),
-        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
-    ])
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    collab_status = models.BooleanField(default=False)
-    creator_pitch = models.TextField()
-    bid_type = models.TextField(choices=[ #the bid from the creator's side - because freedom of choice
-        ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
-        ('COMMISSION-%-ON-SALES','COMMISSION-%-ON-SALES'),
-        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
-    ])
-    bid_amount = models.FloatField(default=0.0)
-    accept_bid = models.BooleanField(default=False)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
-
-
-    def __str__(self):
-        #returns collab type & collab status
-        return 'Collab Type is: %s -- Collab Status: %s' % (self.collab_type, self.collab_status)
 
 
 #Social Model - Key data weights on your social activity to be tracked for cluster-analysis - everything can be deleted
 
 class Social(models.Model):
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.PROTECT) #we cant have user_IDs deleted - its either ways not connected to their physical copies but STILL
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #we cant have user_IDs deleted - its either ways not connected to their physical copies but STILL
     following = ArrayField(base_field=models.TextField(), size=30) #lists of MetaUser_IDs of all people we follow
     followers = ArrayField(base_field=models.TextField(), size=30) #lists of MetaUSer_IDs which follow us
-    profileprivate = models.BooleanField(default=False)
+    makeprofileprivate = models.BooleanField(default=False)
     saved_content = ArrayField(base_field=models.TextField(), size=500) #URLs to product_metakeys - stored as an array
     likes = ArrayField(base_field=models.TextField(), size=200) #List of Product MetaKeys liked 
     comments = ArrayField(base_field=models.TextField(), size=200) #List of Product MetaKeys commented on
@@ -348,42 +374,52 @@ class Social(models.Model):
 
 class Shop(models.Model):
 
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #Owner details - we will show user_ID.meta_username
     #shop_ID will be automatically created by PostGRE - we will add a unique validator on it
 
     all_products = ArrayField(base_field=models.TextField(), size=200) #list of all products owned by that creator
     all_user_data = ArrayField(base_field=models.TextField(), size=100) #list of metauser IDs for your reference. no other data is shown here
     shop_name = models.TextField( default='Use your username as shop name?')
     shop_desc = models.TextField()
+    shop_logo = models.FileField(upload_to='shop-details/profile_picture')
+    #Ask user if their Shop address is same as their own address for fucks sake.
+    address_line1 = models.TextField()
+    address_line2 = models.TextField()
+    address_state = models.TextField()
+    city = models.TextField()
+    postal_code = models.TextField()
+    country = models.TextField(choices=[
+        ('INDIA', 'IN'),
+        ('USA', 'US'),
+    ]) #Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
     shop_traits = ArrayField(base_field=models.TextField(), size=50) #define what kind of customers you want to reach
     assistance_ask = ArrayField(base_field=models.TextField(), size=20) #add tags on what help you need? funding - hiring etc
     uniquesellingprop = models.TextField(default='Why your meta-shop is special than others?')
 
 
+    def __str__(self):
+        #returns Shop nane and User_ID
+        return 'Shop name is: %s -- User ID is: %s' % (self.shop_name, self.user_ID)
 
 
 
-# Creating Product model - how does a product look like? what are the traits?
+
+
+#Creating Product model - how does a product look like? what are the traits?
 
 class Product(models.Model):
     name=models.TextField( default='No Product Name, yet', unique=True)
     desc = models.TextField(default='Explain your creation in great poetic detail.')
-    #ADD comments & likes
-    sku = models.TextField(default='Give it a serial number ex: SNKRS-NKE-WMN-AJ12-7.5?')
+    selling_price = models.FloatField(default=0.0)
+    discounted_price = models.FloatField(default=0.0)
     product_categoryID = models.ForeignKey(Product_Category, on_delete=models.CASCADE)
     product_themesID = models.ForeignKey(Product_Themes, on_delete=models.CASCADE)
-    collaborationID = models.ForeignKey(Collaboration, on_delete=models.CASCADE)
-    has_multiple_variants = models.BooleanField(default=False)
-
-    if(has_multiple_variants):
-        price_size = ArrayField(models.TextField(default='Size 0 Price 0'))
-    else:
-        price = models.FloatField(default=0.0)
-    
     discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    price = models.FloatField(default=0.0)
+    quantity = models.IntegerField(default=0)
     total_sales = models.FloatField(default=0.0)
-    clicks_on_product = models.IntegerField(1)
+    clicks_on_product = models.IntegerField()
     created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     is_product_digital = models.BooleanField(default=False)
     is_product_sharable = models.BooleanField(default=False)
@@ -394,15 +430,6 @@ class Product(models.Model):
     production_time_days = models.IntegerField()
     hours_invested = models.FloatField(default=1.0)
     encrypt_product = models.BooleanField(default=False)
-
-    if encrypt_product == False:
-        product_active = models.BooleanField(default=True)
-        product_hidden = models.BooleanField(default=False)
-
-    else:
-        product_active = models.BooleanField(default=False)
-        product_hidden= models.BooleanField(default=True)
-
     unit_sold_expectation = models.IntegerField(default=0)
     size_chart = models.FileField(upload_to='product/size_chart')
     product_image1 = models.FileField(upload_to='product/product_image1')
@@ -418,22 +445,110 @@ class Product(models.Model):
         return 'Product Name: %s -- Meta-Key: %s' % (self.name, self.hashkey)
     
 
+#Collaboration model allows all types of users to collaborate on any asset on the TRILL ecosystem and do business
+#many creators can collaborate with many products. but one product / asset at one time can have only one ownership / collab ID
+class Collaboration(models.Model):
+    name = models.TextField( default='Your campaign definition')
+    desc = models.TextField(default='Describe your campaign')
+    creator_collab_choice = models.TextField(choices=[ #the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
+        ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
+        ('BARTER-DEAL', 'BARTER-DEAL'),
+        ('COMMISSION-%-ON-SALES','COMMISSION-%-ON-SALES'),
+        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
+    ])
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    creator_pitch = models.TextField()
+    bid_type = models.TextField(choices=[ #the bid from the creator's side - because freedom of choice
+        ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
+        ('BARTER-DEAL', 'BARTER-DEAL'),
+        ('COMMISSION-%-ON-SALES','COMMISSION-%-ON-SALES'),
+        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
+    ])
+    bid_amount = models.FloatField(default=0.0)
+    accept_bid = models.BooleanField(default=False)
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+
+
+    def __str__(self):
+        #returns collab type & collab status
+        return 'User ID: %s -- Shop ID: %s' % (self.user_ID, self.shop_ID)
+
+
+#Create temp table for Shopping Session - We will store this data and analyze behaviour.
+class Shopping_Session(models.Model):
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    total_amount = models.FloatField(default=0.0)
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+
+    def __str__(self):
+        #returns user_ID and total amount
+        return 'User ID: %s -- Total Amount: %s' % (self.user_ID, self.total_amount)
 
 
 
+#Create temp table called Cart Item --> We wil store the data. Analyze behaviour.
+class Cart_Item(models.Model):
+    session_ID = models.ForeignKey(Shopping_Session, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #We dont want our product to be deleted because of our cute temporary cart item table
+    quanity = models.IntegerField(default=0)
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+
+
+    def __str__(self):
+        # Returns Cart ID and Product ID
+        return 'Cart ID: %s --- Product ID: %s' % (self.id, self.product_ID)
+        #this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
 
 
 
+#Create Order Details table 
+#Remember, just like message chat room shit
+#Many Order_Items can have the same Order_Detail 
+#A Tee and A Dildo can be order number 5566 for user name xyz - fucking modular. less risks of falling  
+class Order_Details(models.Model):
+    total_amount = models.FloatField(default=0.0)
+    payment_info = models.ForeignKey(User_Payment, on_delete=models.CASCADE)
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+
+    def __str__(self):
+        #returns order id
+        return 'Order ID: %s' % (self.id)
 
 
 
+#Create Order Items Table - remember many order items can have the SAME ORDER DETAILS
+#Here, we are accounting for each and every product purchased and bundling them.
+#Because payment is done in arrays and then added up to the total amount. Duh lol
+class Order_Items(models.Model):
+    order_ID = models.ForeignKey(Order_Details, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=0)
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+
+
+    def __str__(self):
+        #returns Order_ID and Product ID
+        return 'Order ID: %s -- Product ID: %s' % (self.order_ID, self.product_ID)
 
 
 
-
-
-
-
-
-
+#making every human, a creator.
+#Monetizing Data --> AI + Investments + Protocol + COIN value will go up + more value
+#Digitization Of Monetization 
+#making human to human connection global & honest
+#One Humanity, Infinite stories
+#serving free-will 
+#question everything  
+#whoareyou?
+#chaseyourself
+#whatcanyoubecome?
+#whatwillyoudowithit?
+#
 

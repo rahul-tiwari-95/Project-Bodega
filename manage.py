@@ -5,6 +5,8 @@ import sys
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "trill.settings"
 
+
+
 import django
 django.setup()
 from backend.models import *
