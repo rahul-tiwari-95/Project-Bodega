@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'trill.wsgi.application'
 DATABASES = {
     'default':{
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'trillmeta_db',
+        'NAME':'bodegadao',
         'USER': 'postgres',
         'PASSWORD': '043074',
         'HOST' : '127.0.0.1',

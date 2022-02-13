@@ -1,29 +1,22 @@
+import imp
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-from rest_framework import permissions
-from .models import MetaUser
-from .serializers import MetaUserSerializer, UserSerializer
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.parsers import JSONParser
+from backend.models import MetaUser
+from backend.serializers import MetaUserSerializer
+
+
+
+@csrf_exempt
+def metauser_list(request):
+    if request.method == 'GET':
+        metauser = MetaUser.objects.all()
+        serializer = MetaUserSerializer(metauser.data, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+
+
 
 #
 
-
-
-class UserViewSet(viewsets.ModelViewSet):
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-
-
-class MetaUserViewSet(viewsets.ModelViewSet):
-
-    queryset = MetaUser.objects.all()
-    serializer_class = MetaUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-# Create your views here.

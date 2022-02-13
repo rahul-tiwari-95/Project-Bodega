@@ -1,4 +1,4 @@
-
+from email.policy import default
 from password_generator import PasswordGenerator
 from django.contrib.postgres.fields import ArrayField
 import hashlib
@@ -9,9 +9,10 @@ import datetime
 
 
 pg = PasswordGenerator() #initiating PG exec
-pg.maxlen = 30
-pg2 = PasswordGenerator()
-pg2.minlen = 10
+
+
+def hashkey_generator():
+    return hashlib.sha1(str(pg.non_duplicate_password(40)).encode()).hexdigest()
 
 
 # Link to DB ER Diagram : https://excalidraw.com/#json=1o-AHOOFnaF6jYHp2Hgz1,4aF7oWBC0cdS89i-a0AN7A
@@ -25,7 +26,7 @@ pg2.minlen = 10
 class MetaUser(models.Model):
     meta_username = models.TextField( default='username_not_defined', unique=True)
     password = models.TextField( unique=True, default='Go for easy 4-digit numeric code - which is not obvious.')
-    hashkey = models.TextField( default=hashlib.sha512(str(pg2.generate()).encode()).hexdigest(), unique=True)
+    hashkey = models.TextField( default=hashkey_generator, unique=True)
     email = models.EmailField( default='fakeemailaddress@somewebsite.com')
     created_at = models.DateField() ##the date when this user was created.
     modified_at = models.DateTimeField()  ##the timezone when the user_data was modified
@@ -46,10 +47,7 @@ class User_Address(models.Model):
     address_state = models.TextField()
     city = models.TextField()
     postal_code = models.TextField()
-    country = models.TextField(choices=[
-        ('INDIA', 'IN'),
-        ('USA', 'US'),
-    ]) #Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
+    country = models.TextField() 
     planet = models.TextField( default='Earth') #What if aliens wanna buy muay thai shorts??
     cell_phone = models.TextField(default='0000')
     created_at = models.DateField()
@@ -67,11 +65,7 @@ class User_Address(models.Model):
 
 class User_Payment(models.Model):
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    payment_type = models.TextField( choices=[
-        ('DEBIT/CREDIT-CARD', 'DEBIT/CREDIT-CARD'),
-        ('PAYPAL', 'PAYPAL'),
-        ('CRYPTO(BETA)', 'CRYPTO(BETA)')
-    ])
+    payment_type = models.TextField()
     payment_provider = models.TextField( default='STRIPE')
     payment_status = models.BooleanField(default=False) #We will toggle this from the frontend via status '200' - will add CASCADEion
     total_money_out = models.FloatField(default=0.00)
@@ -143,7 +137,7 @@ class User_Type(models.Model):
         ('3', 'I believe that anonymity gives me power to create wihout fear of failure.'),
         ('4', 'I believe that we all are special in some way - Genetic mutations'),
         ('5', 'I believe that our society is all about conformism & accumulation of material-shit'),
-        ('6', 'I believe that I do not mildy resonate with any subjective statements above.')
+        ('6', 'I believe that these questions are pointless.')
     ])
     about_you_belief2 = models.TextField(choices=[
         ('1', 'I believe that people or organizations cant be trusted with anything'),
@@ -151,7 +145,7 @@ class User_Type(models.Model):
         ('3', 'I believe that anonymity gives me power to create wihout fear of failure.'),
         ('4', 'I believe that we all are special in some way - Genetic mutations'),
         ('5', 'I believe that our society is all about conformism & accumulation of material-shit'),
-        ('6', 'I believe that I do not mildy resonate with any subjective statements above.')
+        ('6', 'I believe that these questions are pointless.')
     ])
     about_you_disbelief = models.TextField(choices=[
         ('1', 'I dont belief in the concept of banks, goverments, race, color, religion because these myths stop us from questioning who we truly are'),
@@ -179,7 +173,7 @@ class User_Type(models.Model):
 
     ])
 
-    member_feedback_preferences = models.TextField(default='Cant find what you love? Type away and we will get to work!')
+    member_feedback_preferences = models.TextField(default='Cant find what you love? Type away and we will get to work')
 
     #How do you feel after experiencing Bodega?
     #this will give us live anonymous NPS Score
@@ -215,7 +209,7 @@ class Chat_Room(models.Model):
     #Chat_Room ID will be created automatically by PostGre
     name = models.TextField( default='Unnamed-Secure-Room')
     desc = models.TextField(default='Why was this room created?')
-    rules = models.TextField(default='Follow the rules else create your own room')
+    rules = models.TextField(default='Your room, Your rules')
     type_of_room = models.TextField(choices=[
         ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),#only people with meta_key can join the secure_room
         ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),#anyone can join the secure room
@@ -234,7 +228,7 @@ class Chat_Room(models.Model):
 
 
 #Who all with particpate in which rooms? - See secuirty can be fucking easy
-class Particpants(models.Model):
+class Particpant(models.Model):
     #Particpant_ID will be created automaticaly
     #one user_ID can have multiple particpantIDs
     #one room can have multiple particpants - multiple users can have multiple participantID but same chat_room_ID for group chat
@@ -245,7 +239,7 @@ class Particpants(models.Model):
     def __str__(self):
         #returns nothing
 
-        return ('Initializing-Particpants')
+        return 'User_ID: %s -- Chat_Room_ID: %s' % (self.user_ID, self.chat_room_ID)
 
 
 #what a message will look like or what traits will it have
@@ -255,10 +249,10 @@ class Message(models.Model):
     chat_room_ID = models.ForeignKey(Chat_Room, on_delete=models.CASCADE)
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     message_body = models.TextField()
-    upload_file = models.FileField(upload_to='user_meta_key/message/files')
+    upload_file = models.FileField(upload_to='user_meta_key/message/files', default=None)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
-    hashkey = models.TextField( default=hashlib.sha256(str(pg.generate()).encode()).hexdigest(), unique=True)
+    hashkey = models.TextField( default=hashkey_generator, unique=True)
 
     def __str__(self):
         # returns chat_room_ID
@@ -323,8 +317,8 @@ class Product_Themes(models.Model):
 
 #Product Discount definition - How much discount?
 class Discount(models.Model):
-    discount_name = models.TextField()
-    discount_desc = models.TextField()
+    name = models.TextField()
+    description = models.TextField()
     discount_percent = models.FloatField(default=0.0)
     active_status = models.BooleanField(default=False)
     created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #which user created this
@@ -334,27 +328,32 @@ class Discount(models.Model):
     def __str__(self):
         #returns Discount code and Discount %
 
-        return 'Code: %s' % (self.discount_name)
+        return 'Code: %s' % (self.name)
 
 
-
+#creating base template for Bodega coins 
+#in the beginning, bodega coins will be simply points you get on purchase
+class Bodegacoins(models.Model):
+    quantity = models.FloatField(default=300)
+    
 
 #Social Model - Key data weights on your social activity to be tracked for cluster-analysis - everything can be deleted
 
 class Social(models.Model):
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #we cant have user_IDs deleted - its either ways not connected to their physical copies but STILL
+    #bodegacoins_ID = models.ForeignKey(Bodegacoins, on_delete=models.CASCADE)
     following = ArrayField(base_field=models.TextField(), size=30) #lists of MetaUser_IDs of all people we follow
     followers = ArrayField(base_field=models.TextField(), size=30) #lists of MetaUSer_IDs which follow us
     makeprofileprivate = models.BooleanField(default=False)
     saved_content = ArrayField(base_field=models.TextField(), size=500) #URLs to product_metakeys - stored as an array
-    likes = ArrayField(base_field=models.TextField(), size=200) #List of Product MetaKeys liked 
+    likes = ArrayField(base_field=models.TextField(), size=200) #List of Product Hashkeys liked by user 
+    dislikes = ArrayField(base_field=models.TextField(), size=200) #List and count of Product Hashkeys disliked by user
     comments = ArrayField(base_field=models.TextField(), size=200) #List of Product MetaKeys commented on
     products_clickedOn = ArrayField(base_field=models.TextField(), size=500)
     bio = models.TextField()
     blocked_list = ArrayField(base_field=models.TextField(), size=200)
     data_mining_status = models.BooleanField(default=False) #Ask for permissions for data collection 
     #ONLY SELECT USERS whose SOCIAL.data_mining_status == True - Simple solution to privacy, consent! consent! consent!
-
     account_active = models.BooleanField(default=True)
     delete_metauser = models.BooleanField(default=False)
     created_on = models.DateField()
@@ -379,14 +378,16 @@ class Shop(models.Model):
 
     all_products = ArrayField(base_field=models.TextField(), size=200) #list of all products owned by that creator
     all_user_data = ArrayField(base_field=models.TextField(), size=100) #list of metauser IDs for your reference. no other data is shown here
-    shop_name = models.TextField( default='Use your username as shop name?')
-    shop_desc = models.TextField()
-    shop_logo = models.FileField(upload_to='shop-details/profile_picture')
+    name = models.TextField()
+    description = models.TextField()
+    logo = models.FileField(upload_to='shop-details/profile_picture')
+    cover_image = models.FileField(upload_to='shop-details/profile_cover_image', default='EMPTY')
     #Ask user if their Shop address is same as their own address for fucks sake.
     address_line1 = models.TextField()
     address_line2 = models.TextField()
     address_state = models.TextField()
     city = models.TextField()
+    state = models.TextField(default='NY')
     postal_code = models.TextField()
     country = models.TextField(choices=[
         ('INDIA', 'IN'),
@@ -395,11 +396,14 @@ class Shop(models.Model):
     shop_traits = ArrayField(base_field=models.TextField(), size=50) #define what kind of customers you want to reach
     assistance_ask = ArrayField(base_field=models.TextField(), size=20) #add tags on what help you need? funding - hiring etc
     uniquesellingprop = models.TextField(default='Why your meta-shop is special than others?')
+    data_mining_status = models.BooleanField(default=False)
+    created_on = models.DateField()
+    modified_on = models.DateTimeField()
 
 
     def __str__(self):
         #returns Shop nane and User_ID
-        return 'Shop name is: %s -- User ID is: %s' % (self.shop_name, self.user_ID)
+        return 'Shop name is: %s -- User ID is: %s' % (self.name, self.user_ID)
 
 
 
@@ -409,14 +413,21 @@ class Shop(models.Model):
 
 class Product(models.Model):
     name=models.TextField( default='No Product Name, yet', unique=True)
-    desc = models.TextField(default='Explain your creation in great poetic detail.')
+    description = models.TextField(default='Explain your creation in great poetic detail.')
+    numberoflikes = models.IntegerField(default=0)
+    numberofdislikes = models.IntegerField(default=0)
+    numberofcomments = models.IntegerField(default=0)
+    numberofclicks = models.IntegerField(default=0)
+    totaltimespentonproduct_hours = models.IntegerField(default=0)
+    userID_array_of_likes = ArrayField(base_field=models.TextField(), size=100)
+    userID_array_of_dislikes = ArrayField(base_field=models.TextField(), size=100)
+    userID_array_of_comments = ArrayField(base_field=models.TextField(), size=100)
     selling_price = models.FloatField(default=0.0)
     discounted_price = models.FloatField(default=0.0)
     product_categoryID = models.ForeignKey(Product_Category, on_delete=models.CASCADE)
     product_themesID = models.ForeignKey(Product_Themes, on_delete=models.CASCADE)
     discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0)
     total_sales = models.FloatField(default=0.0)
     clicks_on_product = models.IntegerField()
@@ -433,9 +444,9 @@ class Product(models.Model):
     unit_sold_expectation = models.IntegerField(default=0)
     size_chart = models.FileField(upload_to='product/size_chart')
     product_image1 = models.FileField(upload_to='product/product_image1')
-    product_image2 = models.FileField(upload_to='product/product_image2')
-    product_image3 = models.FileField(upload_to='product/product_image3')
-    hashkey = models.TextField( default=hashlib.sha1(str(pg.generate()).encode()).hexdigest(), unique=True) #generates unique SHA1 key for your product - which is immutable in TRILL universe
+    product_image2 = models.FileField(upload_to='product/product_image2', default=None)
+    product_image3 = models.FileField(upload_to='product/product_image3', default=None)
+    hashkey = models.TextField( default=hashkey_generator, unique=True) #generates unique SHA1 key for your product - which is immutable in TRILL universe
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -449,16 +460,17 @@ class Product(models.Model):
 #many creators can collaborate with many products. but one product / asset at one time can have only one ownership / collab ID
 class Collaboration(models.Model):
     name = models.TextField( default='Your campaign definition')
-    desc = models.TextField(default='Describe your campaign')
+    description = models.TextField(default='Describe your campaign')
     creator_collab_choice = models.TextField(choices=[ #the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
         ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
         ('BARTER-DEAL', 'BARTER-DEAL'),
         ('COMMISSION-%-ON-SALES','COMMISSION-%-ON-SALES'),
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
-    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #creators can paste their hashkey to auth
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #creators can paste the hashkey to add the product ID
+    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE) #add a search feature on Front-End - for People to search by Shop name
+    #product_shop_ID should be EQUAL to shop_ID to verify identity that both User_IDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[ #the bid from the creator's side - because freedom of choice
         ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
@@ -467,7 +479,7 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     bid_amount = models.FloatField(default=0.0)
-    accept_bid = models.BooleanField(default=False)
+    accept_bid = models.BooleanField(default=False) #only Product Owner has this privilege 
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -510,7 +522,7 @@ class Cart_Item(models.Model):
 #Remember, just like message chat room shit
 #Many Order_Items can have the same Order_Detail 
 #A Tee and A Dildo can be order number 5566 for user name xyz - fucking modular. less risks of falling  
-class Order_Details(models.Model):
+class Order_Detail(models.Model):
     total_amount = models.FloatField(default=0.0)
     payment_info = models.ForeignKey(User_Payment, on_delete=models.CASCADE)
     created_at = models.DateField()
@@ -525,8 +537,8 @@ class Order_Details(models.Model):
 #Create Order Items Table - remember many order items can have the SAME ORDER DETAILS
 #Here, we are accounting for each and every product purchased and bundling them.
 #Because payment is done in arrays and then added up to the total amount. Duh lol
-class Order_Items(models.Model):
-    order_ID = models.ForeignKey(Order_Details, on_delete=models.CASCADE)
+class Order_Item(models.Model):
+    order_ID = models.ForeignKey(Order_Detail, on_delete=models.CASCADE)
     product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     created_at = models.DateField()
@@ -536,6 +548,29 @@ class Order_Items(models.Model):
     def __str__(self):
         #returns Order_ID and Product ID
         return 'Order ID: %s -- Product ID: %s' % (self.order_ID, self.product_ID)
+
+
+
+#Create models for Vendor payouts if needed
+#maybe Shop_Payout Table
+class Shop_Payout(models.Model):
+    order_detail_ID = models.ForeignKey(Order_Detail, on_delete=models.CASCADE)
+    #Add code here to payout Creator and Collaborator  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -550,5 +585,3 @@ class Order_Items(models.Model):
 #chaseyourself
 #whatcanyoubecome?
 #whatwillyoudowithit?
-#
-
