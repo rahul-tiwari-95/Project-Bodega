@@ -3,6 +3,7 @@ from password_generator import PasswordGenerator
 from django.contrib.postgres.fields import ArrayField
 import hashlib
 from django.apps import apps
+from django.db.models import JSONField
 from django.db import models
 from django.utils import timezone
 import datetime
@@ -103,9 +104,6 @@ class User_Type(models.Model):
     
     #1. how humanity behaves digitally anonymously -- should include computation on likes, shares, comments, purchases & people they follow
     #what you have liked or engaged with?
-
-    digital_base_personality = ArrayField(base_field=models.TextField(), size=8)
-
     #2. more loud materially = more suppressed digitally | less deadly materially = more corrupt digital | more quiet materially = more loud digitally
     #.. more impulsive materially = more deadly digitally | more selfish materially or high degree of conformism = less free digitally 
     #.. more detached materially = more attached spiritually | more suppressed materially by mercenaries = more likely to lead humanity towards Species 3
@@ -130,7 +128,8 @@ class User_Type(models.Model):
     # and also, what they say is factually correct and not a subjective opinion.
 
     #what you will do in the future?
-    digital_future_personality = ArrayField(base_field=models.TextField(), size=8)
+    digital_base_personality = JSONField(null=True, blank=True)
+    digital_future_personality = JSONField(null=True, blank=True)
     about_you_belief = models.TextField(choices=[ #your cornerstones
         ('1', 'I believe that people or organizations cant be trusted with anything'),
         ('2', 'I believe that nowadays, free will is fucking hard.'),
@@ -186,7 +185,7 @@ class User_Type(models.Model):
 
 
 
-    describe_yourself = ArrayField(base_field=models.TextField(), size=10)
+    describe_yourself = JSONField(null=True, blank=True)
     shoe_size = models.FloatField(default=11.5)
     waist_size = models.TextField(default='[XL, 36]')
     chest_size = models.TextField(default='[XL, 30Inch]')
@@ -298,7 +297,7 @@ class Product_Category(models.Model):
 class Product_Themes(models.Model):
     collection_name = models.TextField( default='Collection Name')
     collection_desc = models.TextField(default='Collection Decsription')
-    audience_traits = ArrayField(base_field=models.TextField(), size=10)
+    audience_traits = JSONField(null=True, blank=True)
     marketing_funnel = models.TextField(choices=[
         ('Community', 'Creator-Community'),
         ('Performance-ADs', 'Performance-ADs-IG/FB'),
@@ -342,16 +341,16 @@ class Bodegacoins(models.Model):
 class Social(models.Model):
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #we cant have user_IDs deleted - its either ways not connected to their physical copies but STILL
     #bodegacoins_ID = models.ForeignKey(Bodegacoins, on_delete=models.CASCADE)
-    following = ArrayField(base_field=models.TextField(), size=30) #lists of MetaUser_IDs of all people we follow
-    followers = ArrayField(base_field=models.TextField(), size=30) #lists of MetaUSer_IDs which follow us
+    following = JSONField(null=True, blank=True) #lists of MetaUser_IDs of all people we follow
+    followers = JSONField(null=True, blank=True) #lists of MetaUSer_IDs which follow us
     makeprofileprivate = models.BooleanField(default=False)
-    saved_content = ArrayField(base_field=models.TextField(), size=500) #URLs to product_metakeys - stored as an array
-    likes = ArrayField(base_field=models.TextField(), size=200) #List of Product Hashkeys liked by user 
-    dislikes = ArrayField(base_field=models.TextField(), size=200) #List and count of Product Hashkeys disliked by user
-    comments = ArrayField(base_field=models.TextField(), size=200) #List of Product MetaKeys commented on
-    products_clickedOn = ArrayField(base_field=models.TextField(), size=500)
+    saved_content = JSONField(null=True, blank=True) #URLs to product_metakeys - stored as an array
+    likes = JSONField(null=True, blank=True) #List of Product Hashkeys liked by user 
+    dislikes = JSONField(null=True, blank=True) #List and count of Product Hashkeys disliked by user
+    comments = JSONField(null=True, blank=True) #List of Product MetaKeys commented on
+    products_clickedOn = JSONField(null=True, blank=True)
     bio = models.TextField()
-    blocked_list = ArrayField(base_field=models.TextField(), size=200)
+    blocked_list = JSONField(null=True, blank=True)
     data_mining_status = models.BooleanField(default=False) #Ask for permissions for data collection 
     #ONLY SELECT USERS whose SOCIAL.data_mining_status == True - Simple solution to privacy, consent! consent! consent!
     account_active = models.BooleanField(default=True)
@@ -376,8 +375,8 @@ class Shop(models.Model):
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #Owner details - we will show user_ID.meta_username
     #shop_ID will be automatically created by PostGRE - we will add a unique validator on it
 
-    all_products = ArrayField(base_field=models.TextField(), size=200) #list of all products owned by that creator
-    all_user_data = ArrayField(base_field=models.TextField(), size=100) #list of metauser IDs for your reference. no other data is shown here
+    all_products = JSONField(null=True, blank=True) #list of all products owned by that creator
+    all_user_data = JSONField(null=True, blank=True) #list of metauser IDs for your reference. no other data is shown here
     name = models.TextField()
     description = models.TextField()
     logo = models.FileField(upload_to='shop-details/profile_picture')
@@ -393,8 +392,8 @@ class Shop(models.Model):
         ('INDIA', 'IN'),
         ('USA', 'US'),
     ]) #Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
-    shop_traits = ArrayField(base_field=models.TextField(), size=50) #define what kind of customers you want to reach
-    assistance_ask = ArrayField(base_field=models.TextField(), size=20) #add tags on what help you need? funding - hiring etc
+    shop_traits = JSONField(null=True, blank=True) #define what kind of customers you want to reach
+    assistance_ask = JSONField(null=True, blank=True) #add tags on what help you need? funding - hiring etc
     uniquesellingprop = models.TextField(default='Why your meta-shop is special than others?')
     data_mining_status = models.BooleanField(default=False)
     created_on = models.DateField()
@@ -419,11 +418,12 @@ class Product(models.Model):
     numberofcomments = models.IntegerField(default=0)
     numberofclicks = models.IntegerField(default=0)
     totaltimespentonproduct_hours = models.IntegerField(default=0)
-    userID_array_of_likes = ArrayField(base_field=models.TextField(), size=100)
-    userID_array_of_dislikes = ArrayField(base_field=models.TextField(), size=100)
-    userID_array_of_comments = ArrayField(base_field=models.TextField(), size=100)
+    userID_array_of_likes = JSONField(null=True, blank=True)
+    userID_array_of_dislikes = JSONField(null=True, blank=True)
+    userID_array_of_comments = JSONField(null=True, blank=True)
     selling_price = models.FloatField(default=0.0)
     discounted_price = models.FloatField(default=0.0)
+    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     product_categoryID = models.ForeignKey(Product_Category, on_delete=models.CASCADE)
     product_themesID = models.ForeignKey(Product_Themes, on_delete=models.CASCADE)
     discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
@@ -431,11 +431,10 @@ class Product(models.Model):
     quantity = models.IntegerField(default=0)
     total_sales = models.FloatField(default=0.0)
     clicks_on_product = models.IntegerField()
-    created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     is_product_digital = models.BooleanField(default=False)
     is_product_sharable = models.BooleanField(default=False)
-    product_unique_traits = ArrayField(base_field=models.TextField(),size=15) #Why is it special?
-    customer_unique_traits = ArrayField(base_field=models.TextField(), size=15) #what kind of customer do you see?
+    product_unique_traits = JSONField(null=True, blank=True) #Why is it special?
+    customer_unique_traits = JSONField(null=True, blank=True) #what kind of customer do you see?
     nsfw_content = models.BooleanField(default=False)
     production_cost = models.FloatField(default=0.0) #helps us tweak our user targeting based on audience group
     production_time_days = models.IntegerField()

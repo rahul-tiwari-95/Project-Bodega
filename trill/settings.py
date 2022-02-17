@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'dal',
+    'dal_select2',
+    'dal_queryset_sequence',
 
 ]
 REST_FRAMEWORK = {

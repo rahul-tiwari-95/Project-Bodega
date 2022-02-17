@@ -70,11 +70,12 @@ product_category_array = [
 #Serializer template for MetaUser
 class MetaUserSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True) 
-    password = serializers.CharField(required=True, max_length=100)
+    meta_username = serializers.CharField(required=True)
+    password = serializers.CharField(required=False, max_length=100)
     hashkey = serializers.CharField(default='sha1 hash key', read_only=True)
     email = serializers.CharField(required=False)
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
     #creating functions which will execute on Serializers and create model instances.
     #this allows us to secure the access to db directly.
     def create(self, validated_data):
@@ -84,7 +85,7 @@ class MetaUserSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         #Updating instances of our model - here instance refers to id number and validated_data refers to body of the instance
-
+        instance.meta_username = validated_data.get('meta_username', instance.meta_username)
         instance.password = validated_data.get('password', instance.password)
         instance.hashkey = validated_data.get('hashkey', instance.hashkey)
         instance.email = validated_data.get('email', instance.email)
@@ -99,16 +100,20 @@ class MetaUserSerializer(serializers.Serializer):
 
 #Serializer for User Address Class
 class UserAddressSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.CharField(required=True)
+    id = serializers.IntegerField( read_only=True)
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    #the above statement gives the power to this class to manipulate MetaUser objects by will  
+    #a very good way Python enforces control over data read write  
+    #that means humans can be wrong, not code  - simple
+    #this feels like a carefully orchestrated painting
     address_line1 = serializers.CharField(required=False)
     address_line2 = serializers.CharField(required=False)
     address_state = serializers.CharField(required=False)
     city = serializers.CharField(required=False)
     postal_code = serializers.CharField(required=False)
     country = serializers.ChoiceField(choices=country_list, default='ISR')
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
 
     #create() and update() functions interact with our DB not the APIs directly  
     def create(self, validated_data):
@@ -117,9 +122,10 @@ class UserAddressSerializer(serializers.Serializer):
     
     def update(self, instance, validated_data):
         #updating a model instance with only the validated_fields  
+        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
         instance.address_line1 = validated_data.get('address_line1', instance.address_line1)
         instance.address_line2 = validated_data.get('address_line2', instance.address_line2)
-        instance.address_state = validated_data.get('address_state', instance.address_line2)
+        instance.address_state = validated_data.get('address_state', instance.address_state)
         instance.city = validated_data.get('city', instance.city)
         instance.postal_code = validated_data.get('postal_code', instance.postal_code)
         instance.country = validated_data.get('country', instance.country)
@@ -134,17 +140,17 @@ class UserAddressSerializer(serializers.Serializer):
 #Serializer User Payment Class
 class UserPaymentSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.CharField(required=True)
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     payment_type = serializers.ChoiceField( choices=payment_types, default='PAYPAL')
-    payment_provider = serializers.CharField(required=True)
-    payment_status = serializers.BooleanField(required=True)
+    payment_provider = serializers.CharField(required=False)
+    payment_status = serializers.BooleanField(required=False)
     total_money_out = serializers.FloatField()
     total_money_in = serializers.FloatField()
-    user_payment_profile_status = serializers.BooleanField(required=True)
+    user_payment_profile_status = serializers.BooleanField(required=False)
     #add code for routing money via Stripe to multiple vendors  
     #all data can be fetched via FE, they can route this data here  
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
 
 
     #create() and update() functions to interact with our DB
@@ -156,7 +162,7 @@ class UserPaymentSerializer(serializers.Serializer):
         #passes validated_data field to instance
         #.get() fetches that field name from the POST request data and updates the field of User_Payment table
         instance.user_ID = validated_data.get('user_ID', instance.user_ID)
-        instance.payment_type = validated_data.get('payment_type', instance.payment_ID)
+        instance.payment_type = validated_data.get('payment_type', instance.payment_type)
         instance.payment_provider = validated_data.get('payment_provider', instance.payment_provider)
         instance.payment_status = validated_data.get('payment_status', instance.payment_status)
         instance.total_money_out = validated_data.get('total_money_out', instance.total_money_out)
@@ -173,23 +179,23 @@ class UserPaymentSerializer(serializers.Serializer):
 #Serializer for User Type Class
 class UserTypeSerializer (serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.CharField(required=True)
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     user_role = serializers.ChoiceField(choices=user_role_array, default='Creator')
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
-    digital_base_personality = serializers.CharField(required=False)
-    digital_future_personality = serializers.CharField(required=False) 
-    about_you_belief = serializers.CharField(required=True)
-    about_you_belief2 = serializers.CharField(required=True)
-    about_you_disbelief = serializers.CharField(required=True)
-    why_did_you_join_bodega = serializers.CharField(required=True)
-    explore_bodega_preferences = serializers.CharField(required=True)
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
+    digital_base_personality = serializers.CharField()
+    digital_future_personality = serializers.CharField() 
+    about_you_belief = serializers.CharField()
+    about_you_belief2 = serializers.CharField()
+    about_you_disbelief = serializers.CharField()
+    why_did_you_join_bodega = serializers.CharField()
+    explore_bodega_preferences = serializers.CharField()
     member_feedback_preferences = serializers.CharField(default='What new features would you like to see?')
-    feedback_bodega = serializers.CharField(required=True)
-    describe_yourself = serializers.CharField(required=True)
-    shoe_size = serializers.FloatField(required=False)
-    waist_size = serializers.CharField(required=False)
-    chest_size = serializers.CharField(required=True)
+    feedback_bodega = serializers.CharField()
+    describe_yourself = serializers.CharField()
+    shoe_size = serializers.FloatField()
+    waist_size = serializers.CharField()
+    chest_size = serializers.CharField()
 
     #create() and update() functions to interact with our DB
     def create(self, validated_data):
@@ -255,8 +261,8 @@ class ChatRoomSerializer(serializers.Serializer):
 #Serializer class for Particpant model 
 class ParticpantSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.CharField(required=True) #FK
-    chat_room_ID = serializers.CharField(required=True) #FK2
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all()) #FK
+    chat_room_ID = serializers.PrimaryKeyRelatedField(queryset=Chat_Room.objects.all()) #FK2
 
     #create() and update() functions to interact with our DB
     def create(self, validated_data):
@@ -274,12 +280,12 @@ class ParticpantSerializer(serializers.Serializer):
 #Serializer class for Message model
 class MessageSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    chat_room_ID = serializers.CharField(required=True)
-    user_ID = serializers.CharField(required=True)
+    chat_room_ID = serializers.PrimaryKeyRelatedField(queryset=Chat_Room.objects.all())
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     message_body = serializers.CharField(required=True)
-    upload_file = serializers.CharField(required=False)
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    upload_file = serializers.CharField()
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
     hashkey = serializers.CharField(read_only=True)
 
     #create() and update() functions to interact with our DB
@@ -304,13 +310,13 @@ class MessageSerializer(serializers.Serializer):
 class ProductCategorySerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     category_name = serializers.ChoiceField(required=True,choices=product_category_array)
-    category_desc = serializers.CharField(required=True)
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
-    category_image1 = serializers.CharField(required=True)
-    category_image2 = serializers.CharField(required=True)
-    category_image3 = serializers.CharField(required=True)
-
+    category_desc = serializers.CharField()
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
+    category_image1 = serializers.CharField()
+    category_image2 = serializers.CharField()
+    category_image3 = serializers.CharField()
+    #no default on image can create issues when using POST
 
     def create(self, validated_data):
         #returns a new model instance
@@ -333,12 +339,12 @@ class ProductCategorySerializer(serializers.Serializer):
 #Serializer for Product Themes Model
 class ProductThemesSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    collection_name = serializers.CharField(required=True)
-    collection_desc = serializers.CharField(required=True)
-    audience_traits = serializers.CharField(required=True)
-    marketing_funnel = serializers.ChoiceField(choices=marketing_funnel_array, required=True)
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    collection_name = serializers.CharField()
+    collection_desc = serializers.CharField()
+    audience_traits = serializers.CharField()
+    marketing_funnel = serializers.ChoiceField(choices=marketing_funnel_array)
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
 
     def create(self, validated_data):
         #returns a new model instance
@@ -362,12 +368,13 @@ class ProductThemesSerializer(serializers.Serializer):
 #Serializer for Discount model
 class DiscountSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(required=True)
-    description = serializers.CharField(required=True)
-    discount_percent = serializers.FloatField(required=True)
-    active_status = serializers.BooleanField(required=True)
-    created_by = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    name = serializers.CharField()
+    description = serializers.CharField()
+    discount_percent = serializers.FloatField()
+    active_status = serializers.BooleanField()
+    created_by = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
 
     def create(self, validated_data):
         return Discount.objects.create(**validated_data)
@@ -378,6 +385,7 @@ class DiscountSerializer(serializers.Serializer):
         instance.discount_percent = validated_data.get('discount_percent', instance.discount_percent)
         instance.active_status = validated_data.get('active_status', instance.active_status)
         instance.created_by = validated_data.get('created_by', instance.created_by)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
         instance.modified_at = validated_data.get('modified_at', instance.modified_at)
 
         instance.save()
@@ -387,21 +395,22 @@ class DiscountSerializer(serializers.Serializer):
 #Serializer for Social model
 class SocialSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.CharField(required=True)
-    following = serializers.CharField(required=True)
-    followers = serializers.CharField(required=True)
-    makeprofileprivate = serializers.BooleanField(required=True)
-    saved_content = serializers.CharField(required=True)
-    likes = serializers.CharField(required=True)
-    comments = serializers.CharField(required=True)
-    products_clickedOn = serializers.CharField(required=True)
-    bio = serializers.CharField(required=True, allow_blank=True)
-    blocked_list = serializers.CharField(required=True)
-    data_mining_status = serializers.BooleanField(required=True)
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    following = serializers.CharField()
+    followers = serializers.CharField()
+    makeprofileprivate = serializers.BooleanField()
+    saved_content = serializers.CharField()
+    likes = serializers.CharField()
+    dislikes = serializers.CharField()
+    comments = serializers.CharField()
+    products_clickedOn = serializers.CharField()
+    bio = serializers.CharField(allow_blank=True)
+    blocked_list = serializers.CharField()
+    data_mining_status = serializers.BooleanField()
     account_active = serializers.BooleanField( default=True)
     delete_metauser = serializers.BooleanField(default=False)
-    created_on = serializers.CharField(required=True)
-    modified_on = serializers.CharField(required=True)
+    created_on = serializers.CharField()
+    modified_on = serializers.CharField()
 
     def create(self, validated_data):
         return Social.objects.create(**validated_data)
@@ -432,7 +441,7 @@ class SocialSerializer(serializers.Serializer):
 #Serializer for Shop Model
 class ShopSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.CharField(required=True)
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     all_products = serializers.CharField(required=True)
     all_user_data = serializers.CharField(required=True)
     name = serializers.CharField(required=True)
@@ -475,8 +484,8 @@ class ShopSerializer(serializers.Serializer):
         instance.assistance_ask = validated_data.get('assistance_ask', instance.assistance_ask)
         instance.uniquesellingprop = validated_data.get('uniquesellingprop', instance.uniquesellingprop)
         instance.data_mining_status = validated_data.get('data_mining_status', instance.data_mining_status)
-        instance.created_on = serializers.CharField(required=True)
-        instance.modified_on = serializers.CharField(required=True)
+        instance.created_on = validated_data.get('created_on', instance.created_on)
+        instance.modified_on = validated_data.get('modified_on', instance.modified_on)
 
         instance.save()
         return instance
@@ -489,35 +498,35 @@ class ShopSerializer(serializers.Serializer):
 
 class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(required=True)
-    description = serializers.CharField(required=True)
-    selling_price = serializers.CharField(required=True)
-    discounted_price = serializers.CharField(required=True)
-    product_categoryID = serializers.CharField(required=True)
-    product_themesID = serializers.CharField(required=True)
-    discount_ID = serializers.CharField(required=True)
-    shop_ID = serializers.CharField(required=True)
-    quanity = serializers.IntegerField(required=True)
-    total_sales = serializers.FloatField(required=True)
-    clicks_on_product = serializers.IntegerField(required=True)
-    created_by = serializers.CharField(required=True)
-    is_product_digital = serializers.BooleanField(required=True)
-    is_product_sharable = serializers.BooleanField(required=True)
-    product_unqiue_traits = serializers.CharField(required=True)
-    customer_unique_traits = serializers.CharField(required=True)
-    nsfw_content = serializers.BooleanField(required=True)
-    production_cost = serializers.FloatField(required=True)
-    production_time_days = serializers.IntegerField(required=True)
-    hours_invested = serializers.FloatField(required=True)
-    encrypt_product = serializers.BooleanField(required=True)
+    name = serializers.CharField()
+    description = serializers.CharField()
+    selling_price = serializers.CharField()
+    discounted_price = serializers.CharField()
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    product_categoryID = serializers.PrimaryKeyRelatedField(queryset=Product_Category.objects.all())
+    product_themesID = serializers.PrimaryKeyRelatedField(queryset=Product_Themes.objects.all())
+    discount_ID = serializers.PrimaryKeyRelatedField(queryset=Discount.objects.all())
+    shop_ID = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all())
+    quantity = serializers.IntegerField()
+    total_sales = serializers.FloatField()
+    clicks_on_product = serializers.IntegerField()
+    is_product_digital = serializers.BooleanField()
+    is_product_sharable = serializers.BooleanField()
+    product_unique_traits = serializers.CharField()
+    customer_unique_traits = serializers.CharField()
+    nsfw_content = serializers.BooleanField()
+    production_cost = serializers.FloatField()
+    production_time_days = serializers.IntegerField()
+    hours_invested = serializers.FloatField()
+    encrypt_product = serializers.BooleanField()
     unit_sold_expectation = serializers.IntegerField()
     size_chart = serializers.CharField(allow_blank=True)
     product_image1 = serializers.CharField(required=True)
     product_image2 = serializers.CharField(allow_blank=True)
     product_image3 = serializers.CharField(allow_blank=True)
     hashkey = serializers.CharField(read_only=True) #Should be hidden by default
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
 
 
     def create(self, validated_data):
@@ -537,16 +546,16 @@ class ProductSerializer(serializers.Serializer):
         instance.quantity = validated_data.get('quantity', instance.quantity)
         instance.total_sales = validated_data.get('total_sales', instance.total_sales)
         instance.clicks_on_product = validated_data.get('clicks_on_product', instance.clicks_on_product)
-        instance.created_by = validated_data.get('created_by', instance.created_by)
+        instance.user_ID = validated_data.get('created_by', instance.user_ID)
         instance.is_product_digital = validated_data.get('is_product_digital', instance.is_product_digital)
         instance.is_product_sharable = validated_data.get('is_product_sharable', instance.is_product_sharable)
-        instance.product_unqiue_traits = validated_data.get('product_unqiue_traits', instance.product_unqiue_traits)
+        instance.product_unique_traits = validated_data.get('product_unique_traits', instance.product_unique_traits)
         instance.customer_unique_traits = validated_data.get('customer_unique_traits', instance.customer_unique_traits)
         instance.nsfw_content = validated_data.get('nsfw_content', instance.nsfw_content)
         instance.production_cost = validated_data.get('production_cost', instance.production_cost)
         instance.production_time_days = validated_data.get('production_time_days', instance.production_time_days)
         instance.encrypt_product = validated_data.get('encrypt_product', instance.encrypt_product)
-        instance.unit_sold_expectation = validated_data.get('unit_sold_expectations', instance.unit_sold_expectations)
+        instance.unit_sold_expectation = validated_data.get('unit_sold_expectation', instance.unit_sold_expectation)
         instance.size_chart = validated_data.get('size_chart', instance.size_chart)
         instance.product_image1 = validated_data.get('product_image1', instance.product_image1)
         instance.product_image2 = validated_data.get('product_image2', instance.product_image2)
@@ -564,18 +573,18 @@ class ProductSerializer(serializers.Serializer):
 
 class CollaborationSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    name =  serializers.CharField(required=True)
-    description = serializers.CharField(required=True)
-    creator_collab_choice = serializers.ChoiceField(required=True, choices=collab_type_array)
-    user_ID = serializers.CharField(required=True)
-    product_ID = serializers.CharField(required=True)
-    shop_ID = serializers.CharField(required=True)
-    creator_pitch = serializers.CharField(required=True)
+    name =  serializers.CharField()
+    description = serializers.CharField()
+    creator_collab_choice = serializers.ChoiceField( choices=collab_type_array)
+    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    product_ID = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    shop_ID = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all())
+    creator_pitch = serializers.CharField()
     bid_type = serializers.ChoiceField(choices=collab_type_array)
-    bid_amount = serializers.FloatField(required=True)
-    accept_bid = serializers.BooleanField(required=True)
-    created_at = serializers.CharField(required=True)
-    modified_at = serializers.CharField(required=True)
+    bid_amount = serializers.FloatField()
+    accept_bid = serializers.BooleanField()
+    created_at = serializers.CharField()
+    modified_at = serializers.CharField()
 
 
     def create(self, validated_data):
@@ -584,9 +593,12 @@ class CollaborationSerializer(serializers.Serializer):
     
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
-        instance.code = validated_data.get('code', instance.code)
         instance.description = validated_data.get('description', instance.description)
         instance.creator_collab_choice = validated_data.get('creator_collab_choice', instance.creator_collab_choice)
+        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        instance.product_ID = validated_data.get('product_ID', instance.product_ID)
+        instance.shop_ID = validated_data.get('shop_ID', instance.shop_ID)
+        instance.creator_pitch = validated_data.get('creator_pitch', instance.creator_pitch)
         instance.bid_type = validated_data.get('bid_type', instance.bid_type)
         instance.bid_amount = validated_data.get('bid_amount', instance.bid_amount)
         instance.accept_bid = validated_data.get('accept_bid', instance.accept_bid)
