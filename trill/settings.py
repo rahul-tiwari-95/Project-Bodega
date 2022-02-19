@@ -16,7 +16,7 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+#hello
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -43,10 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'dal',
-    'dal_select2',
-    'dal_queryset_sequence',
 
 ]
 REST_FRAMEWORK = {
@@ -96,12 +92,8 @@ ASGI_APPLICATION = 'trill.asgi.application'
 
 DATABASES = {
     'default':{
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'bodegadao',
-        'USER': 'postgres',
-        'PASSWORD': '043074',
-        'HOST' : '127.0.0.1',
-        'PORT':'5432'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME':  str(BASE_DIR/'db.sqlite3'),
     }
 }
 
@@ -147,8 +139,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_ROOT = os.path.join(PROJECT_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = '/metadata/bodega-md5/media/'
 
 

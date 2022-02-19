@@ -12,7 +12,11 @@ from backend import views
 
 urlpatterns = [
 
-  path('home/', views.landing_page),
+  path('', views.home_page), #sends to index html
+  path('not-auth/', views.filter_spam), #sends to index html
+  path('home/', views.landing_page), #after True, on index.html
+  path('home/aboutbodega/', views.about_us), #about us
+  path('home/contact-us/', views.contact_us), #contact us
 
   #METAUSER API ENDPOINTS
   path('bodega-api/metauser/', views.metauser_list),
@@ -60,7 +64,7 @@ urlpatterns = [
   path('bodega-api/product_category/<int:pk>/', views.product_category_detail),
 
 
-  #Product Themes Model Endpoint by messageID
+  #Product Themes Model Endpoint by ProductID
   path('bodega-api/product_theme/', views.product_theme_list),
   path('bodega-api/product_theme/<int:pk>/', views.product_theme_detail),
 

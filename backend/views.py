@@ -11,12 +11,15 @@ import requests
 
 
 
-from backend.models import MetaUser, User_Address, User_Payment, User_Type, Chat_Room, Particpant, Message, Product_Category, Product_Themes, Discount, Social, Shop_Payout, Shop, Product,  Collaboration
+from backend.models import MetaUser, User_Address, User_Payment, User_Type, Chat_Room, Particpant, Message, Product_Category, Product_Themes, Discount, Social, Shop_Payout, Shop, Product,  Collaboration, hashkey_generator
 from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer
 
 
 
 #HTML files for Bodega Landing Page
+def home_page(request):
+    metausers = hashkey_generator()
+    return render(request, 'backend/index.html', {'metausers': metausers})
 
 def landing_page(request):
     metausers = MetaUser.objects.all()
@@ -24,6 +27,15 @@ def landing_page(request):
     kanye = requests.get('https://api.kanye.rest')
     kanye = kanye.text
     return render(request, 'backend/landingpage.html', {'metausers': metausers, 'time':time, 'kanye': kanye})
+
+def filter_spam(request):
+    return render(request, 'backend/filter-non-hackers.html')
+
+def about_us(request):
+    return render(request, 'backend/aboutbodega.html')
+
+def contact_us(request):
+    return render(request, 'backend/contact_us.html')
 
 
 @csrf_exempt
