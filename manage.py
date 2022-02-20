@@ -22,7 +22,7 @@ import sys
 if __name__ == '__main__':
     # If WEBSITE_HOSTNAME is defined as an environment variable, then we're running
     # on Azure App Service and should use the production settings.
-    settings_module = "azuresite.production" if 'WEBSITE_HOSTNAME' in os.environ else 'azuresite.settings'
+    settings_module = "trill.production" if 'WEBSITE_HOSTNAME' in os.environ else 'trill.settings'
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
 
     try:
