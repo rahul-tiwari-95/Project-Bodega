@@ -38,7 +38,7 @@ def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
 
-@csrf_exempt
+
 def metauser_list(request):
     #GET, POST request for metauser/
     if request.method == 'GET':
@@ -58,7 +58,7 @@ def metauser_list(request):
     
 
 
-@csrf_exempt
+
 def metauser_detail(request, pk):
     #GET,PUT,DELETE request for metauser{id}
     try:
@@ -89,7 +89,7 @@ def metauser_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-@csrf_exempt
+
 def address_list(request):
     #GET, POST request for metauser_address/
     if request.method == 'GET':
@@ -105,7 +105,7 @@ def address_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+
 def address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -134,7 +134,7 @@ def address_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-@csrf_exempt
+#@csrf_exempt
 def child_address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -166,7 +166,7 @@ def child_address_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-@csrf_exempt
+#@csrf_exempt
 def user_payment_list(request):
     #GET, POST request for metauser_address/
     if request.method == 'GET':
@@ -182,7 +182,7 @@ def user_payment_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def user_payment_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -211,7 +211,7 @@ def user_payment_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-@csrf_exempt
+#@csrf_exempt
 def child_payment_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -244,7 +244,7 @@ def child_payment_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-@csrf_exempt
+#@csrf_exempt
 def user_type_list(request):
 
     if request.method == 'GET':
@@ -260,7 +260,7 @@ def user_type_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def user_type_detail(request, pk):
 
 
@@ -289,7 +289,7 @@ def user_type_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-@csrf_exempt
+#@csrf_exempt
 def child_type_detail(request, pk):
 
 
@@ -323,7 +323,7 @@ def child_type_detail(request, pk):
 #Fetching data by ChatRoomID, simply  
 
 
-@csrf_exempt
+#@csrf_exempt
 def chat_room_list(request):
 
     if request.method == 'GET':
@@ -339,7 +339,7 @@ def chat_room_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def chat_room_detail(request, pk):
 
 
@@ -371,7 +371,7 @@ def chat_room_detail(request, pk):
 #The code can be replicated for fetching via:  User_ID as well - but thats restricted.
 
 
-@csrf_exempt
+#@csrf_exempt
 def participant_list(request):
 
     if request.method == 'GET':
@@ -387,7 +387,7 @@ def participant_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def participant_detail(request, pk):
 
 
@@ -422,7 +422,7 @@ def participant_detail(request, pk):
 #many messageIDs can have same UserID or ChatRoomID - So, iterate via messageID
 
 
-@csrf_exempt
+#@csrf_exempt
 def message_list(request):
 
     if request.method == 'GET':
@@ -438,7 +438,7 @@ def message_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def message_detail(request, pk):
 
 
@@ -471,7 +471,7 @@ def message_detail(request, pk):
 #No FK relationships here to worry about.
 
 
-@csrf_exempt
+#@csrf_exempt
 def product_category_list(request):
 
     if request.method == 'GET':
@@ -487,7 +487,7 @@ def product_category_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def product_category_detail(request, pk):
 
 
@@ -522,7 +522,7 @@ def product_category_detail(request, pk):
 #No FK relationships here to worry about.
 
 
-@csrf_exempt
+#@csrf_exempt
 def product_theme_list(request):
 
     if request.method == 'GET':
@@ -538,7 +538,7 @@ def product_theme_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def product_theme_detail(request, pk):
 
 
@@ -573,7 +573,7 @@ def product_theme_detail(request, pk):
 #One FK with MetaUser --> But read_only is sufficient.
 
 
-@csrf_exempt
+#@csrf_exempt
 def discount_list(request):
 
     if request.method == 'GET':
@@ -589,7 +589,7 @@ def discount_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def discount_detail(request, pk):
 
 
@@ -625,7 +625,7 @@ def discount_detail(request, pk):
 #But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser 
 
 
-@csrf_exempt
+#@csrf_exempt
 def social_list(request):
 
     if request.method == 'GET':
@@ -641,7 +641,7 @@ def social_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def social_detail(request, pk):
 
 
@@ -669,7 +669,7 @@ def social_detail(request, pk):
 
 #Fetching data via User_ID - Parent Table ID - RESTRICTED USE
 
-@csrf_exempt
+#@csrf_exempt
 def parent_social_detail(request, pk):
 
 
@@ -704,7 +704,7 @@ def parent_social_detail(request, pk):
 #But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser - For security purposes
 
 
-@csrf_exempt
+#@csrf_exempt
 def shop_list(request):
 
     if request.method == 'GET':
@@ -720,7 +720,7 @@ def shop_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def shop_detail(request, pk):
 
 
@@ -748,7 +748,7 @@ def shop_detail(request, pk):
 
 #Fetching data via User_ID - Parent Table ID - RESTRICTED USE
 
-@csrf_exempt
+#@csrf_exempt
 def parent_shop_detail(request, pk):
 
 
@@ -786,7 +786,7 @@ def parent_shop_detail(request, pk):
 #These endpoints can be coded later - they need few edits to QuerySet - but this is not urgent  
 
 
-@csrf_exempt
+#@csrf_exempt
 def product_list(request):
 
     if request.method == 'GET':
@@ -802,7 +802,7 @@ def product_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def product_detail(request, pk):
 
 
@@ -836,7 +836,7 @@ def product_detail(request, pk):
 
 
 
-@csrf_exempt
+#@csrf_exempt
 def collaboration_list(request):
 
     if request.method == 'GET':
@@ -852,7 +852,7 @@ def collaboration_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+#@csrf_exempt
 def collaboration_detail(request, pk):
 
 
