@@ -3,34 +3,26 @@
 import os
 import sys
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "trill.settings"
 
 
-
-import django
-django.setup()
-from backend.models import *
-
-
-def main():
-    """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trill.settings')
-    try:
-        from django.core.management import execute_from_command_line
-    except ImportError as exc:
-        raise ImportError(
-            "Couldn't import Django. Are you sure it's installed and "
-            "available on your PYTHONPATH environment variable? Did you "
-            "forget to activate a virtual environment?"
-        ) from exc
-    execute_from_command_line(sys.argv)
+#def main():
+ #   """Run administrative tasks."""
+  #  os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trill.settings')
+  #  try:
+   #     from django.core.management import execute_from_command_line
+   # except ImportError as exc:
+    #    raise ImportError(
+     #       "Couldn't import Django. Are you sure it's installed and "
+      #      "available on your PYTHONPATH environment variable? Did you "
+       #     "forget to activate a virtual environment?"
+        #) from exc
+    #execute_from_command_line(sys.argv)
 
 
 if __name__ == '__main__':
-    main()
     # If WEBSITE_HOSTNAME is defined as an environment variable, then we're running
     # on Azure App Service and should use the production settings.
-    settings_module = "trill.production" if 'WEBSITE_HOSTNAME' in os.environ else 'trill.settings'
+    settings_module = "azuresite.production" if 'WEBSITE_HOSTNAME' in os.environ else 'azuresite.settings'
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
 
     try:
