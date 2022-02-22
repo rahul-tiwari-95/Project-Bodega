@@ -128,32 +128,11 @@ class User_Type(models.Model):
     # and also, what they say is factually correct and not a subjective opinion.
 
     #what you will do in the future?
-    digital_base_personality = JSONField(null=True, blank=True)
-    digital_future_personality = JSONField(null=True, blank=True)
-    about_you_belief = models.TextField(choices=[ #your cornerstones
-        ('1', 'I believe that people or organizations cant be trusted with anything'),
-        ('2', 'I believe that nowadays, free will is fucking hard.'),
-        ('3', 'I believe that anonymity gives me power to create wihout fear of failure.'),
-        ('4', 'I believe that we all are special in some way - Genetic mutations'),
-        ('5', 'I believe that our society is all about conformism & accumulation of material-shit'),
-        ('6', 'I believe that these questions are pointless.')
-    ])
-    about_you_belief2 = models.TextField(choices=[
-        ('1', 'I believe that people or organizations cant be trusted with anything'),
-        ('2', 'I believe that nowadays, free will is fucking hard.'),
-        ('3', 'I believe that anonymity gives me power to create wihout fear of failure.'),
-        ('4', 'I believe that we all are special in some way - Genetic mutations'),
-        ('5', 'I believe that our society is all about conformism & accumulation of material-shit'),
-        ('6', 'I believe that these questions are pointless.')
-    ])
-    about_you_disbelief = models.TextField(choices=[
-        ('1', 'I dont belief in the concept of banks, goverments, race, color, religion because these myths stop us from questioning who we truly are'),
-        ('2', 'I dont belief that any government cares about the Libyan slavery crisis'),
-        ('3', 'I dont belief in Mars colonization, I think we should all work to fix mother earth.'),
-        ('4', 'I dont belief in the concept of monogamous relationships'),
-        ('5', 'I dont belief that people understand others perspectives.'),
-        ('6', 'I dont belief in anything.')
-    ])
+    bodega_vision_tags = JSONField(null=True, blank=True) #not visible to user
+    sentino_items_API = JSONField(null=True, blank=True) #self statement analysis 
+    sentino_inventory_API = JSONField(null=True, blank=True) #Returns personality statement based on tests 
+    sentino_people_API = JSONField(null=True, blank=True)
+    what_do_you_want_from_bodega = JSONField(null=True, blank=True)
     why_did_you_join_bodega = models.TextField(choices=[
         ('Anonymity', 'Anonymity'),
         ('Creative-Freedom', 'Creative-Freedom'),
@@ -183,12 +162,10 @@ class User_Type(models.Model):
 
     ])
 
-
-
-    describe_yourself = JSONField(null=True, blank=True)
     shoe_size = models.FloatField(default=11.5)
     waist_size = models.TextField(default='[XL, 36]')
     chest_size = models.TextField(default='[XL, 30Inch]')
+
 
 
     
@@ -392,8 +369,8 @@ class Shop(models.Model):
         ('INDIA', 'IN'),
         ('USA', 'US'),
     ]) #Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
-    shop_traits = JSONField(null=True, blank=True) #define what kind of customers you want to reach
-    assistance_ask = JSONField(null=True, blank=True) #add tags on what help you need? funding - hiring etc
+    bodega_vision_tags = JSONField(null=True, blank=True) #loaded data from Azure Vision API - All tags stored here - Solomon_vision
+    bodega_customer_tags = JSONField(null=True, blank=True) #load tags on customers
     uniquesellingprop = models.TextField(default='Why your meta-shop is special than others?')
     data_mining_status = models.BooleanField(default=False)
     created_on = models.DateField()
@@ -433,18 +410,19 @@ class Product(models.Model):
     clicks_on_product = models.IntegerField()
     is_product_digital = models.BooleanField(default=False)
     is_product_sharable = models.BooleanField(default=False)
-    product_unique_traits = JSONField(null=True, blank=True) #Why is it special?
-    customer_unique_traits = JSONField(null=True, blank=True) #what kind of customer do you see?
+    bodega_vision_tags = JSONField(null=True, blank=True) # Auto populated by Azure Vision API
+    bodega_people_tags = JSONField(null=True, blank=True) #Auto populated by Sentino People API (User_Types)
     nsfw_content = models.BooleanField(default=False)
     production_cost = models.FloatField(default=0.0) #helps us tweak our user targeting based on audience group
     production_time_days = models.IntegerField()
     hours_invested = models.FloatField(default=1.0)
     encrypt_product = models.BooleanField(default=False)
     unit_sold_expectation = models.IntegerField(default=0)
-    size_chart = models.FileField(upload_to='product/size_chart')
+    size_chart = models.FileField(upload_to='product/size_chart', default=None)
     product_image1 = models.FileField(upload_to='product/product_image1')
     product_image2 = models.FileField(upload_to='product/product_image2', default=None)
     product_image3 = models.FileField(upload_to='product/product_image3', default=None)
+    product_image4 = models.FileField(upload_to='product/product_image4', default=None)
     hashkey = models.TextField( default=hashkey_generator, unique=True) #generates unique SHA1 key for your product - which is immutable in TRILL universe
     created_at = models.DateField()
     modified_at = models.DateTimeField()
