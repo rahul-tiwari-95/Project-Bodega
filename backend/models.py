@@ -422,7 +422,6 @@ class Product(models.Model):
     product_image1 = models.FileField(upload_to='product/product_image1')
     product_image2 = models.FileField(upload_to='product/product_image2', default=None)
     product_image3 = models.FileField(upload_to='product/product_image3', default=None)
-    product_image4 = models.FileField(upload_to='product/product_image4', default=None)
     hashkey = models.TextField( default=hashkey_generator, unique=True) #generates unique SHA1 key for your product - which is immutable in TRILL universe
     created_at = models.DateField()
     modified_at = models.DateTimeField()
