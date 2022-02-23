@@ -387,7 +387,7 @@ class Shop(models.Model):
 
 #Creating Product model - how does a product look like? what are the traits?
 
-class Product(models.Model):
+class Bitsnap(models.Model):
     name=models.TextField( default='No Product Name, yet', unique=True)
     description = models.TextField(default='Explain your creation in great poetic detail.')
     numberoflikes = models.IntegerField(default=0)
@@ -444,7 +444,7 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #creators can paste their hashkey to auth
-    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #creators can paste the hashkey to add the product ID
+    bitsnap_ID = models.ForeignKey(Bitsnap, on_delete=models.CASCADE) #creators can paste the hashkey to add the product ID
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE) #add a search feature on Front-End - for People to search by Shop name
     #product_shop_ID should be EQUAL to shop_ID to verify identity that both User_IDs are same.
     creator_pitch = models.TextField()
@@ -481,7 +481,7 @@ class Shopping_Session(models.Model):
 #Create temp table called Cart Item --> We wil store the data. Analyze behaviour.
 class Cart_Item(models.Model):
     session_ID = models.ForeignKey(Shopping_Session, on_delete=models.CASCADE)
-    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #We dont want our product to be deleted because of our cute temporary cart item table
+    bitsnap_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #We dont want our product to be deleted because of our cute temporary cart item table
     quanity = models.IntegerField(default=0)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
@@ -489,7 +489,7 @@ class Cart_Item(models.Model):
 
     def __str__(self):
         # Returns Cart ID and Product ID
-        return 'Cart ID: %s --- Product ID: %s' % (self.id, self.product_ID)
+        return 'Cart ID: %s --- Product ID: %s' % (self.id, self.bitsnap_ID)
         #this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
 
 
@@ -515,7 +515,7 @@ class Order_Detail(models.Model):
 #Because payment is done in arrays and then added up to the total amount. Duh lol
 class Order_Item(models.Model):
     order_ID = models.ForeignKey(Order_Detail, on_delete=models.CASCADE)
-    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    bitsnap_ID = models.ForeignKey(Bitsnap, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
@@ -523,7 +523,7 @@ class Order_Item(models.Model):
 
     def __str__(self):
         #returns Order_ID and Product ID
-        return 'Order ID: %s -- Product ID: %s' % (self.order_ID, self.product_ID)
+        return 'Order ID: %s -- Product ID: %s' % (self.order_ID, self.bitsnap_ID)
 
 
 
