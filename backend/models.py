@@ -410,8 +410,8 @@ class Product(models.Model):
     clicks_on_product = models.IntegerField()
     is_product_digital = models.BooleanField(default=False)
     is_product_sharable = models.BooleanField(default=False)
-    bodega_vision_tags = JSONField(null=True, blank=True) # Auto populated by Azure Vision API
-    bodega_people_tags = JSONField(null=True, blank=True) #Auto populated by Sentino People API (User_Types)
+    product_unique_traits = JSONField(null=True, blank=True) # Auto populated by Azure Vision API
+    customer_unique_traits = JSONField(null=True, blank=True) #Auto populated by Sentino People API (User_Types)
     nsfw_content = models.BooleanField(default=False)
     production_cost = models.FloatField(default=0.0) #helps us tweak our user targeting based on audience group
     production_time_days = models.IntegerField()
