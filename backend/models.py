@@ -1,4 +1,3 @@
-from email.policy import default
 from password_generator import PasswordGenerator
 from django.contrib.postgres.fields import ArrayField
 import hashlib
@@ -14,9 +13,6 @@ pg = PasswordGenerator() #initiating PG exec
 
 def hashkey_generator():
     return hashlib.sha1(str(pg.non_duplicate_password(40)).encode()).hexdigest()
-
-def agent_hashkey_generator():
-    return hashlib.sha256(str(pg.non_duplicate_password(80)).encode()).hexdigest()
 
 
 # Link to DB ER Diagram : https://excalidraw.com/#json=1o-AHOOFnaF6jYHp2Hgz1,4aF7oWBC0cdS89i-a0AN7A
@@ -241,7 +237,7 @@ class Message(models.Model):
 
 
 
-#Bitsnap Category Definition - How are the products/assets categorized / segmented?
+#Product Category Definition - How are the products/assets categorized / segmented?
 class Product_Category(models.Model):
     category_name = models.TextField(choices=[
         ('SHIRTS', 'SHIRTS' ),
@@ -266,14 +262,14 @@ class Product_Category(models.Model):
 
 
     def __str__(self):
-        #returns Bitsnap Category
+        #returns Product Category
 
-        return 'Bitsnap Category Name: %s ' % (self.category_name)
+        return 'Product Category Name: %s ' % (self.category_name)
 
     
 
 
-#Bitsnap Collection definition - How are different assets segmented by themes?
+#Product Collection definition - How are different assets segmented by themes?
 class Product_Themes(models.Model):
     collection_name = models.TextField( default='Collection Name')
     collection_desc = models.TextField(default='Collection Decsription')
@@ -294,7 +290,7 @@ class Product_Themes(models.Model):
 
 
 
-#Bitsnap Discount definition - How much discount?
+#Product Discount definition - How much discount?
 class Discount(models.Model):
     name = models.TextField()
     description = models.TextField()
@@ -325,9 +321,9 @@ class Social(models.Model):
     followers = JSONField(null=True, blank=True) #lists of MetaUSer_IDs which follow us
     makeprofileprivate = models.BooleanField(default=False)
     saved_content = JSONField(null=True, blank=True) #URLs to product_metakeys - stored as an array
-    likes = JSONField(null=True, blank=True) #List of Bitsnap Hashkeys liked by user 
-    dislikes = JSONField(null=True, blank=True) #List and count of Bitsnap Hashkeys disliked by user
-    comments = JSONField(null=True, blank=True) #List of Bitsnap MetaKeys commented on
+    likes = JSONField(null=True, blank=True) #List of Product Hashkeys liked by user 
+    dislikes = JSONField(null=True, blank=True) #List and count of Product Hashkeys disliked by user
+    comments = JSONField(null=True, blank=True) #List of Product MetaKeys commented on
     products_clickedOn = JSONField(null=True, blank=True)
     bio = models.TextField()
     blocked_list = JSONField(null=True, blank=True)
@@ -388,10 +384,10 @@ class Shop(models.Model):
 
 
 
-#Creating Bitsnap model - how does a product look like? what are the traits?
+#Creating Product model - how does a product look like? what are the traits?
 
-class Bitsnap(models.Model):
-    name=models.TextField( default='No Bitsnap Name, yet', unique=True)
+class Product(models.Model):
+    name=models.TextField( default='No Product Name, yet', unique=True)
     description = models.TextField(default='Explain your creation in great poetic detail.')
     numberoflikes = models.IntegerField(default=0)
     numberofdislikes = models.IntegerField(default=0)
@@ -413,8 +409,8 @@ class Bitsnap(models.Model):
     clicks_on_product = models.IntegerField()
     is_product_digital = models.BooleanField(default=False)
     is_product_sharable = models.BooleanField(default=False)
-    product_unique_traits = JSONField(null=True, blank=True) # Auto populated by Azure Vision API
-    customer_unique_traits = JSONField(null=True, blank=True) #Auto populated by Sentino People API (User_Types)
+    shop_traits = JSONField(null=True, blank=True) #define what kind of customers you want to reach
+    assistance_ask = JSONField(null=True, blank=True) #add tags on what help you need? funding - hiring etc
     nsfw_content = models.BooleanField(default=False)
     production_cost = models.FloatField(default=0.0) #helps us tweak our user targeting based on audience group
     production_time_days = models.IntegerField()
@@ -425,14 +421,15 @@ class Bitsnap(models.Model):
     product_image1 = models.FileField(upload_to='product/product_image1')
     product_image2 = models.FileField(upload_to='product/product_image2', default=None)
     product_image3 = models.FileField(upload_to='product/product_image3', default=None)
+    product_image4 = models.FileField(upload_to='product/product_image4', default=None)
     hashkey = models.TextField( default=hashkey_generator, unique=True) #generates unique SHA1 key for your product - which is immutable in TRILL universe
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
     def __str__(self):
-        #returns Bitsnap Name & Bitsnap Meta Key
+        #returns Product Name & Product Meta Key
 
-        return 'Bitsnap Name: %s -- Meta-Key: %s' % (self.name, self.hashkey)
+        return 'Product Name: %s -- Meta-Key: %s' % (self.name, self.hashkey)
     
 
 #Collaboration model allows all types of users to collaborate on any asset on the TRILL ecosystem and do business
@@ -447,7 +444,7 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE) #creators can paste their hashkey to auth
-    bitsnap_ID = models.ForeignKey(Bitsnap, on_delete=models.CASCADE) #creators can paste the hashkey to add the product ID
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #creators can paste the hashkey to add the product ID
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE) #add a search feature on Front-End - for People to search by Shop name
     #product_shop_ID should be EQUAL to shop_ID to verify identity that both User_IDs are same.
     creator_pitch = models.TextField()
@@ -458,7 +455,7 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     bid_amount = models.FloatField(default=0.0)
-    accept_bid = models.BooleanField(default=False) #only Bitsnap Owner has this privilege 
+    accept_bid = models.BooleanField(default=False) #only Product Owner has this privilege 
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -484,15 +481,15 @@ class Shopping_Session(models.Model):
 #Create temp table called Cart Item --> We wil store the data. Analyze behaviour.
 class Cart_Item(models.Model):
     session_ID = models.ForeignKey(Shopping_Session, on_delete=models.CASCADE)
-    bitsnap_ID = models.ForeignKey(Bitsnap, on_delete=models.CASCADE) #We dont want our product to be deleted because of our cute temporary cart item table
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE) #We dont want our product to be deleted because of our cute temporary cart item table
     quanity = models.IntegerField(default=0)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
 
     def __str__(self):
-        # Returns Cart ID and Bitsnap ID
-        return 'Cart ID: %s --- Bitsnap ID: %s' % (self.id, self.bitsnap_ID)
+        # Returns Cart ID and Product ID
+        return 'Cart ID: %s --- Product ID: %s' % (self.id, self.product_ID)
         #this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
 
 
@@ -518,15 +515,15 @@ class Order_Detail(models.Model):
 #Because payment is done in arrays and then added up to the total amount. Duh lol
 class Order_Item(models.Model):
     order_ID = models.ForeignKey(Order_Detail, on_delete=models.CASCADE)
-    bitsnap_ID = models.ForeignKey(Bitsnap, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
 
     def __str__(self):
-        #returns Order_ID and Bitsnap ID
-        return 'Order ID: %s -- Bitsnap ID: %s' % (self.order_ID, self.bitsnap_ID)
+        #returns Order_ID and Product ID
+        return 'Order ID: %s -- Product ID: %s' % (self.order_ID, self.product_ID)
 
 
 
@@ -539,18 +536,6 @@ class Shop_Payout(models.Model):
 
 
 
-#Creating models for marketing & ops teams
-#a CRM kinda shit to keep a tab on who brought how many influencers? or designers? how much have their brands sold? in total?
-#a true account owner shit. ya know?
-
-#MarketplaceAgent - User_ID, Reporting_Officer(user_ID), influencer_list (Influencer.objects.get(agent_ID='XYZ')), designer_list(Designers.objects.get(agent_ID='XYZ')), churn_percentage_demand, churn_percentage_supply, client_total_earnings, agent_total_earnings,  
-class MarketplaceAgent(models.Model):
-    user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    reporting_officer_user_ID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    agent_hashkey = models.TextField( default=agent_hashkey_generator(), unique=True)
-    client_total_earnings = models.FloatField(default=0.0)
-    agent_total_earnings = models.FloatField(default=0.0)
-    agent_level_clearance = models.IntegerField(default=5)
 
 
 
