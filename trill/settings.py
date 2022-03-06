@@ -96,8 +96,12 @@ ASGI_APPLICATION = 'trill.asgi.application'
 
 DATABASES = {
     'default':{
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME':  str(BASE_DIR/'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'testdb',
+        'USER': 'postgres',
+        'PASSWORD' : '043074',
+        'HOST' : '127.0.0.1',
+        'PORT' : '5432'
     }
 }
 
@@ -144,7 +148,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_ROOT = '/metadata/bodega-md5/media/'
+
 
 
 # Default primary key field type

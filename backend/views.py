@@ -11,14 +11,16 @@ import requests
 
 
 
-from backend.models import MetaUser, User_Address, User_Payment, User_Type, Chat_Room, Particpant, Message, Product_Category, Product_Themes, Discount, Social, Shop_Payout, Shop, Product,  Collaboration, hashkey_generator
-from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer
+from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode
+from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveItemSerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassficationSerializer, SentinoItemClassficationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer
+
+
 
 
 
 #HTML files for Bodega Landing Page
 def home_page(request):
-    metausers = hashkey_generator()
+    metausers = message_hashkey_generator()
     return render(request, 'backend/index.html', {'metausers': metausers})
 
 def landing_page(request):
@@ -39,6 +41,9 @@ def contact_us(request):
 
 
 
+
+#MetaUser Views
+#@csrf_exempt
 def metauser_list(request):
     #GET, POST request for metauser/
     if request.method == 'GET':
@@ -55,9 +60,9 @@ def metauser_list(request):
         
         return JsonResponse(serializer.errors, status=400)
 
-    
 
 
+#@csrf_exempt
 
 def metauser_detail(request, pk):
     #GET,PUT,DELETE request for metauser{id}
@@ -86,14 +91,676 @@ def metauser_detail(request, pk):
 
 
 
+#Level Views
+def level_list(request):
+    #GET, POST request for Level
+    if request.method == 'GET':
+        level = Level.objects.all()
+        serializer = LevelSerializer(level, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = LevelSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def level_detail(request, pk):
+    #GET, PUT, DELETE request for level{id}
+    try:
+        level = Level.objects.get(pk=pk)
+    except Level.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = LevelSerializer(level)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = LevelSerializer(level, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        level.delete()
+        return HttpResponse(status=204)
+
+
+
+
+#BLA Views
+
+def blascore_list(request):
+    #GET, POST request for BLAScore
+    if request.method == 'GET':
+        base_line_analysis = BLAScore.objects.all()
+        serializer = BLASerializer(base_line_analysis, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BLASerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def blascore_detail(request, pk):
+    #GET, PUT, DELETE request for  blascore{id}
+    try:
+        base_line_analysis = BLAScore.objects.get(pk=pk)
+    except BLAScore.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BLASerializer(base_line_analysis)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BLASerializer(base_line_analysis, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        base_line_analysis.delete()
+        return HttpResponse(status=204)
+
+
+
+
+#Sentino Item Proximity Model
+
+def sentino_item_proximity_list(request):
+    #GET, POST request for sentino_item_proximity model
+    if request.method == 'GET':
+        sentino_item_proximity = SentinoItemProximity.objects.all()
+        serializer = SentinoItemProximitySerializer(sentino_item_proximity, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SentinoItemProximitySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def sentino_item_proximity_detail(request, pk):
+    #GET, PUT, DELETE request for  sentino_item_proximity{id}
+    try:
+        sentino_item_proximity = SentinoItemProximity.objects.get(pk=pk)
+    except SentinoItemProximity.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SentinoItemProximitySerializer(sentino_item_proximity)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SentinoItemProximitySerializer(sentino_item_proximity, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sentino_item_proximity.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Sentino Item Projection Model
+
+def sentino_item_projection_list(request):
+    #GET, POST request for sentino_item_projection model
+    if request.method == 'GET':
+        sentino_item_projection = SentinoItemProjection.objects.all()
+        serializer = SentinoItemProjectionSerializer(sentino_item_projection, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SentinoItemProjectionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def sentino_item_projection_detail(request, pk):
+    #GET, PUT, DELETE request for  sentino_item_projection{id}
+    try:
+        sentino_item_projection = SentinoItemProjection.objects.get(pk=pk)
+    except SentinoItemProjection.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SentinoItemProjectionSerializer(sentino_item_projection)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SentinoItemProjectionSerializer(sentino_item_projection, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sentino_item_projection.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Sentino Item Classification Model
+
+def sentino_item_classification_list(request):
+    #GET, POST request for sentino_item_classification model
+    if request.method == 'GET':
+        sentino_item_classification = SentinoItemClassification.objects.all()
+        serializer = SentinoItemClassficationSerializer(sentino_item_classification, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SentinoItemClassficationSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def sentino_item_classification_detail(request, pk):
+    #GET, PUT, DELETE request for  sentino_item_classification{id}
+    try:
+        sentino_item_classification = SentinoItemClassification.objects.get(pk=pk)
+    except SentinoItemClassification.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SentinoItemClassficationSerializer(sentino_item_classification)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SentinoItemClassficationSerializer(sentino_item_classification, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sentino_item_classification.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Sentino  Inventory Model
+
+def sentino_inventory_list(request):
+    #GET, POST request for sentino_inventory model
+    if request.method == 'GET':
+        sentino_inventory = SentinoInventory.objects.all()
+        serializer = SentinoInventorySerializer(sentino_inventory, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SentinoInventorySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def sentino_inventory_detail(request, pk):
+    #GET, PUT, DELETE request for  sentino_inventory{id}
+    try:
+        sentino_inventory = SentinoInventory.objects.get(pk=pk)
+    except SentinoInventory.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SentinoInventorySerializer(sentino_inventory)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SentinoInventorySerializer(sentino_inventory, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sentino_inventory.delete()
+        return HttpResponse(status=204)
+
+
+
+
+#Sentino Description Model
+
+def sentino_description_list(request):
+    #GET, POST request for sentino_description model
+    if request.method == 'GET':
+        sentino_description = SentinoSelfDescription.objects.all()
+        serializer = SentinoDescriptionSerializer(sentino_description, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SentinoDescriptionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def sentino_description_detail(request, pk):
+    #GET, PUT, DELETE request for  sentino_description{id}
+    try:
+        sentino_description = SentinoSelfDescription.objects.get(pk=pk)
+    except SentinoSelfDescription.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SentinoDescriptionSerializer(sentino_description)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SentinoDescriptionSerializer(sentino_description, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sentino_description.delete()
+        return HttpResponse(status=204)
+
+
+#Sentino Profile Model
+
+def sentino_profile_list(request):
+    #GET, POST request for sentino_profile model
+    if request.method == 'GET':
+        sentino_profile = SentinoProfile.objects.all()
+        serializer = SentinoProfileSerializer(sentino_profile, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SentinoProfileSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def sentino_profile_detail(request, pk):
+    #GET, PUT, DELETE request for  sentino_profile{id}
+    try:
+        sentino_profile = SentinoProfile.objects.get(pk=pk)
+    except SentinoProfile.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SentinoProfileSerializer(sentino_profile)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SentinoProfileSerializer(sentino_profile, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sentino_profile.delete()
+        return HttpResponse(status=204)
+
+
+
+#Bodega Vision Model
+
+def bodega_vision_list(request):
+    #GET, POST request for bodega_vision model
+    if request.method == 'GET':
+        bodega_vision = BodegaVision.objects.all()
+        serializer = BodegaVisionSerializer(bodega_vision, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaVisionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_vision_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_vision{id}
+    try:
+        bodega_vision = BodegaVision.objects.get(pk=pk)
+    except BodegaVision.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaVisionSerializer(bodega_vision)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaVisionSerializer(bodega_vision, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_vision.delete()
+        return HttpResponse(status=204)
+
+
+
+
+#Bodega Face Model
+
+def bodega_face_list(request):
+    #GET, POST request for bodega_face model
+    if request.method == 'GET':
+        bodega_face = BodegaFace.objects.all()
+        serializer = BodegaFaceSerializer(bodega_face, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaFaceSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_face_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_face{id}
+    try:
+        bodega_face = BodegaFace.objects.get(pk=pk)
+    except BodegaFace.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaFaceSerializer(bodega_face)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaFaceSerializer(bodega_face, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_face.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Bodega Personalizer Model
+
+def bodega_personalizer_list(request):
+    #GET, POST request for bodega_personalizer model
+    if request.method == 'GET':
+        bodega_personalizer = BodegaPersonalizer.objects.all()
+        serializer = BodegaPersonalizerSerializer(bodega_personalizer, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaPersonalizerSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_personalizer_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_personalizer{id}
+    try:
+        bodega_personalizer = BodegaPersonalizer.objects.get(pk=pk)
+    except BodegaPersonalizer.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaPersonalizerSerializer(bodega_personalizer)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaPersonalizerSerializer(bodega_personalizer, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_personalizer.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Bodega Cognitive Item Model
+
+def bodega_item_list(request):
+    #GET, POST request for bodega_item model
+    if request.method == 'GET':
+        bodega_item = BodegaCognitiveItem.objects.all()
+        serializer = BodegaCognitiveItemSerializer(bodega_item, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaCognitiveItemSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_item_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_item{id}
+    try:
+        bodega_item = BodegaCognitiveItem.objects.get(pk=pk)
+    except BodegaCognitiveItem.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaCognitiveItemSerializer(bodega_item)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaCognitiveItemSerializer(bodega_item, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_item.delete()
+        return HttpResponse(status=204)
+
+
+
+#Bodega Cognitive Inventory Model
+
+def bodega_inventory_list(request):
+    #GET, POST request for bodega_inventory model
+    if request.method == 'GET':
+        bodega_inventory = BodegaCognitiveInventory.objects.all()
+        serializer = BodegaCognitiveInventorySerializer(bodega_inventory, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaCognitiveInventorySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_inventory_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_inventory{id}
+    try:
+        bodega_inventory = BodegaCognitiveInventory.objects.get(pk=pk)
+    except BodegaCognitiveInventory.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaCognitiveInventorySerializer(bodega_inventory)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaCognitiveInventorySerializer(bodega_inventory, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_inventory.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Bodega Cognitive Person Model
+
+def bodega_person_list(request):
+    #GET, POST request for bodega_person model
+    if request.method == 'GET':
+        bodega_person = BodegaCognitivePerson.objects.all()
+        serializer = BodegaCognitivePersonSerializer(bodega_person, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaCognitivePersonSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_person_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_person{id}
+    try:
+        bodega_person = BodegaCognitivePerson.objects.get(pk=pk)
+    except BodegaCognitivePerson.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaCognitivePersonSerializer(bodega_person)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaCognitivePersonSerializer(bodega_person, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_person.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#Bodega Department Model
+
+def bodega_dept_list(request):
+    #GET, POST request for bodega_dept model
+    if request.method == 'GET':
+        bodega_dept = BodegaDept.objects.all()
+        serializer = BodegaDeptSerializer(bodega_dept, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = BodegaDeptSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        
+        return JSONParser(serializer.errors, status=400)
+
+
+def bodega_dept_detail(request, pk):
+    #GET, PUT, DELETE request for  bodega_dept{id}
+    try:
+        bodega_dept = BodegaDept.objects.get(pk=pk)
+    except BodegaDept.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = BodegaDeptSerializer(bodega_dept)
+        return JsonResponse(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BodegaDeptSerializer(bodega_dept, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        bodega_dept.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+#USER ADDRESS MODEL
+
 #Fetching data via UserID - Parent ID - RESTRICTED USE
-
-
-
 def address_list(request):
     #GET, POST request for metauser_address/
     if request.method == 'GET':
-        user_address = User_Address.objects.all()
+        user_address = UserAddress.objects.all()
         serializer = UserAddressSerializer(user_address, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -110,9 +777,9 @@ def address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
     try:
-        user_address = User_Address.objects.get(user_ID=pk)
+        user_address = UserAddress.objects.get(user_ID=pk)
     
-    except User_Address.DoesNotExist:
+    except UserAddress.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -134,14 +801,14 @@ def address_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-#@csrf_exempt
+##@csrf_exempt
 def child_address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
     try:
-        user_address = User_Address.objects.get(pk=pk)
+        user_address = UserAddress.objects.get(pk=pk)
     
-    except User_Address.DoesNotExist:
+    except UserAddress.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -166,11 +833,11 @@ def child_address_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-#@csrf_exempt
+##@csrf_exempt
 def user_payment_list(request):
     #GET, POST request for metauser_address/
     if request.method == 'GET':
-        user_payment = User_Payment.objects.all()
+        user_payment = UserPayment.objects.all()
         serializer = UserPaymentSerializer(user_payment, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -182,14 +849,14 @@ def user_payment_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def user_payment_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
     try:
-        user_payment = User_Payment.objects.get(user_ID=pk)
+        user_payment = UserPayment.objects.get(user_ID=pk)
     
-    except User_Payment.DoesNotExist:
+    except UserPayment.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -211,14 +878,14 @@ def user_payment_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-#@csrf_exempt
+##@csrf_exempt
 def child_payment_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
     try:
-        user_payment = User_Payment.objects.get(pk=pk)
+        user_payment = UserPayment.objects.get(pk=pk)
     
-    except User_Payment.DoesNotExist:
+    except UserPayment.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -244,11 +911,11 @@ def child_payment_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-#@csrf_exempt
+##@csrf_exempt
 def user_type_list(request):
 
     if request.method == 'GET':
-        user_type = User_Type.objects.all()
+        user_type = UserType.objects.all()
         serializer = UserTypeSerializer(user_type, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -260,14 +927,14 @@ def user_type_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def user_type_detail(request, pk):
 
 
     try:
-        user_type = User_Type.objects.get(user_ID=pk)
+        user_type = UserType.objects.get(user_ID=pk)
     
-    except User_Type.DoesNotExist:
+    except UserType.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -289,14 +956,14 @@ def user_type_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-#@csrf_exempt
+##@csrf_exempt
 def child_type_detail(request, pk):
 
 
     try:
-        user_type = User_Type.objects.get(pk=pk)
+        user_type = UserType.objects.get(pk=pk)
     
-    except User_Type.DoesNotExist:
+    except UserType.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -327,7 +994,7 @@ def child_type_detail(request, pk):
 def chat_room_list(request):
 
     if request.method == 'GET':
-        chat_room_type = Chat_Room.objects.all()
+        chat_room_type = ChatRoom.objects.all()
         serializer = ChatRoomSerializer(chat_room_type, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -344,9 +1011,9 @@ def chat_room_detail(request, pk):
 
 
     try:
-        chat_room_type = Chat_Room.objects.get(pk=pk)
+        chat_room_type = ChatRoom.objects.get(pk=pk)
     
-    except Chat_Room.DoesNotExist:
+    except ChatRoom.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -371,7 +1038,7 @@ def chat_room_detail(request, pk):
 #The code can be replicated for fetching via:  User_ID as well - but thats restricted.
 
 
-#@csrf_exempt
+##@csrf_exempt
 def participant_list(request):
 
     if request.method == 'GET':
@@ -387,7 +1054,7 @@ def participant_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def participant_detail(request, pk):
 
 
@@ -471,11 +1138,11 @@ def message_detail(request, pk):
 #No FK relationships here to worry about.
 
 
-#@csrf_exempt
+##@csrf_exempt
 def product_category_list(request):
 
     if request.method == 'GET':
-        product_category = Product_Category.objects.all()
+        product_category = ProductCategory.objects.all()
         serializer = ProductCategorySerializer(product_category, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -487,14 +1154,14 @@ def product_category_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def product_category_detail(request, pk):
 
 
     try:
-        product_category = Product_Category.objects.get(pk=pk)
+        product_category = ProductCategory.objects.get(pk=pk)
     
-    except Product_Category.DoesNotExist:
+    except ProductCategory.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -522,11 +1189,11 @@ def product_category_detail(request, pk):
 #No FK relationships here to worry about.
 
 
-#@csrf_exempt
+##@csrf_exempt
 def product_theme_list(request):
 
     if request.method == 'GET':
-        product_theme = Product_Themes.objects.all()
+        product_theme = ProductThemes.objects.all()
         serializer = ProductThemesSerializer(product_theme, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -538,14 +1205,14 @@ def product_theme_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def product_theme_detail(request, pk):
 
 
     try:
-        product_theme = Product_Themes.objects.get(pk=pk)
+        product_theme = ProductThemes.objects.get(pk=pk)
     
-    except Product_Themes.DoesNotExist:
+    except ProductThemes.DoesNotExist:
         return JsonResponse(status=404)
 
     if request.method == 'GET':
@@ -573,7 +1240,7 @@ def product_theme_detail(request, pk):
 #One FK with MetaUser --> But read_only is sufficient.
 
 
-#@csrf_exempt
+##@csrf_exempt
 def discount_list(request):
 
     if request.method == 'GET':
@@ -589,7 +1256,7 @@ def discount_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def discount_detail(request, pk):
 
 
@@ -625,7 +1292,7 @@ def discount_detail(request, pk):
 #But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser 
 
 
-#@csrf_exempt
+##@csrf_exempt
 def social_list(request):
 
     if request.method == 'GET':
@@ -641,7 +1308,7 @@ def social_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+##@csrf_exempt
 def social_detail(request, pk):
 
 
@@ -669,7 +1336,7 @@ def social_detail(request, pk):
 
 #Fetching data via User_ID - Parent Table ID - RESTRICTED USE
 
-#@csrf_exempt
+##@csrf_exempt
 def parent_social_detail(request, pk):
 
 
@@ -773,6 +1440,48 @@ def parent_shop_detail(request, pk):
         return HttpResponse(status=204)
 
 
+#----------------------------------------------------------------------------------
+
+#Product MetaData Instance 
+##@csrf_exempt
+def product_metadata_list(request):
+
+    if request.method == 'GET':
+        product_metadata = ProductMetaData.objects.all()
+        serializer = ProductMetaDataSerializer(product_metadata, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = ProductMetaDataSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+##@csrf_exempt
+def product_metadata_detail(request, pk):
+
+
+    try:
+        product_metadata = ProductMetaData.objects.get(pk=pk)
+    
+    except ProductMetaData.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(ProductMetaDataSerializer(product_metadata).data)
+
+    elif request.method == 'PUT':
+        serializer = ProductMetaDataSerializer(product_metadata, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        product_metadata.delete()
+        return HttpResponse(status=204)
 
 
 #----------------------------------------------------------------------------------
@@ -877,3 +1586,415 @@ def collaboration_detail(request, pk):
         return HttpResponse(status=204)
 
 
+
+#Shopping Session Views 
+#@csrf_exempt
+def shopping_session_list(request):
+
+    if request.method == 'GET':
+        shopping_session = ShoppingSession.objects.all()
+        serializer = ShoppingSessionSerializer(shopping_session, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = ShoppingSessionSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def shopping_session_detail(request, pk):
+
+
+    try:
+        shopping_session = ShoppingSession.objects.get(pk=pk)
+    
+    except ShoppingSession.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(ShoppingSessionSerializer(shopping_session).data)
+
+    elif request.method == 'PUT':
+        serializer = ShoppingSessionSerializer(shopping_session, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        shopping_session.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+
+#Cart Item Views 
+#@csrf_exempt
+def cart_item_list(request):
+
+    if request.method == 'GET':
+        cart_item = CartItem.objects.all()
+        serializer = CartItemSerializer(cart_item, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = CartItemSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def cart_item_detail(request, pk):
+
+
+    try:
+        cart_item = CartItem.objects.get(pk=pk)
+    
+    except CartItem.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(CartItemSerializer(cart_item).data)
+
+    elif request.method == 'PUT':
+        serializer = CartItemSerializer(cart_item, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        cart_item.delete()
+        return HttpResponse(status=204)
+
+
+
+
+#Order Detail Views 
+#@csrf_exempt
+def order_detail_list(request):
+
+    if request.method == 'GET':
+        order_detail = OrderDetail.objects.all()
+        serializer = OrderDetailsSerializer(order_detail, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = OrderDetailsSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def order_detail_detail(request, pk):
+
+
+    try:
+        order_detail = OrderDetail.objects.get(pk=pk)
+    
+    except OrderDetail.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(OrderDetailsSerializer(order_detail).data)
+
+    elif request.method == 'PUT':
+        serializer = OrderDetailsSerializer(order_detail, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        order_detail.delete()
+        return HttpResponse(status=204)
+
+
+
+
+
+
+
+#Order Item Views 
+#@csrf_exempt
+def order_item_list(request):
+
+    if request.method == 'GET':
+        order_item = OrderItem.objects.all()
+        serializer = OrderItemSerializer(order_item, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = OrderItemSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def order_item_detail(request, pk):
+
+
+    try:
+        order_item = OrderItem.objects.get(pk=pk)
+    
+    except OrderItem.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(OrderDetailsSerializer(order_item).data)
+
+    elif request.method == 'PUT':
+        serializer = OrderItemSerializer(order_item, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        order_item.delete()
+        return HttpResponse(status=204)
+    
+    
+    
+
+
+#SysOpsAgent Views
+#@csrf_exempt
+def sysops_agent_list(request):
+
+    if request.method == 'GET':
+        sysops_agent = SysOpsAgent.objects.all()
+        serializer = SysOpsAgentSerializer(sysops_agent, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = SysOpsAgentSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def sysops_agent_detail(request, pk):
+
+
+    try:
+        sysops_agent = SysOpsAgent.objects.get(pk=pk)
+    
+    except SysOpsAgent.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(SysOpsAgentSerializer(sysops_agent).data)
+
+    elif request.method == 'PUT':
+        serializer = SysOpsAgentSerializer(sysops_agent, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sysops_agent.delete()
+        return HttpResponse(status=204)
+    
+    
+    
+    
+
+
+
+
+#SysOpsAgent Repo Views
+#@csrf_exempt
+def sysops_agent_repo_list(request):
+
+    if request.method == 'GET':
+        sysops_agent_repo = SysOpsAgentRepo.objects.all()
+        serializer = SysOpsAgentRepoSerializer(sysops_agent_repo, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = SysOpsAgentRepoSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def sysops_agent_repo_detail(request, pk):
+
+
+    try:
+        sysops_agent_repo = SysOpsAgentRepo.objects.get(pk=pk)
+    
+    except SysOpsAgentRepo.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(SysOpsAgentRepoSerializer(sysops_agent_repo).data)
+
+    elif request.method == 'PUT':
+        serializer = SysOpsAgentRepoSerializer(sysops_agent_repo, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sysops_agent_repo.delete()
+        return HttpResponse(status=204)
+    
+    
+    
+
+
+
+
+#SysOpsAgent Project Views
+#@csrf_exempt
+def sysops_agent_project_list(request):
+
+    if request.method == 'GET':
+        sysops_agent_project = SysOpsProject.objects.all()
+        serializer = SysOpsProjectSerializer(sysops_agent_project, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = SysOpsProjectSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def sysops_agent_project_detail(request, pk):
+
+
+    try:
+        sysops_agent_project = SysOpsProject.objects.get(pk=pk)
+    
+    except SysOpsProject.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(SysOpsProjectSerializer(sysops_agent_project).data)
+
+    elif request.method == 'PUT':
+        serializer = SysOpsProjectSerializer(sysops_agent_project, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sysops_agent_project.delete()
+        return HttpResponse(status=204)
+    
+    
+    
+    
+
+
+#SysOpsDemandNode Views
+#@csrf_exempt
+def sysopsdemandnode_list(request):
+
+    if request.method == 'GET':
+        sysopsdemandnode = SysOpsDemandNode.objects.all()
+        serializer = SysOpsDemandNodeSerializer(sysopsdemandnode, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = SysOpsDemandNodeSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def sysopsdemandnode_detail(request, pk):
+
+
+    try:
+        sysopsdemandnode = SysOpsDemandNode.objects.get(pk=pk)
+    
+    except SysOpsDemandNode.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(SysOpsDemandNodeSerializer(sysopsdemandnode).data)
+
+    elif request.method == 'PUT':
+        serializer = SysOpsDemandNodeSerializer(sysopsdemandnode, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sysopsdemandnode.delete()
+        return HttpResponse(status=204)
+    
+    
+    
+    
+
+
+
+#SysOpsSupplyNode Views
+#@csrf_exempt
+def sysopssupplynode_list(request):
+
+    if request.method == 'GET':
+        sysopssupplynode = SysOpsSupplyNode.objects.all()
+        serializer = SysOpsSupplyNodeSerializer(sysopssupplynode, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = SysOpsSupplyNodeSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+#@csrf_exempt
+def sysopssupplynode_detail(request, pk):
+
+
+    try:
+        sysopssupplynode = SysOpsSupplyNode.objects.get(pk=pk)
+    
+    except SysOpsSupplyNode.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(SysOpsSupplyNodeSerializer(sysopssupplynode).data)
+
+    elif request.method == 'PUT':
+        serializer = SysOpsSupplyNodeSerializer(sysopssupplynode, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        sysopssupplynode.delete()
+        return HttpResponse(status=204)
+    

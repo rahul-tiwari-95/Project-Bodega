@@ -1,94 +1,100 @@
 from django.contrib.auth.models import User, Group
-from .models import Cart_Item, Chat_Room, Collaboration, Discount, MetaUser, Order_Detail, Order_Item, Product, Product_Category, Product_Themes, Shop_Payout, Shopping_Session, Social, Shop, User_Address, User_Payment, User_Type,  Particpant, Message
+from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, \
+    BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, MetaUser, \
+    OrderDetail, OrderItem, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, \
+    SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, \
+    SentinoSelfDescription, ShopPayout, ShoppingSession, Social, Shop, Solomonv0, SysOpsAgent, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, \
+    UserType, Particpant, Message
 from rest_framework import serializers
 
+# Serializer Class for Developers
+# wherever possible, apply constraints
+# GET functions arent defined explicitly because we are just reading data - so no corruption can be done
 
-#Serializer Class for Developers
-#wherever possible, apply constraints
-#GET functions arent defined explicitly because we are just reading data - so no corruption can be done  
+# validated_data = data which needs to be requested or posted
+# instance = this is the instance of the model with pk=id
 
-#validated_data = data which needs to be requested or posted
-#instance = this is the instance of the model with pk=id
-
-collab_type_array = [ #the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
-        ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
-        ('COMMISSION-%-ON-SALES','COMMISSION-%-ON-SALES'),
-        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
-    ]
+collab_type_array = [
+    # the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
+    ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
+    ('BARTER-DEAL', 'BARTER-DEAL'),
+    ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
+    ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
+]
 
 marketing_funnel_array = [
-        ('Community', 'Creator-Community'),
-        ('Performance-ADs', 'Performance-ADs-IG/FB'),
-        ('Influencer-Marketing', 'Influencer-Marketing'),
-    ]
+    ('Community', 'Creator-Community'),
+    ('Performance-ADs', 'Performance-ADs-IG/FB'),
+    ('Influencer-Marketing', 'Influencer-Marketing'),
+]
 
 country_list = [
-        ('INDIA', 'IN'),
-        ('USA', 'US'),
+    ('INDIA', 'IN'),
+    ('USA', 'US'),
 ]
 
 payment_types = [
-        ('DEBIT/CREDIT-CARD', 'DEBIT/CREDIT-CARD'),
-        ('PAYPAL', 'PAYPAL'),
+    ('DEBIT/CREDIT-CARD', 'DEBIT/CREDIT-CARD'),
+    ('PAYPAL', 'PAYPAL'),
 
-        ('CRYPTO(BETA)', 'CRYPTO(BETA)')
-    ]
+    ('CRYPTO(BETA)', 'CRYPTO(BETA)')
+]
 
 user_role_array = [
-        ('Creator', 'Creator'),
-        ('Business', 'Business'),
-        ('Bodega-Community-Member', 'Bodega-Community-Member'),
-    ]
+    ('Creator', 'Creator'),
+    ('Business', 'Business'),
+    ('Bodega-Community-Member', 'Bodega-Community-Member'),
+]
 type_of_room_array = [
-        ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),#only people with meta_key can join the secure_room
-        ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),#anyone can join the secure room
-        ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION') #leads ro the deletion of the room
-    ]
-#Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
+    ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),  # only people with meta_key can join the secure_room
+    ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),  # anyone can join the secure room
+    ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')  # leads ro the deletion of the room
+]
+# Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
 
-product_category_array = [
-        ('SHIRTS', 'SHIRTS' ),
-        ('BOTTOMS', 'BOTTOMS'),
-        ('SNEAKERS', 'SNEAKERS'),
-        ('THERMALS', 'THERMALS'),
-        ('SHORTS', 'SHORTS'),
-        ('HOME-DECOR', 'HOME-DECOR'),
-        ('DIGITAL-ART', 'DIGITAL-ART'),
-        ('MUSIC-FILE', 'MUSIC-FILE'),
-        ('COLLECTIBLES','COLLECTIBLES'),
-        ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
-        ('DIGITAL-ACCESSORIES', 'DIGITAL-ACCESSORIES'),
-        ('POTRAIT-VIDEO-FILE', 'POTRAIT-VIDEO-FILE'),]
-
-#Serializer for User Class under Django-Admin 
+ProductCategory_array = [
+    ('SHIRTS', 'SHIRTS'),
+    ('BOTTOMS', 'BOTTOMS'),
+    ('SNEAKERS', 'SNEAKERS'),
+    ('THERMALS', 'THERMALS'),
+    ('SHORTS', 'SHORTS'),
+    ('HOME-DECOR', 'HOME-DECOR'),
+    ('DIGITAL-ART', 'DIGITAL-ART'),
+    ('MUSIC-FILE', 'MUSIC-FILE'),
+    ('COLLECTIBLES', 'COLLECTIBLES'),
+    ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
+    ('DIGITAL-ACCESSORIES', 'DIGITAL-ACCESSORIES'),
+    ('POTRAIT-VIDEO-FILE', 'POTRAIT-VIDEO-FILE'), ]
 
 
+# Serializer for User Class under Django-Admin
 
 
-
-#Serializer template for MetaUser
+# Serializer template for MetaUser
 class MetaUserSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True) 
+    id = serializers.IntegerField(read_only=True)
     meta_username = serializers.CharField(required=True)
-    password = serializers.CharField(required=False, max_length=100)
-    hashkey = serializers.CharField(default='sha1 hash key', read_only=True)
-    email = serializers.CharField(required=False)
+    passcode = serializers.CharField(required=False, max_length=100)
+    private_hashkey = serializers.CharField(required=False, read_only=True)
+    public_hashkey = serializers.CharField(required=False, read_only=True)
+    discord_username = serializers.CharField(required=False)
     created_at = serializers.CharField(required=False)
     modified_at = serializers.CharField(required=False)
-    #creating functions which will execute on Serializers and create model instances.
-    #this allows us to secure the access to db directly.
+
+    # creating functions which will execute on Serializers and create model instances.
+    # this allows us to secure the access to db directly.
     def create(self, validated_data):
-        #Creating new instances of the MetaUser model  
+        # Creating new instances of the MetaUser model
 
         return MetaUser.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        #Updating instances of our model - here instance refers to id number and validated_data refers to body of the instance
+        # Updating instances of our model - here instance refers to id number and validated_data refers to body of the instance
         instance.meta_username = validated_data.get('meta_username', instance.meta_username)
-        instance.password = validated_data.get('password', instance.password)
-        instance.hashkey = validated_data.get('hashkey', instance.hashkey)
-        instance.email = validated_data.get('email', instance.email)
+        instance.passcode = validated_data.get('passcode', instance.passcode)
+        instance.private_hashkey = validated_data.get('private_hashkey', instance.private_hashkey)
+        instance.public_hashkey = validated_data.get('public_hashkey', instance.public_hashkey)
+        instance.discord_username = validated_data.get('discord_username', instance.discord_username)
         instance.created_at = validated_data.get('created_at', instance.created_at)
         instance.modified = validated_data.get('modified_at', instance.modified_at)
 
@@ -96,16 +102,429 @@ class MetaUserSerializer(serializers.Serializer):
         return instance
 
 
+# Serializer for Level Model
+class LevelSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    number = serializers.FloatField(default=3.0)
+
+    def create(self, validated_data):
+        # Creating new instances of the Level model
+        return Level.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # Updating instances of our model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.number = validated_data.get('number', instance.number)
+
+        instance.save()
+        return instance
 
 
-#Serializer for User Address Class
+# Serializer for BLAScore Model
+class BLASerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    levelID = serializers.PrimaryKeyRelatedField(queryset=Level.objects.all())
+    ReviewCycleNo = serializers.FloatField(default=1.0)
+    current_score = serializers.FloatField(default=3.0)
+    predicted_score = serializers.FloatField(default=3.0)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instanced of BLAScore Model
+        return BLAScore.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating instances of our model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.levelID = validated_data.get('levelID', instance.levelID)
+        instance.ReviewCycleNo = validated_data.get('ReviewCycleNo', instance.ReviewCycleNo)
+        instance.current_score = validated_data.get('current_score', instance.current_score)
+        instance.predicted_score = validated_data.get('predicted_score', instance.predicted_score)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Sentino Item Proximity Model
+class SentinoItemProximitySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    content_metadata = serializers.CharField(required=False)
+    content_metadata2 = serializers.CharField(required=False)
+    content_metadata3 = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    self_statements = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of SentinoItemProximity
+        return SentinoItemProximity.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Sentino Item Proximity
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.content_metadata2 = validated_data.get('content_metadata2', instance.content_metadata2)
+        instance.content_metadata3 = validated_data.get('content_metadata3', instance.content_metadata3)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Sentino Item Projection Model
+class SentinoItemProjectionSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    content_metadata = serializers.CharField(required=False)
+    content_metadata2 = serializers.CharField(required=False)
+    content_metadata3 = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    self_statements = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of SentinoItemProjection
+        return SentinoItemProjection.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Sentino Item Projection
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.content_metadata2 = validated_data.get('content_metadata2', instance.content_metadata2)
+        instance.content_metadata3 = validated_data.get('content_metadata3', instance.content_metadata3)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Sentino Item Classfication Model
+class SentinoItemClassficationSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    content_metadata = serializers.CharField(required=False)
+    content_metadata2 = serializers.CharField(required=False)
+    content_metadata3 = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    self_statements = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of SentinoItemProjection
+        return SentinoItemClassification.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Sentino Item Projection
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.content_metadata2 = validated_data.get('content_metadata2', instance.content_metadata2)
+        instance.content_metadata3 = validated_data.get('content_metadata3', instance.content_metadata3)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Sentino  Inventory Model
+class SentinoInventorySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    content_metadata = serializers.CharField(required=False)
+    content_metadata2 = serializers.CharField(required=False)
+    content_metadata3 = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    self_statements = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of SentinoItemProjection
+        return SentinoInventory.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Sentino Inventory
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.content_metadata2 = validated_data.get('content_metadata2', instance.content_metadata2)
+        instance.content_metadata3 = validated_data.get('content_metadata3', instance.content_metadata3)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Sentino Self Description Model
+class SentinoDescriptionSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    content_metadata = serializers.CharField(required=False)
+    content_metadata2 = serializers.CharField(required=False)
+    content_metadata3 = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    self_statements = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of SentinoSelfDescription
+        return SentinoSelfDescription.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of SentinoSelfDescription
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.content_metadata2 = validated_data.get('content_metadata2', instance.content_metadata2)
+        instance.content_metadata3 = validated_data.get('content_metadata3', instance.content_metadata3)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Sentino Profile Model
+class SentinoProfileSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    content_metadata = serializers.CharField(required=False)
+    content_metadata2 = serializers.CharField(required=False)
+    content_metadata3 = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    self_statements = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of SentinoProfile
+        return SentinoProfile.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of SentinoSelfDescription
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.content_metadata2 = validated_data.get('content_metadata2', instance.content_metadata2)
+        instance.content_metadata3 = validated_data.get('content_metadata3', instance.content_metadata3)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Bodega Vision Model
+class BodegaVisionSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    image_metadata = serializers.CharField(required=False)
+    video_metadata = serializers.CharField(required=False)
+    content_metadata = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of BodegaVision Model
+        return BodegaVision.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Vision
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.image_metadata = validated_data.get('image_metadata', instance.image_metadata)
+        instance.video_metadata = validated_data.get('video_metadata', instance.video_metadata)
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Seriazlier for Bodega Face Model
+class BodegaFaceSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    facial_metadata = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of Bodega Face Model
+        return BodegaFace.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Face Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.facial_metadata = validated_data.get('facial_metadata', instance.facial_metadata)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Bodega Personalizer Model
+class BodegaPersonalizerSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    content_metadata = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of Bodega Personalizer Model
+        return BodegaPersonalizer.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Personalizer Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Bodega Cognitive Item Model
+class BodegaCognitiveItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    proximityID = serializers.PrimaryKeyRelatedField(queryset=SentinoItemProximity.objects.all())
+    classificationID = serializers.PrimaryKeyRelatedField(queryset=SentinoItemClassification.objects.all())
+    projectionID = serializers.PrimaryKeyRelatedField(queryset=SentinoItemProjection.objects.all())
+    self_statements = serializers.CharField(required=False)
+    content_metadata = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of Bodega Cognitive Model
+        return BodegaCognitiveItem.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Cognitive Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.proximityID = validated_data.get('proximityID', instance.proximityID)
+        instance.classificationID = validated_data.get('classificationID', instance.classificationID)
+        instance.projectionID = validated_data.get('projectionID', instance.projectionID)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Bodega Cognitive Inventory
+class BodegaCognitiveInventorySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    inventoryID = serializers.PrimaryKeyRelatedField(queryset=SentinoInventory.objects.all())
+    self_statements = serializers.CharField(required=False)
+    content_metadata = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of Bodega Cognitive Inventory Model
+        return BodegaCognitiveInventory.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Cognitive Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.inventoryID = validated_data.get('inventoryID', instance.inventoryID)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Bodega Cognitive Person
+class BodegaCognitivePersonSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    self_descriptionID = serializers.PrimaryKeyRelatedField(queryset=SentinoSelfDescription.objects.all())
+    profileID = serializers.PrimaryKeyRelatedField(queryset=SentinoProfile.objects.all())
+    self_statements = serializers.CharField(required=False)
+    content_metadata = serializers.CharField(required=False)
+    syslog_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of Bodega Cognitive Person  Model
+        return BodegaCognitivePerson.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Cognitive Person Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.self_descriptionID = validated_data.get('self_descriptionID', instance.self_descriptionID)
+        instance.profileID = validated_data.get('profileID', instance.profileID)
+        instance.self_statements = validated_data.get('self_statements', instance.self_statements)
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.syslog_metadata = validated_data.get('syslog_metadata', instance.syslog_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for Bodega Department Model
+class BodegaDeptSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    departmentname = serializers.CharField(required=False)
+    content_metadata = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of Bodega Dept Model
+        return BodegaDept.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating new instances of Bodega Dept Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.departmentname = validated_data.get('departmentname', instance.departmentname)
+        instance.content_metadata = validated_data.get('content_metadata', instance.content_metadata)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+# Serializer for User Address Class
 class UserAddressSerializer(serializers.Serializer):
-    id = serializers.IntegerField( read_only=True)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
-    #the above statement gives the power to this class to manipulate MetaUser objects by will  
-    #a very good way Python enforces control over data read write  
-    #that means humans can be wrong, not code  - simple
-    #this feels like a carefully orchestrated painting
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     address_line1 = serializers.CharField(required=False)
     address_line2 = serializers.CharField(required=False)
     address_state = serializers.CharField(required=False)
@@ -115,14 +534,14 @@ class UserAddressSerializer(serializers.Serializer):
     created_at = serializers.CharField(required=False)
     modified_at = serializers.CharField(required=False)
 
-    #create() and update() functions interact with our DB not the APIs directly  
+    # create() and update() functions interact with our DB not the APIs directly
     def create(self, validated_data):
-        #creating a new instance of the UserAddress Model
-        return User_Address.objects.create(**validated_data)
-    
+        # creating a new instance of the UserAddress Model
+        return UserAddress.objects.create(**validated_data)
+
     def update(self, instance, validated_data):
-        #updating a model instance with only the validated_fields  
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        # updating a model instance with only the validated_fields
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.address_line1 = validated_data.get('address_line1', instance.address_line1)
         instance.address_line2 = validated_data.get('address_line2', instance.address_line2)
         instance.address_state = validated_data.get('address_state', instance.address_state)
@@ -136,38 +555,37 @@ class UserAddressSerializer(serializers.Serializer):
         return instance
 
 
-
-#Serializer User Payment Class
+# Serializer User Payment Class
 class UserPaymentSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
-    payment_type = serializers.ChoiceField( choices=payment_types, default='PAYPAL')
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    payment_type = serializers.ChoiceField(choices=payment_types, default='PAYPAL')
     payment_provider = serializers.CharField(required=False)
     payment_status = serializers.BooleanField(required=False)
     total_money_out = serializers.FloatField()
     total_money_in = serializers.FloatField()
     user_payment_profile_status = serializers.BooleanField(required=False)
-    #add code for routing money via Stripe to multiple vendors  
-    #all data can be fetched via FE, they can route this data here  
+    # add code for routing money via Stripe to multiple vendors
+    # all data can be fetched via FE, they can route this data here
     created_at = serializers.CharField(required=False)
     modified_at = serializers.CharField(required=False)
 
-
-    #create() and update() functions to interact with our DB
+    # create() and update() functions to interact with our DB
     def create(self, validated_data):
-        #returns a new model instance with yhe validated data as input 
-        return User_Payment.objects.create(**validated_data)
+        # returns a new model instance with yhe validated data as input
+        return UserPayment.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        #passes validated_data field to instance
-        #.get() fetches that field name from the POST request data and updates the field of User_Payment table
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        # passes validated_data field to instance
+        # .get() fetches that field name from the POST request data and updates the field of UserPayment table
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.payment_type = validated_data.get('payment_type', instance.payment_type)
         instance.payment_provider = validated_data.get('payment_provider', instance.payment_provider)
         instance.payment_status = validated_data.get('payment_status', instance.payment_status)
         instance.total_money_out = validated_data.get('total_money_out', instance.total_money_out)
         instance.total_money_in = validated_data.get('total_money_in', instance.total_money_in)
-        instance.user_payment_profile_status = validated_data.get('user_payment_profile_status', instance.user_payment_profile_status)
+        instance.user_payment_profile_status = validated_data.get('user_payment_profile_status',
+                                                                  instance.user_payment_profile_status)
         instance.created_at = validated_data.get('created_at', instance.created_at)
         instance.modified_at = validated_data.get('modified_at', instance.modified_at)
 
@@ -175,76 +593,52 @@ class UserPaymentSerializer(serializers.Serializer):
         return instance
 
 
-
-#Serializer for User Type Class
-class UserTypeSerializer (serializers.Serializer):
+# Serializer for User Type Class
+class UserTypeSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
-    user_role = serializers.ChoiceField(choices=user_role_array, default='Creator')
-    created_at = serializers.CharField()
-    modified_at = serializers.CharField()
-    digital_base_personality = serializers.CharField()
-    digital_future_personality = serializers.CharField() 
-    about_you_belief = serializers.CharField()
-    about_you_belief2 = serializers.CharField()
-    about_you_disbelief = serializers.CharField()
-    why_did_you_join_bodega = serializers.CharField()
-    explore_bodega_preferences = serializers.CharField()
-    member_feedback_preferences = serializers.CharField(default='What new features would you like to see?')
-    feedback_bodega = serializers.CharField()
-    describe_yourself = serializers.CharField()
-    shoe_size = serializers.FloatField()
-    waist_size = serializers.CharField()
-    chest_size = serializers.CharField()
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    bodega_vision_ID = serializers.PrimaryKeyRelatedField(queryset=BodegaVision.objects.all())
+    level_ID = serializers.PrimaryKeyRelatedField(queryset=Level.objects.all())
+    solomon_person_ID = serializers.PrimaryKeyRelatedField(queryset=Solomonv0.objects.all())
+    user_role = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
 
-    #create() and update() functions to interact with our DB
     def create(self, validated_data):
-        #returns a new instance of our model
-        return User_Type.objects.create(**validated_data)
+        # Creating new instances of User Type Model
+        return UserType.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
-        #appends model instance values
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        # Updating instances of User Type Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.bodega_vision_ID = validated_data.get('bodega_vision_ID', instance.bodega_vision_ID)
+        instance.level_ID = validated_data.get('level_ID', instance.level_ID)
+        instance.solomon_person_ID = validated_data.get('solomon_person_ID', instance.solomon_person_ID)
         instance.user_role = validated_data.get('user_role', instance.user_role)
         instance.created_at = validated_data.get('created_at', instance.created_at)
-        instance.modified_at = validated_data.get('modified_at', instance.modified_at) 
-        instance.digital_base_personality = validated_data.get('digital_base_personality', instance.digital_base_personality)
-        instance.digital_future_personality = validated_data.get('digital_future_personality', instance.digital_future_personality)
-        instance.about_you_belief = validated_data.get('about_you_belief', instance.about_you_belief)
-        instance.about_you_belief2 = validated_data.get('about_you_belief2', instance.about_you_belief2)
-        instance.about_you_disbelief = validated_data.get('about_you_disbelief', instance.about_you_disbelief)
-        instance.why_did_you_join_bodega = validated_data.get('why_did_you_join_bodega', instance.why_did_you_join_bodega)
-        instance.explore_bodega_preferences = validated_data.get('explore_bodega_preferences', instance.explore_bodega_preferences)
-        instance.member_feedback_preferences = validated_data.get('member_feedback_preferences', instance.member_feedback_preferences)
-        instance.feedback_bodega = validated_data.get('feedback_bodega', instance.feedback_bodega)
-        instance.describe_yourself = validated_data.get('describe_yourself', instance.describe_yourself)
-        instance.shoe_size = validated_data.get('shoe_size', instance.shoe_size)
-        instance.waist_size = validated_data.get('waist_size ', instance.waist_size )
-        instance.chest_size = validated_data.get('chest_size', instance.chest_size)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
 
         instance.save()
         return instance
 
 
-
-#Serializer Class for Chat Room Model
+# Serializer Class for Chat Room Model
 class ChatRoomSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(required=True)
     desc = serializers.CharField(required=True)
     rules = serializers.CharField(required=False)
     type_of_room = serializers.ChoiceField(choices=type_of_room_array, required=True)
+    is_room_active = serializers.BooleanField(required=True)
+    room_hashkey = serializers.CharField(default='ROOM HASHKEY', read_only=True)
     created_on = serializers.CharField(required=True)
     modified_on = serializers.CharField(required=True)
-    is_room_active = serializers.BooleanField(required=True)
 
-    #create() and update() funrctions to interaact with our DB
+    # create() and update() funrctions to interaact with our DB
     def create(self, validated_data):
-        #returns a new model instance
-        return Chat_Room.objects.create(**validated_data)
+        # returns a new model instance
+        return ChatRoom.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.desc = validated_data.get('desc', instance.desc)
@@ -257,45 +651,44 @@ class ChatRoomSerializer(serializers.Serializer):
         return instance
 
 
-
-#Serializer class for Particpant model 
+# Serializer class for Particpant model
 class ParticpantSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all()) #FK
-    chat_room_ID = serializers.PrimaryKeyRelatedField(queryset=Chat_Room.objects.all()) #FK2
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())  # FK
+    chat_room_ID = serializers.PrimaryKeyRelatedField(queryset=ChatRoom.objects.all())  # FK2
 
-    #create() and update() functions to interact with our DB
+    # create() and update() functions to interact with our DB
     def create(self, validated_data):
-        #returns a new model instance 
+        # returns a new model instance
         return Particpant.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.chat_room_ID = validated_data.get('chat_room_ID', instance.chat_room_ID)
 
         instance.save()
         return instance
 
 
-#Serializer class for Message model
+# Serializer class for Message model
 class MessageSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    chat_room_ID = serializers.PrimaryKeyRelatedField(queryset=Chat_Room.objects.all())
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    chat_room_ID = serializers.PrimaryKeyRelatedField(queryset=ChatRoom.objects.all())
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     message_body = serializers.CharField(required=True)
     upload_file = serializers.CharField()
     created_at = serializers.CharField()
     modified_at = serializers.CharField()
     hashkey = serializers.CharField(read_only=True)
 
-    #create() and update() functions to interact with our DB
+    # create() and update() functions to interact with our DB
     def create(self, validated_data):
-        #returns a new model instance
+        # returns a new model instance
         return Message.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.chat_room_ID = validated_data.get('chat_room_ID', instance.chat_room_ID)
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.message_body = validated_data.get('message_body', instance.message_body)
         instance.upload_file = validated_data.get('upload_file', instance.upload_file)
         instance.created_at = validated_data.get('created_at', instance.created_at)
@@ -306,21 +699,22 @@ class MessageSerializer(serializers.Serializer):
         return instance
 
 
-#Serializer for Product Category Model
+# Serializer for Product Category Model
 class ProductCategorySerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    category_name = serializers.ChoiceField(required=True,choices=product_category_array)
+    category_name = serializers.ChoiceField(required=True, choices=ProductCategory_array)
     category_desc = serializers.CharField()
     created_at = serializers.CharField()
     modified_at = serializers.CharField()
     category_image1 = serializers.CharField()
     category_image2 = serializers.CharField()
     category_image3 = serializers.CharField()
-    #no default on image can create issues when using POST
+
+    # no default on image can create issues when using POST
 
     def create(self, validated_data):
-        #returns a new model instance
-        return Product_Category.objects.create(**validated_data)
+        # returns a new model instance
+        return ProductCategory.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.category_name = validated_data.get('category_name', instance.category_name)
@@ -335,8 +729,7 @@ class ProductCategorySerializer(serializers.Serializer):
         return instance
 
 
-
-#Serializer for Product Themes Model
+# Serializer for Product Themes Model
 class ProductThemesSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     collection_name = serializers.CharField()
@@ -347,9 +740,9 @@ class ProductThemesSerializer(serializers.Serializer):
     modified_at = serializers.CharField()
 
     def create(self, validated_data):
-        #returns a new model instance
-        return Product_Themes.objects.create(**validated_data)
-    
+        # returns a new model instance
+        return ProductThemes.objects.create(**validated_data)
+
     def update(self, instance, validated_data):
         instance.collection_name = validated_data.get('collection_name', instance.collection_name)
         instance.collection_desc = validated_data.get('collection_desc', instance.collection_desc)
@@ -357,15 +750,12 @@ class ProductThemesSerializer(serializers.Serializer):
         instance.marketing_funnel = validated_data.get('marketing_funnel', instance.marketing_funnel)
         instance.created_at = validated_data.get('created_at', instance.created_at)
         instance.modified_at = validated_data.get('modified_at', instance.modified_at)
-        
+
         instance.save()
         return instance
 
 
-
-
-
-#Serializer for Discount model
+# Serializer for Discount model
 class DiscountSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
@@ -378,7 +768,7 @@ class DiscountSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return Discount.objects.create(**validated_data)
-    
+
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
@@ -392,10 +782,10 @@ class DiscountSerializer(serializers.Serializer):
         return instance
 
 
-#Serializer for Social model
+# Serializer for Social model
 class SocialSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     following = serializers.CharField()
     followers = serializers.CharField()
     makeprofileprivate = serializers.BooleanField()
@@ -407,7 +797,7 @@ class SocialSerializer(serializers.Serializer):
     bio = serializers.CharField(allow_blank=True)
     blocked_list = serializers.CharField()
     data_mining_status = serializers.BooleanField()
-    account_active = serializers.BooleanField( default=True)
+    account_active = serializers.BooleanField(default=True)
     delete_metauser = serializers.BooleanField(default=False)
     created_on = serializers.CharField()
     modified_on = serializers.CharField()
@@ -415,9 +805,8 @@ class SocialSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Social.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.following = validated_data.get('following', instance.following)
         instance.followers = validated_data.get('followers', instance.followers)
         instance.makeprofileprivate = validated_data.get('makeprofileprivate', instance.makeprofileprivate)
@@ -438,14 +827,14 @@ class SocialSerializer(serializers.Serializer):
         return instance
 
 
-#Serializer for Shop Model
+# Serializer for Shop Model
 class ShopSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     all_products = serializers.CharField(required=True)
     all_user_data = serializers.CharField(required=True)
     name = serializers.CharField(required=True)
-    description = serializers.CharField(required=True) 
+    description = serializers.CharField(required=True)
     logo = serializers.CharField(required=True)
     cover_image = serializers.CharField(required=True)
     address_line1 = serializers.CharField(required=True)
@@ -453,21 +842,20 @@ class ShopSerializer(serializers.Serializer):
     city = serializers.CharField(required=True)
     state = serializers.CharField(required=True)
     postal_code = serializers.CharField(required=True)
-    country = serializers.ChoiceField(choices=country_list) #Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
-    shop_traits = serializers.CharField(required=True)
-    assistance_ask = serializers.CharField(required=True)
-    uniquesellingprop = serializers.CharField(required=True)
-    data_mining_status = serializers.CharField(required=True)
-    created_on = serializers.CharField(required=True)
-    modified_on = serializers.CharField(required=True)
-
+    country = serializers.ChoiceField(
+        choices=country_list)  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
+    bodega_vision_tags = serializers.CharField(required=False)
+    bodega_customer_tags = serializers.CharField(required=False)
+    unqiuesellingprop = serializers.CharField(required=False)
+    data_mining_status = serializers.CharField(required=False)
+    created_on = serializers.CharField(required=False)
+    modified_on = serializers.CharField(required=False)
 
     def create(self, validated_data):
         return Shop.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.all_products = validated_data.get('all_products', instance.all_products)
         instance.all_user_data = validated_data.get('all_user_data', instance.all_user_data)
         instance.name = validated_data.get('name', instance.name)
@@ -480,9 +868,9 @@ class ShopSerializer(serializers.Serializer):
         instance.state = validated_data.get('state', instance.state)
         instance.postal_code = validated_data.get('postal_code', instance.postal_code)
         instance.country = validated_data.get('country', instance.country)
-        instance.shop_traits = validated_data.get('shop_traits', instance.shop_traits)
-        instance.assistance_ask = validated_data.get('assistance_ask', instance.assistance_ask)
-        instance.uniquesellingprop = validated_data.get('uniquesellingprop', instance.uniquesellingprop)
+        instance.bodega_vision_tags = validated_data.get('bodega_vision_tags', instance.bodega_vision_tags)
+        instance.bodega_customer_tags = validated_data.get('bodega_customer_tags', instance.bodega_customer_tags)
+        instance.unqiuesellingprop = validated_data.get('unqiuesellingprop', instance.unqiuesellingprop)
         instance.data_mining_status = validated_data.get('data_mining_status', instance.data_mining_status)
         instance.created_on = validated_data.get('created_on', instance.created_on)
         instance.modified_on = validated_data.get('modified_on', instance.modified_on)
@@ -491,75 +879,110 @@ class ShopSerializer(serializers.Serializer):
         return instance
 
 
+# most important fucking serializer class - be extra careful
+# Serializer for ProductMetaData Model
+
+class ProductMetaDataSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    numberoflikes = serializers.IntegerField(required=False)
+    numberofcomments = serializers.IntegerField(required=False)
+    numberofclicks = serializers.IntegerField(required=False)
+    totaltimespentonproduct_hours = serializers.IntegerField(required=False)
+    metauserID_of_likes = serializers.CharField(required=False)
+    metauserID_of_dislikes = serializers.CharField(required=False)
+    metauserID_of_comments = serializers.CharField(required=False)
+    total_sales = serializers.FloatField(required=False)
+    clicks_on_product = serializers.IntegerField(required=False)
+    is_product_digital = serializers.BooleanField(required=False)
+    assistance_ask = serializers.CharField(required=False)
+    nsfw_content = serializers.BooleanField(required=True)
+    production_cost = serializers.FloatField(required=False)
+    production_time_days = serializers.IntegerField(required=True)
+    hours_invested = serializers.FloatField(required=False)
+    encrypt_product = serializers.BooleanField(required=False)
+    unit_sold_expectation = serializers.IntegerField(required=False)
+    size_chart = serializers.CharField(required=False)
+    product_image2 = serializers.CharField(required=False)
+    product_image3 = serializers.CharField(required=False)
+    product_image4 = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        # Creating new instances of ProductMetaData Model Instance
+        return ProductMetaData.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # updating instances of ProductMetaData Model
+        instance.numberoflikes = validated_data.get('numberoflikes', instance.numberoflikes)
+        instance.numberofcomments = validated_data.get('numberofcomments', instance.numberofcomments)
+        instance.numberofclicks = validated_data.get('numberofclicks', instance.numberofclicks)
+        instance.totaltimespentonproduct_hours = validated_data.get('totaltimespentonproduct_hours',
+                                                                    instance.totaltimespentonproduct_hours)
+        instance.metauserID_of_likes = validated_data.get('metauserID_of_likes', instance.metauserID_of_likes)
+        instance.metauserID_of_dislikes = validated_data.get('metauserID_of_dislikes', instance.metauserID_of_dislikes)
+        instance.metauserID_of_comments = validated_data.get('metauserID_of_comments', instance.metauserID_of_comments)
+        instance.total_sales = validated_data.get('total_sales', instance.total_sales)
+        instance.clicks_on_product = validated_data.get('clicks_on_product', instance.clicks_on_product)
+        instance.is_product_digital = validated_data.get('is_product_digital', instance.is_product_digital)
+        instance.assistance_ask = validated_data.get('assistance_ask', instance.assistance_ask)
+        instance.nsfw_content = validated_data.get('nsfw_content', instance.nsfw_content)
+        instance.production_cost = validated_data.get('production_cost', instance.production_cost)
+        instance.production_time_days = validated_data.get('production_time_days', instance.production_time_days)
+        instance.hours_invested = validated_data.get('hours_invested', instance.hours_invested)
+        instance.encrypt_product = validated_data.get('encrypt_product', instance.encrypt_product)
+        instance.unit_sold_expectation = validated_data.get('unit_sold_expectation', instance.unit_sold_expectation)
+        instance.size_chart = validated_data.get('size_chart', instance.size_chart)
+        instance.product_image2 = validated_data.get('product_image2', instance.product_image2)
+        instance.product_image3 = validated_data.get('product_image3', instance.product_image3)
+        instance.product_image4 = validated_data.get('product_image4', instance.product_image4)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
 
 
-#most important fucking serializer class - be extra careful 
-#Serializer for Product Model
+# Serializer for Product Model
 
 class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField()
-    description = serializers.CharField()
-    selling_price = serializers.CharField()
-    discounted_price = serializers.CharField()
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
-    product_categoryID = serializers.PrimaryKeyRelatedField(queryset=Product_Category.objects.all())
-    product_themesID = serializers.PrimaryKeyRelatedField(queryset=Product_Themes.objects.all())
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    productMetaDataID = serializers.PrimaryKeyRelatedField(queryset=ProductMetaData.objects.all())
+    product_categoryID = serializers.PrimaryKeyRelatedField(queryset=ProductCategory.objects.all())
+    product_themesID = serializers.PrimaryKeyRelatedField(queryset=ProductThemes.objects.all())
     discount_ID = serializers.PrimaryKeyRelatedField(queryset=Discount.objects.all())
     shop_ID = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all())
-    quantity = serializers.IntegerField()
-    total_sales = serializers.FloatField()
-    clicks_on_product = serializers.IntegerField()
-    is_product_digital = serializers.BooleanField()
-    is_product_sharable = serializers.BooleanField()
-    product_unique_traits = serializers.CharField()
-    customer_unique_traits = serializers.CharField()
-    nsfw_content = serializers.BooleanField()
-    production_cost = serializers.FloatField()
-    production_time_days = serializers.IntegerField()
-    hours_invested = serializers.FloatField()
-    encrypt_product = serializers.BooleanField()
-    unit_sold_expectation = serializers.IntegerField()
-    size_chart = serializers.CharField(allow_blank=True)
+    name = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    selling_price = serializers.FloatField(required=False)
+    discounted_price = serializers.FloatField(required=False)
+    quanity = serializers.IntegerField(required=False)
+    is_product_digital = serializers.BooleanField(required=True)
     product_image1 = serializers.CharField(required=True)
-    product_image2 = serializers.CharField(allow_blank=True)
-    product_image3 = serializers.CharField(allow_blank=True)
-    hashkey = serializers.CharField(read_only=True) #Should be hidden by default
-    created_at = serializers.CharField()
-    modified_at = serializers.CharField()
-
+    hashkey = serializers.CharField(read_only=True)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
 
     def create(self, validated_data):
-        #returns a new model instance
+        # Creating new instance of Product Model
         return Product.objects.create(**validated_data)
-    
-    def update(self, instance, validated_data):
 
-        instance.name = validated_data.get('name', instance.name)
-        instance.description = validated_data.get('description', instance.description)
-        instance.selling_price = validated_data.get('selling_price', instance.selling_price)
-        instance.discounted_price = validated_data.get('discounted_price', instance.discounted_price)
+    def update(self, instance, validated_data):
+        # Updating instances of Product Model
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.productMetaDataID = validated_data.get('productMetaDataID', instance.productMetaDataID)
         instance.product_categoryID = validated_data.get('product_categoryID', instance.product_categoryID)
         instance.product_themesID = validated_data.get('product_themesID', instance.product_themesID)
         instance.discount_ID = validated_data.get('discount_ID', instance.discount_ID)
         instance.shop_ID = validated_data.get('shop_ID', instance.shop_ID)
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.selling_price = validated_data.get('selling_price', instance.selling_price)
+        instance.discounted_price = validated_data.get('discounted_price', instance.discounted_price)
         instance.quantity = validated_data.get('quantity', instance.quantity)
-        instance.total_sales = validated_data.get('total_sales', instance.total_sales)
-        instance.clicks_on_product = validated_data.get('clicks_on_product', instance.clicks_on_product)
-        instance.user_ID = validated_data.get('created_by', instance.user_ID)
         instance.is_product_digital = validated_data.get('is_product_digital', instance.is_product_digital)
-        instance.is_product_sharable = validated_data.get('is_product_sharable', instance.is_product_sharable)
-        instance.product_unique_traits = validated_data.get('product_unique_traits', instance.product_unique_traits)
-        instance.customer_unique_traits = validated_data.get('customer_unique_traits', instance.customer_unique_traits)
-        instance.nsfw_content = validated_data.get('nsfw_content', instance.nsfw_content)
-        instance.production_cost = validated_data.get('production_cost', instance.production_cost)
-        instance.production_time_days = validated_data.get('production_time_days', instance.production_time_days)
-        instance.encrypt_product = validated_data.get('encrypt_product', instance.encrypt_product)
-        instance.unit_sold_expectation = validated_data.get('unit_sold_expectation', instance.unit_sold_expectation)
-        instance.size_chart = validated_data.get('size_chart', instance.size_chart)
         instance.product_image1 = validated_data.get('product_image1', instance.product_image1)
-        instance.product_image2 = validated_data.get('product_image2', instance.product_image2)
-        instance.product_image3 = validated_data.get('product_image3', instance.product_image1)
         instance.hashkey = validated_data.get('hashkey', instance.hashkey)
         instance.created_at = validated_data.get('created_at', instance.created_at)
         instance.modified_at = validated_data.get('modified_at', instance.modified_at)
@@ -568,15 +991,14 @@ class ProductSerializer(serializers.Serializer):
         return instance
 
 
-
-#Serializer for Collaboration class
+# Serializer for Collaboration class
 
 class CollaborationSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    name =  serializers.CharField()
+    name = serializers.CharField()
     description = serializers.CharField()
-    creator_collab_choice = serializers.ChoiceField( choices=collab_type_array)
-    user_ID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    creator_collab_choice = serializers.ChoiceField(choices=collab_type_array)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     product_ID = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     shop_ID = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all())
     creator_pitch = serializers.CharField()
@@ -586,16 +1008,14 @@ class CollaborationSerializer(serializers.Serializer):
     created_at = serializers.CharField()
     modified_at = serializers.CharField()
 
-
     def create(self, validated_data):
         return Collaboration.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
         instance.creator_collab_choice = validated_data.get('creator_collab_choice', instance.creator_collab_choice)
-        instance.user_ID = validated_data.get('user_ID', instance.user_ID)
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.product_ID = validated_data.get('product_ID', instance.product_ID)
         instance.shop_ID = validated_data.get('shop_ID', instance.shop_ID)
         instance.creator_pitch = validated_data.get('creator_pitch', instance.creator_pitch)
@@ -609,20 +1029,19 @@ class CollaborationSerializer(serializers.Serializer):
         return instance
 
 
-
-
-#Shopping Session Serializer Class 
+# Shopping Session Serializer Class
 class ShoppingSessionSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     total_amount = serializers.FloatField(required=True)
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        return Shopping_Session.objects.create(**validated_data)
+        return ShoppingSession.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
         instance.total_amount = validated_data.get('total_amount', instance.total_amount)
         instance.created_at = validated_data.get('created_at', instance.created_at)
         instance.modified_at = validated_data.get('modified_at', instance.modified_at)
@@ -631,8 +1050,7 @@ class ShoppingSessionSerializer(serializers.Serializer):
         return instance
 
 
-
-#Cart Item Serializer
+# Cart Item Serializer
 class CartItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     session_ID = serializers.CharField(required=True)
@@ -642,9 +1060,8 @@ class CartItemSerializer(serializers.Serializer):
     modified_at = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        return Cart_Item.objects.create(**validated_data)
+        return CartItem.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
         instance.session_ID = validated_data.get('session_ID', instance.session_ID)
         instance.product_ID = validated_data.get('product_ID', instance.product_ID)
@@ -656,8 +1073,7 @@ class CartItemSerializer(serializers.Serializer):
         return instance
 
 
-
-#Order Details Serializer class
+# Order Details Serializer class
 class OrderDetailsSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     total_amount = serializers.FloatField(required=True)
@@ -666,9 +1082,8 @@ class OrderDetailsSerializer(serializers.Serializer):
     modified_at = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        return Order_Detail.objects.create(**validated_data)
+        return OrderDetail.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
         instance.total_amount = validated_data.get('total_amount', instance.total_amount)
         instance.payment_info = validated_data.get('payment_info', instance.payment_info)
@@ -679,8 +1094,7 @@ class OrderDetailsSerializer(serializers.Serializer):
         return instance
 
 
-
-#Order Items Serializer Class
+# Order Items Serializer Class
 class OrderItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     order_ID = serializers.CharField(required=True)
@@ -690,9 +1104,8 @@ class OrderItemSerializer(serializers.Serializer):
     modified_at = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        return Order_Item.objects.create(**validated_data)
+        return OrderItem.objects.create(**validated_data)
 
-    
     def update(self, instance, validated_data):
         instance.order_ID = validated_data.get('order_ID', instance.order_ID)
         instance.product_ID = validated_data.get('product_ID', instance.product_ID)
@@ -704,18 +1117,260 @@ class OrderItemSerializer(serializers.Serializer):
         return instance
 
 
-
-
-#Shop Payout Serializer Class
-#NOT COMPLETED
-#Need to revisit after seeing Stipe Connect
+# Shop Payout Serializer Class
+# NOT COMPLETED
+# Need to revisit after seeing Stipe Connect
 class ShopPayoutSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     order_detail_ID = serializers.CharField(required=True)
 
     def create(self, validated_idea):
-        return Shop_Payout.objects.create(**validated_idea)
+        return ShopPayout.objects.create(**validated_idea)
 
-    
     def update(self, instance, validated_idea):
         instance.order_detail_ID = validated_idea.get('order_detail_ID', instance.order_detail_ID)
+        instance.save()
+        return instance
+
+
+# Serializers for SysOps Agent Models
+
+
+# Serialzier for SysOpsAgent
+class SysOpsAgentSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    levelID = serializers.PrimaryKeyRelatedField(queryset=Level.objects.all())
+    departmentID = serializers.PrimaryKeyRelatedField(queryset=BodegaDept.objects.all())
+    agent_hashkey = serializers.CharField(required=True)
+    bio = serializers.CharField(required=False)
+    reporting_officer = serializers.CharField(required=True)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        return SysOpsAgent.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.levelID = validated_data.get('levelID', instance.levelID)
+        instance.departmentID = validated_data.get('departmentID', instance.departmentID)
+        instance.agent_hashkey = validated_data.get('agent_hashkey', instance.agent_hashkey)
+        instance.bio = validated_data.get('bio', instance.bio)
+        instance.reporting_officer = validated_data.get('reporting_officer', instance.reporting_officer)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+
+#Serializer for SysOps Agent Repo Model
+class SysOpsAgentRepoSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    sysops_agentID = serializers.PrimaryKeyRelatedField(queryset=SysOpsAgent.objects.all())
+    project_hashkey = serializers.CharField(required=True)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        return SysOpsProject.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.metauserID = validated_data.get('metauserID', instance.metauserID)
+        instance.sysops_agentID = validated_data.get('sysops_agentID', instance.sysops_agentID)
+        instance.project_hashkey = validated_data.get('project_hashkey', instance.project_hashkey)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+
+#Serializer for SysOps Project Model
+class SysOpsProjectSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    owner_metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    owner_agentID = serializers.PrimaryKeyRelatedField(queryset=SysOpsAgent.objects.all())
+    levelID = serializers.PrimaryKeyRelatedField(queryset=Level.objects.all())
+    divisionID = serializers.PrimaryKeyRelatedField(queryset=BodegaDept.objects.all())
+    name = serializers.CharField(required=True)
+    problem_statement = serializers.CharField(required=False)
+    problem_impact_size = serializers.CharField(required=False)
+    hypothesis = serializers.CharField(required=False)
+    key_performance_indicators = serializers.CharField(required=False)
+    status = serializers.CharField(required=True)
+    ttc_hours = serializers.FloatField(required=False)
+    allocated_ttc_hours = serializers.FloatField(required=False)
+    tasks = serializers.CharField(required=False)
+    team_hashkey_json = serializers.CharField(required=False)
+    hashkey = serializers.CharField(required=False)
+    genesis_project_hashkey = serializers.CharField(required=False)
+    parent_project_hashkey = serializers.CharField(required=False)
+    child_project_hashkey = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        return SysOpsProject.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.owner_metauserID = validated_data.get('owner_metauserID', instance.owner_metauserID)
+        instance.owner_agentID = validated_data.get('owner_agentID', instance.owner_agentID)
+        instance.levelID = validated_data.get('levelID', instance.levelID)
+        instance.divisionID = validated_data.get('divisionID', instance.divisionID)
+        instance.name = validated_data.get('name', instance.name)
+        instance.problem_statement = validated_data.get('problem_statement', instance.problem_statement)
+        instance.problem_impact_size = validated_data.get('problem_impact_size', instance.problem_impact_size)
+        instance.hypothesis = validated_data.get('hypothesis', instance.hypothesis)
+        instance.key_performance_indicators = validated_data.get('key_performance_indicators', instance.key_performance_indicators)
+        instance.status = validated_data.get('status', instance.status)
+        instance.ttc_hours = validated_data.get('ttc_hours', instance.ttc_hours)
+        instance.allocated_ttc_hours = validated_data.get('allocated_ttc_hours', instance.allocated_ttc_hours)
+        instance.tasks = validated_data.get('tasks', instance.tasks)
+        instance.team_hashkey_json = validated_data.get('team_hashkey_json', instance.team_hashkey_json)
+        instance.hashkey = validated_data.get('hashkey', instance.hashkey)
+        instance.genesis_project_hashkey = validated_data.get('genesis_project_hashkey', instance.genesis_project_hashkey)
+        instance.parent_project_hashkey = validated_data.get('parent_project_hashkey', instance.parent_project_hashkey)
+        instance.child_project_hashkey = validated_data.get('child_project_hashkey', instance.child_project_hashkey)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+
+#Serializer for SysOpsSupplyNode Model
+class SysOpsSupplyNodeSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    supply_metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    supply_shopID = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all())
+    bla_ScoreID = serializers.PrimaryKeyRelatedField(queryset=BLAScore.objects.all())
+    opsec_agent_hashkey = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
+    location = serializers.CharField(required=True)
+    status = serializers.CharField(required=False)
+    tokens_allocated = serializers.FloatField(required=False)
+    creator_hypothesis = serializers.CharField(required=False)
+    SysOpsAgent_hypothesis = serializers.CharField(required=False)
+    creator_identity_status = serializers.BooleanField(required=True)
+    all_digital_url = serializers.CharField(required=False)
+    influence_size = serializers.CharField(required=False)
+    genre = serializers.CharField(required=False)
+    category_vertical = serializers.CharField(required=False)
+    category_vertical2 = serializers.CharField(required=False)
+    product_traits = serializers.CharField(required=False)
+    creator_traits = serializers.CharField(required=False)
+    production_type = serializers.CharField(required=False)
+    current_revenue = serializers.CharField(required=False)
+    current_aov = serializers.CharField(required=False)
+    predicted_revenue = serializers.CharField(required=False)
+    creator_audience_traits = serializers.CharField(required=False)
+    sysops_solution_hypothesis = serializers.CharField(required=False)
+    additional_notes = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+
+    def create(self, validated_data):
+        return SysOpsSupplyNode.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.supply_metauserID = validated_data.get('supply_metauserID', instance.supply_metauserID)
+        instance.supply_shopID = validated_data.get('supply_shopID', instance.supply_shopID)
+        instance.bla_ScoreID = validated_data.get('bla_ScoreID', instance.bla_ScoreID)
+        instance.opsec_agent_hashkey = validated_data.get('opsec_agent_hashkey', instance.opsec_agent_hashkey)
+        instance.name = validated_data.get('name', instance.name)
+        instance.location = validated_data.get('location', instance.location)
+        instance.status = validated_data.get('status', instance.status)
+        instance.tokens_allocated = validated_data.get('tokens_allocated', instance.tokens_allocated)
+        instance.creator_hypothesis = validated_data.get('creator_hypothesis', instance.creator_hypothesis)
+        instance.SysOpsAgent_hypothesis = validated_data.get('SysOpsAgent_hypothesis', instance.SysOpsAgent_hypothesis)
+        instance.creator_identity_status = validated_data.get('creator_identity_status', instance.creator_identity_status)
+        instance.all_digital_url = validated_data.get('all_digital_url', instance.all_digital_url)
+        instance.influence_size = validated_data.get('influence_size', instance.influence_size)
+        instance.genre = validated_data.get('genre', instance.genre)
+        instance.category_vertical = validated_data.get('category_vertical', instance.category_vertical)
+        instance.category_vertical2 = validated_data.get('category_vertical2', instance.category_vertical2)
+        instance.product_traits = validated_data.get('product_traits', instance.product_traits)
+        instance.creator_traits = validated_data.get('creator_traits', instance.creator_traits)
+        instance.production_type = validated_data.get('production_type', instance.production_type)
+        instance.current_revenue = validated_data.get('current_revenue', instance.current_revenue)
+        instance.current_aov = validated_data.get('current_aov', instance.current_aov)
+        instance.predicted_revenue = validated_data.get('predicted_revenue', instance.predicted_revenue)
+        instance.creator_audience_traits = validated_data.get('creator_audience_traits', instance.creator_audience_traits)
+        instance.sysops_solution_hypothesis = validated_data.get('sysops_solution_hypothesis', instance.sysops_solution_hypothesis)
+        instance.additional_notes = validated_data.get('additional_notes', instance.additional_notes)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
+
+
+#Serializer for SysOpsDemandNode Model
+class SysOpsDemandNodeSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    demand_metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
+    bla_ScoreID = serializers.PrimaryKeyRelatedField(queryset=BLAScore.objects.all())
+    opsec_agent_hashkey = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
+    location = serializers.CharField(required=True)
+    status = serializers.BooleanField(required=False)
+    tokens_allocated = serializers.FloatField(required=False)
+    creator_hypothesis = serializers.CharField(required=False)
+    SysOpsAgent_hypothesis = serializers.CharField(required=False)
+    creator_identity_status = serializers.BooleanField(required=False)
+    all_digital_url = serializers.CharField(required=False)
+    influence_size = serializers.CharField(required=False)
+    genre = serializers.CharField(required=False)
+    category_vertical = serializers.CharField(required=False)
+    category_vertical2 = serializers.CharField(required=False)
+    product_traits = serializers.CharField(required=False)
+    creator_traits = serializers.CharField(required=False)
+    production_type = serializers.CharField(required=False)
+    current_revenue = serializers.CharField(required=False)
+    predicted_revenue = serializers.CharField(required=False)
+    creator_audience_traits = serializers.CharField(required=False)
+    sysops_solution_hypothesis = serializers.CharField(required=False)
+    additional_notes = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+
+
+    def create(self, validated_data):
+        return SysOpsDemandNode.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.demand_metauserID = validated_data.get('demand_metauserID', instance.demand_metauserID)
+        instance.bla_ScoreID = validated_data.get('bla_ScoreID', instance.bla_ScoreID)
+        instance.opsec_agent_hashkey = validated_data.get('opsec_agent_hashkey', instance.opsec_agent_hashkey)
+        instance.name = validated_data.get('name', instance.name)
+        instance.location = validated_data.get('location', instance.location)
+        instance.status = validated_data.get('status', instance.status)
+        instance.tokens_allocated = validated_data.get('tokens_allocated', instance.tokens_allocated)
+        instance.creator_hypothesis = validated_data.get('creator_hypothesis', instance.creator_hypothesis)
+        instance.SysOpsAgent_hypothesis = validated_data.get('SysOpsAgent_hypothesis', instance.SysOpsAgent_hypothesis)
+        instance.creator_identity_status = validated_data.get('creator_identity_status', instance.creator_identity_status)
+        instance.all_digital_url = validated_data.get('all_digital_url', instance.all_digital_url)
+        instance.influence_size = validated_data.get('influence_size', instance.influence_size)
+        instance.genre = validated_data.get('genre', instance.genre)
+        instance.category_vertical = validated_data.get('category_vertical', instance.category_vertical)
+        instance.category_vertical2 = validated_data.get('category_vertical2', instance.category_vertical2)
+        instance.product_traits = validated_data.get('product_traits', instance.product_traits)
+        instance.creator_traits = validated_data.get('creator_traits', instance.creator_traits)
+        instance.production_type = validated_data.get('production_type', instance.production_type)
+        instance.current_revenue = validated_data.get('current_revenue', instance.current_revenue)
+        instance.predicted_revenue = validated_data.get('predicted_revenue', instance.predicted_revenue)
+        instance.creator_audience_traits = validated_data.get('creator_audience_traits', instance.creator_audience_traits)
+        instance.sysops_solution_hypothesis = validated_data.get('sysops_solution_hypothesis', instance.sysops_solution_hypothesis)
+        instance.additional_notes = validated_data.get('additional_notes', instance.additional_notes)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+        instance.save()
+        return instance
