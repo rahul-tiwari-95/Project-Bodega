@@ -43,7 +43,7 @@ def contact_us(request):
 
 
 #MetaUser Views
-#@csrf_exempt
+@csrf_exempt
 def metauser_list(request):
     #GET, POST request for metauser/
     if request.method == 'GET':
@@ -62,7 +62,7 @@ def metauser_list(request):
 
 
 
-#@csrf_exempt
+@csrf_exempt
 
 def metauser_detail(request, pk):
     #GET,PUT,DELETE request for metauser{id}
