@@ -18,6 +18,10 @@ urlpatterns = [
   path('home/aboutbodega/', views.about_us), 
   path('home/contact-us/', views.contact_us),
 
+  # SOLOMON API ENDPOINTS
+  path('bodega-api/solomon/', views.solomon_list),
+  path('bodega-api/solomon/<int:pk>/', views.solomon_detail),
+
   # METAUSER API ENDPOINTS
   path('bodega-api/metauser/', views.metauser_list),
   path('bodega-api/metauser/<int:pk>/', views.metauser_detail),

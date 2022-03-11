@@ -3,8 +3,8 @@ from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, Bod
     BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, MetaUser, \
     OrderDetail, OrderItem, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, \
     SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, \
-    SentinoSelfDescription, ShopPayout, ShoppingSession, Social, Shop, Solomonv0, SysOpsAgent, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, \
-    UserType, Particpant, Message
+    SentinoSelfDescription, ShopPayout, ShoppingSession, Social, Shop, Solomonv0, SysOpsAgent, SysOpsAgentRepo, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, \
+    UserType, Particpant, Message, Solomonv0
 from rest_framework import serializers
 
 # Serializer Class for Developers
@@ -67,9 +67,30 @@ ProductCategory_array = [
     ('POTRAIT-VIDEO-FILE', 'POTRAIT-VIDEO-FILE'), ]
 
 
+#Serializer for Solomon Class
+class SolomonSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    psy_traits = serializers.CharField(required=False)
+    engagement_traits = serializers.CharField(required=False)
+    created_at = serializers.CharField(required=False)
+    modified_at = serializers.CharField(required=False)
+    
+    
+    def create(self, validated_data):
+        return Solomonv0.objects.create(**validated_data)
+    
+    def update(self, instance, validated_data):
+        #Updating instances of SolomonVo model
+        instance.psy_traits = validated_data.get('psy_traits', instance.psy_traits)
+        instance.engagement_traits = validated_data.get('engagement_traits', instance.engagement_traits)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+        
+        instance.save()
+        return instance
+
+
 # Serializer for User Class under Django-Admin
-
-
 # Serializer template for MetaUser
 class MetaUserSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -630,7 +651,7 @@ class ChatRoomSerializer(serializers.Serializer):
     rules = serializers.CharField(required=False)
     type_of_room = serializers.ChoiceField(choices=type_of_room_array, required=True)
     is_room_active = serializers.BooleanField(required=True)
-    room_hashkey = serializers.CharField(default='ROOM HASHKEY', read_only=True)
+    room_hashkey = serializers.CharField(required=False, read_only=True)
     created_on = serializers.CharField(required=True)
     modified_on = serializers.CharField(required=True)
 
@@ -679,7 +700,7 @@ class MessageSerializer(serializers.Serializer):
     upload_file = serializers.CharField()
     created_at = serializers.CharField()
     modified_at = serializers.CharField()
-    hashkey = serializers.CharField(read_only=True)
+    hashkey = serializers.CharField(required=False, read_only=True)
 
     # create() and update() functions to interact with our DB
     def create(self, validated_data):
@@ -960,7 +981,7 @@ class ProductSerializer(serializers.Serializer):
     quanity = serializers.IntegerField(required=False)
     is_product_digital = serializers.BooleanField(required=True)
     product_image1 = serializers.CharField(required=True)
-    hashkey = serializers.CharField(read_only=True)
+    hashkey = serializers.CharField(required=False, read_only=True)
     created_at = serializers.CharField(required=False)
     modified_at = serializers.CharField(required=False)
 
@@ -1142,7 +1163,7 @@ class SysOpsAgentSerializer(serializers.Serializer):
     metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     levelID = serializers.PrimaryKeyRelatedField(queryset=Level.objects.all())
     departmentID = serializers.PrimaryKeyRelatedField(queryset=BodegaDept.objects.all())
-    agent_hashkey = serializers.CharField(required=True)
+    agent_hashkey = serializers.CharField(required=False, read_only=True)
     bio = serializers.CharField(required=False)
     reporting_officer = serializers.CharField(required=True)
     created_at = serializers.CharField(required=False)
@@ -1171,12 +1192,12 @@ class SysOpsAgentRepoSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     metauserID = serializers.PrimaryKeyRelatedField(queryset=MetaUser.objects.all())
     sysops_agentID = serializers.PrimaryKeyRelatedField(queryset=SysOpsAgent.objects.all())
-    project_hashkey = serializers.CharField(required=True)
+    project_hashkey = serializers.CharField(required=False, read_only=True)
     created_at = serializers.CharField(required=False)
     modified_at = serializers.CharField(required=False)
 
     def create(self, validated_data):
-        return SysOpsProject.objects.create(**validated_data)
+        return SysOpsAgentRepo.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.metauserID = validated_data.get('metauserID', instance.metauserID)
@@ -1207,7 +1228,7 @@ class SysOpsProjectSerializer(serializers.Serializer):
     allocated_ttc_hours = serializers.FloatField(required=False)
     tasks = serializers.CharField(required=False)
     team_hashkey_json = serializers.CharField(required=False)
-    hashkey = serializers.CharField(required=False)
+    hashkey = serializers.CharField(required=False, read_only=True)
     genesis_project_hashkey = serializers.CharField(required=False)
     parent_project_hashkey = serializers.CharField(required=False)
     child_project_hashkey = serializers.CharField(required=False)
