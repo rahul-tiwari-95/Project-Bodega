@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, Message, MetaUser, OrderDetail, OrderItem, Particpant, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription,  Shop, ShopPayout, ShoppingSession, Social, Solomonv0, SysOpsAgent, SysOpsAgentRepo, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, UserType, SentinoSelfDescription
+from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, Message, MetaUser, OrderDetail, OrderItem, Particpant, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription,  Shop, ShopPayout, ShoppingSession, Social, Solomonv0, SysOpsAgent, SysOpsAgentRepo, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, UserType, SentinoSelfDescription, ProductOwnershipLedger
 
 
 #User Type Models
@@ -24,6 +24,7 @@ admin.site.register(Social)
 admin.site.register(Shop)
 admin.site.register(Product)
 admin.site.register(ProductMetaData)
+admin.site.register(ProductOwnershipLedger)
 
 #Cart & Checkout Tables - No need to be filled 
 admin.site.register(ShoppingSession)

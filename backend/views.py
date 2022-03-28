@@ -1,18 +1,21 @@
+from matplotlib.style import context
+from phonenumbers import format_national_number_with_carrier_code
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 import datetime
 from django.utils import timezone
+from .forms import UserAddressFormSet
 import requests
 
 
 
-from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, Solomonv0
-from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveItemSerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassficationSerializer, SentinoItemClassficationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SolomonSerializer
+from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, Solomonv0, ProductOwnershipLedger
+from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveItemSerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassficationSerializer, SentinoItemClassficationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SolomonSerializer, ProductOwnershipLedgerSerializer
 
 
 
@@ -38,6 +41,12 @@ def about_us(request):
 
 def contact_us(request):
     return render(request, 'backend/contact_us.html')
+
+def metauseruserauth(request):
+    #we will build a form and handle the conditions here 
+    #html is only to be used for showing dynamic data  remembder that we are building lean
+    return render(request, 'backend/metauserAuth.html')
+
 
 
 
@@ -105,6 +114,7 @@ def metauser_list(request):
             return JsonResponse(serializer.data, status=201)
         
         return JsonResponse(serializer.errors, status=400)
+
 
 
 
@@ -1586,6 +1596,53 @@ def product_detail(request, pk):
 
     elif request.method == 'DELETE':
         product.delete()
+        return HttpResponse(status=204)
+
+#-----------------------------------------------------------------------------------------------------------------------------------
+
+#Product Ownership Ledger Instance 
+#I designed another table for it -- because I wanted this to be as loosely coupled as possible  
+#Because this data will be changed dynamically - 
+#this is DevSecOps --> quality over quantity
+
+@csrf_exempt
+def product_ownershipLedger_list(request):
+
+    if request.method == 'GET':
+        product_ownershipLedger = ProductOwnershipLedger.objects.all()
+        serializer = ProductOwnershipLedgerSerializer(product_ownershipLedger, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        serializer = ProductOwnershipLedgerSerializer(data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def product_ownershipLedger_detail(request, pk):
+
+
+    try:
+        product_ownershipLedger = ProductOwnershipLedger.objects.get(pk=pk)
+    
+    except ProductOwnershipLedger.DoesNotExist:
+        return JsonResponse(status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(ProductOwnershipLedgerSerializer(product_ownershipLedger).data)
+
+    elif request.method == 'PUT':
+        serializer = ProductOwnershipLedgerSerializer(product_ownershipLedger, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        product_ownershipLedger.delete()
         return HttpResponse(status=204)
 
 
