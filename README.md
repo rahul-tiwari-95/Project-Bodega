@@ -21,7 +21,7 @@ simple.
 first reason: less stupidity. as engineers & scientists we are always busy reverting that fault piece of code. its a frustrating process but imagine if the whole park goes dark. 
 not good eh? this allows all hosts, guests to enjoy the experience without major outrages. 
 second reason: we are an AI Park. so we use AI to be an efficient team. so all our work starts at our laptops and end it. being independent is secure. think like a octopus, with 8 hearts
-third reason: we are a DAO. how can I say we are DAO if the source code is sitting it one file ready to be attacked?
+third reason: we are a DAO. how can I say we are DAO if the source code is sitting in one file ready to be attacked? or if the algorithm is exposed?
 
 how do we secure our systems? how do we secure our guests and hosts?
 i have deployed an invisibility cloak the moment you sign in. 
