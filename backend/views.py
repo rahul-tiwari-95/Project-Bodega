@@ -39,6 +39,13 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
+def metauserauth(request):
+    #this will be linked to the authorization view on any frontend 
+    #this will be the template for any auth needed across any of our platforms  
+    
+    return (request)
+
+
 
 
 
@@ -63,7 +70,6 @@ def metauser_list(request):
 
 
 @csrf_exempt
-
 def metauser_detail(request, pk):
     #GET,PUT,DELETE request for metauser{id}
     try:
@@ -92,6 +98,7 @@ def metauser_detail(request, pk):
 
 
 #Level Views
+@csrf_exempt
 def level_list(request):
     #GET, POST request for Level
     if request.method == 'GET':
@@ -109,6 +116,8 @@ def level_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def level_detail(request, pk):
     #GET, PUT, DELETE request for level{id}
     try:
@@ -135,7 +144,7 @@ def level_detail(request, pk):
 
 
 #BLA Views
-
+@csrf_exempt
 def blascore_list(request):
     #GET, POST request for BLAScore
     if request.method == 'GET':
@@ -153,6 +162,9 @@ def blascore_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+
+@csrf_exempt
 def blascore_detail(request, pk):
     #GET, PUT, DELETE request for  blascore{id}
     try:
@@ -179,7 +191,7 @@ def blascore_detail(request, pk):
 
 
 #Sentino Item Proximity Model
-
+@csrf_exempt
 def sentino_item_proximity_list(request):
     #GET, POST request for sentino_item_proximity model
     if request.method == 'GET':
@@ -196,7 +208,7 @@ def sentino_item_proximity_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-
+@csrf_exempt
 def sentino_item_proximity_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_proximity{id}
     try:
@@ -224,7 +236,7 @@ def sentino_item_proximity_detail(request, pk):
 
 
 #Sentino Item Projection Model
-
+@csrf_exempt
 def sentino_item_projection_list(request):
     #GET, POST request for sentino_item_projection model
     if request.method == 'GET':
@@ -242,6 +254,7 @@ def sentino_item_projection_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+@csrf_exempt
 def sentino_item_projection_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_projection{id}
     try:
@@ -269,7 +282,7 @@ def sentino_item_projection_detail(request, pk):
 
 
 #Sentino Item Classification Model
-
+@csrf_exempt
 def sentino_item_classification_list(request):
     #GET, POST request for sentino_item_classification model
     if request.method == 'GET':
@@ -287,6 +300,8 @@ def sentino_item_classification_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def sentino_item_classification_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_classification{id}
     try:
@@ -314,7 +329,7 @@ def sentino_item_classification_detail(request, pk):
 
 
 #Sentino  Inventory Model
-
+@csrf_exempt
 def sentino_inventory_list(request):
     #GET, POST request for sentino_inventory model
     if request.method == 'GET':
@@ -332,6 +347,8 @@ def sentino_inventory_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def sentino_inventory_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_inventory{id}
     try:
@@ -358,7 +375,7 @@ def sentino_inventory_detail(request, pk):
 
 
 #Sentino Description Model
-
+@csrf_exempt
 def sentino_description_list(request):
     #GET, POST request for sentino_description model
     if request.method == 'GET':
@@ -376,6 +393,8 @@ def sentino_description_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def sentino_description_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_description{id}
     try:
@@ -400,7 +419,7 @@ def sentino_description_detail(request, pk):
 
 
 #Sentino Profile Model
-
+@csrf_exempt
 def sentino_profile_list(request):
     #GET, POST request for sentino_profile model
     if request.method == 'GET':
@@ -418,6 +437,8 @@ def sentino_profile_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def sentino_profile_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_profile{id}
     try:
@@ -443,7 +464,7 @@ def sentino_profile_detail(request, pk):
 
 
 #Bodega Vision Model
-
+@csrf_exempt
 def bodega_vision_list(request):
     #GET, POST request for bodega_vision model
     if request.method == 'GET':
@@ -461,6 +482,8 @@ def bodega_vision_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def bodega_vision_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_vision{id}
     try:
@@ -487,7 +510,7 @@ def bodega_vision_detail(request, pk):
 
 
 #Bodega Face Model
-
+@csrf_exempt
 def bodega_face_list(request):
     #GET, POST request for bodega_face model
     if request.method == 'GET':
@@ -505,6 +528,8 @@ def bodega_face_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def bodega_face_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_face{id}
     try:
@@ -532,7 +557,7 @@ def bodega_face_detail(request, pk):
 
 
 #Bodega Personalizer Model
-
+@csrf_exempt
 def bodega_personalizer_list(request):
     #GET, POST request for bodega_personalizer model
     if request.method == 'GET':
@@ -550,6 +575,8 @@ def bodega_personalizer_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def bodega_personalizer_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_personalizer{id}
     try:
@@ -577,7 +604,7 @@ def bodega_personalizer_detail(request, pk):
 
 
 #Bodega Cognitive Item Model
-
+@csrf_exempt
 def bodega_item_list(request):
     #GET, POST request for bodega_item model
     if request.method == 'GET':
@@ -594,7 +621,7 @@ def bodega_item_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-
+@csrf_exempt
 def bodega_item_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_item{id}
     try:
@@ -620,7 +647,7 @@ def bodega_item_detail(request, pk):
 
 
 #Bodega Cognitive Inventory Model
-
+@csrf_exempt
 def bodega_inventory_list(request):
     #GET, POST request for bodega_inventory model
     if request.method == 'GET':
@@ -638,6 +665,8 @@ def bodega_inventory_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+
+@csrf_exempt
 def bodega_inventory_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_inventory{id}
     try:
@@ -665,7 +694,7 @@ def bodega_inventory_detail(request, pk):
 
 
 #Bodega Cognitive Person Model
-
+@csrf_exempt
 def bodega_person_list(request):
     #GET, POST request for bodega_person model
     if request.method == 'GET':
@@ -682,7 +711,7 @@ def bodega_person_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-
+@csrf_exempt
 def bodega_person_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_person{id}
     try:
@@ -710,7 +739,7 @@ def bodega_person_detail(request, pk):
 
 
 #Bodega Department Model
-
+@csrf_exempt
 def bodega_dept_list(request):
     #GET, POST request for bodega_dept model
     if request.method == 'GET':
@@ -727,7 +756,7 @@ def bodega_dept_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-
+@csrf_exempt
 def bodega_dept_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_dept{id}
     try:
@@ -757,6 +786,7 @@ def bodega_dept_detail(request, pk):
 #USER ADDRESS MODEL
 
 #Fetching data via UserID - Parent ID - RESTRICTED USE
+@csrf_exempt
 def address_list(request):
     #GET, POST request for metauser_address/
     if request.method == 'GET':
@@ -772,7 +802,7 @@ def address_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-
+@csrf_exempt
 def address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -801,7 +831,7 @@ def address_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-##@csrf_exempt
+@csrf_exempt
 def child_address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -833,7 +863,7 @@ def child_address_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-##@csrf_exempt
+@csrf_exempt
 def user_payment_list(request):
     #GET, POST request for metauser_address/
     if request.method == 'GET':
@@ -849,7 +879,7 @@ def user_payment_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def user_payment_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -878,7 +908,7 @@ def user_payment_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-##@csrf_exempt
+@csrf_exempt
 def child_payment_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -911,7 +941,7 @@ def child_payment_detail(request, pk):
 #Fetching data via UserID - Parent ID - RESTRICTED USE
 
 
-##@csrf_exempt
+@csrf_exempt
 def user_type_list(request):
 
     if request.method == 'GET':
@@ -927,7 +957,7 @@ def user_type_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def user_type_detail(request, pk):
 
 
@@ -956,7 +986,7 @@ def user_type_detail(request, pk):
 
 #Fetching data via User_AddressID - Child Table ID - FREE USE
 
-##@csrf_exempt
+@csrf_exempt
 def child_type_detail(request, pk):
 
 
@@ -990,7 +1020,7 @@ def child_type_detail(request, pk):
 #Fetching data by ChatRoomID, simply  
 
 
-#@csrf_exempt
+@csrf_exempt
 def chat_room_list(request):
 
     if request.method == 'GET':
@@ -1006,7 +1036,7 @@ def chat_room_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def chat_room_detail(request, pk):
 
 
@@ -1038,7 +1068,7 @@ def chat_room_detail(request, pk):
 #The code can be replicated for fetching via:  User_ID as well - but thats restricted.
 
 
-##@csrf_exempt
+@csrf_exempt
 def participant_list(request):
 
     if request.method == 'GET':
@@ -1054,7 +1084,7 @@ def participant_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def participant_detail(request, pk):
 
 
@@ -1088,8 +1118,7 @@ def participant_detail(request, pk):
 #The code can be replicated for fetching via:  User_ID as well 
 #many messageIDs can have same UserID or ChatRoomID - So, iterate via messageID
 
-
-#@csrf_exempt
+@csrf_exempt
 def message_list(request):
 
     if request.method == 'GET':
@@ -1105,7 +1134,7 @@ def message_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def message_detail(request, pk):
 
 
@@ -1138,7 +1167,7 @@ def message_detail(request, pk):
 #No FK relationships here to worry about.
 
 
-##@csrf_exempt
+@csrf_exempt
 def product_category_list(request):
 
     if request.method == 'GET':
@@ -1154,7 +1183,7 @@ def product_category_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def product_category_detail(request, pk):
 
 
@@ -1189,7 +1218,7 @@ def product_category_detail(request, pk):
 #No FK relationships here to worry about.
 
 
-##@csrf_exempt
+@csrf_exempt
 def product_theme_list(request):
 
     if request.method == 'GET':
@@ -1205,7 +1234,7 @@ def product_theme_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def product_theme_detail(request, pk):
 
 
@@ -1240,7 +1269,7 @@ def product_theme_detail(request, pk):
 #One FK with MetaUser --> But read_only is sufficient.
 
 
-##@csrf_exempt
+@csrf_exempt
 def discount_list(request):
 
     if request.method == 'GET':
@@ -1256,7 +1285,7 @@ def discount_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def discount_detail(request, pk):
 
 
@@ -1292,7 +1321,7 @@ def discount_detail(request, pk):
 #But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser 
 
 
-##@csrf_exempt
+@csrf_exempt
 def social_list(request):
 
     if request.method == 'GET':
@@ -1308,7 +1337,7 @@ def social_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def social_detail(request, pk):
 
 
@@ -1336,7 +1365,7 @@ def social_detail(request, pk):
 
 #Fetching data via User_ID - Parent Table ID - RESTRICTED USE
 
-##@csrf_exempt
+@csrf_exempt
 def parent_social_detail(request, pk):
 
 
@@ -1371,7 +1400,7 @@ def parent_social_detail(request, pk):
 #But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser - For security purposes
 
 
-#@csrf_exempt
+@csrf_exempt
 def shop_list(request):
 
     if request.method == 'GET':
@@ -1387,7 +1416,7 @@ def shop_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def shop_detail(request, pk):
 
 
@@ -1415,7 +1444,7 @@ def shop_detail(request, pk):
 
 #Fetching data via User_ID - Parent Table ID - RESTRICTED USE
 
-#@csrf_exempt
+@csrf_exempt
 def parent_shop_detail(request, pk):
 
 
@@ -1443,7 +1472,7 @@ def parent_shop_detail(request, pk):
 #----------------------------------------------------------------------------------
 
 #Product MetaData Instance 
-##@csrf_exempt
+@csrf_exempt
 def product_metadata_list(request):
 
     if request.method == 'GET':
@@ -1459,7 +1488,7 @@ def product_metadata_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-##@csrf_exempt
+@csrf_exempt
 def product_metadata_detail(request, pk):
 
 
@@ -1495,7 +1524,7 @@ def product_metadata_detail(request, pk):
 #These endpoints can be coded later - they need few edits to QuerySet - but this is not urgent  
 
 
-#@csrf_exempt
+@csrf_exempt
 def product_list(request):
 
     if request.method == 'GET':
@@ -1511,7 +1540,7 @@ def product_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def product_detail(request, pk):
 
 
@@ -1538,6 +1567,7 @@ def product_detail(request, pk):
 
 
 
+
 #----------------------------------------------------------------------------------
 
 #Collaboration Model Instance 
@@ -1545,7 +1575,7 @@ def product_detail(request, pk):
 
 
 
-#@csrf_exempt
+@csrf_exempt
 def collaboration_list(request):
 
     if request.method == 'GET':
@@ -1561,7 +1591,7 @@ def collaboration_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def collaboration_detail(request, pk):
 
 
@@ -1588,7 +1618,7 @@ def collaboration_detail(request, pk):
 
 
 #Shopping Session Views 
-#@csrf_exempt
+@csrf_exempt
 def shopping_session_list(request):
 
     if request.method == 'GET':
@@ -1604,7 +1634,7 @@ def shopping_session_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def shopping_session_detail(request, pk):
 
 
@@ -1634,7 +1664,7 @@ def shopping_session_detail(request, pk):
 
 
 #Cart Item Views 
-#@csrf_exempt
+@csrf_exempt
 def cart_item_list(request):
 
     if request.method == 'GET':
@@ -1650,7 +1680,9 @@ def cart_item_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+
+
+@csrf_exempt
 def cart_item_detail(request, pk):
 
 
@@ -1678,7 +1710,7 @@ def cart_item_detail(request, pk):
 
 
 #Order Detail Views 
-#@csrf_exempt
+@csrf_exempt
 def order_detail_list(request):
 
     if request.method == 'GET':
@@ -1694,7 +1726,7 @@ def order_detail_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def order_detail_detail(request, pk):
 
 
@@ -1725,7 +1757,7 @@ def order_detail_detail(request, pk):
 
 
 #Order Item Views 
-#@csrf_exempt
+@csrf_exempt
 def order_item_list(request):
 
     if request.method == 'GET':
@@ -1741,7 +1773,7 @@ def order_item_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def order_item_detail(request, pk):
 
 
@@ -1770,7 +1802,7 @@ def order_item_detail(request, pk):
 
 
 #SysOpsAgent Views
-#@csrf_exempt
+@csrf_exempt
 def sysops_agent_list(request):
 
     if request.method == 'GET':
@@ -1786,7 +1818,7 @@ def sysops_agent_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def sysops_agent_detail(request, pk):
 
 
@@ -1818,7 +1850,7 @@ def sysops_agent_detail(request, pk):
 
 
 #SysOpsAgent Repo Views
-#@csrf_exempt
+@csrf_exempt
 def sysops_agent_repo_list(request):
 
     if request.method == 'GET':
@@ -1834,7 +1866,7 @@ def sysops_agent_repo_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def sysops_agent_repo_detail(request, pk):
 
 
@@ -1865,7 +1897,7 @@ def sysops_agent_repo_detail(request, pk):
 
 
 #SysOpsAgent Project Views
-#@csrf_exempt
+@csrf_exempt
 def sysops_agent_project_list(request):
 
     if request.method == 'GET':
@@ -1881,7 +1913,7 @@ def sysops_agent_project_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def sysops_agent_project_detail(request, pk):
 
 
@@ -1911,7 +1943,7 @@ def sysops_agent_project_detail(request, pk):
 
 
 #SysOpsDemandNode Views
-#@csrf_exempt
+@csrf_exempt
 def sysopsdemandnode_list(request):
 
     if request.method == 'GET':
@@ -1927,7 +1959,7 @@ def sysopsdemandnode_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def sysopsdemandnode_detail(request, pk):
 
 
@@ -1958,7 +1990,7 @@ def sysopsdemandnode_detail(request, pk):
 
 
 #SysOpsSupplyNode Views
-#@csrf_exempt
+@csrf_exempt
 def sysopssupplynode_list(request):
 
     if request.method == 'GET':
@@ -1974,7 +2006,7 @@ def sysopssupplynode_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-#@csrf_exempt
+@csrf_exempt
 def sysopssupplynode_detail(request, pk):
 
 

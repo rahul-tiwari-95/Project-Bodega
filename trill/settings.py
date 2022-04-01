@@ -16,10 +16,10 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-CSRF_TRUSTED_ORIGINS =[
+CSRF_TRUSTED_ORIGINS = [
     'https://*.bdgdao.azurewebsites.net'
 ]
-#hello
+# hello
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -54,7 +54,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-SERVER_EMAIL =[
+SERVER_EMAIL = [
     'raven88@tuta.io',
     'kashvichauhan5@gmail.com'
 ]
@@ -96,17 +96,17 @@ ASGI_APPLICATION = 'trill.asgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default':{
+    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'testdb',
         'USER': 'postgres',
-        'PASSWORD' : '043074',
-        'HOST' : '127.0.0.1',
-        'PORT' : '5432'
+        'PASSWORD': '043074',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
     }
 }
 
-REST_FRAMEWORK= {
+REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
@@ -149,7 +149,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 
 
 # Default primary key field type

@@ -82,13 +82,17 @@ class Solomonv0(models.Model):
 
 # Creating MetaUser - ONLY AUTH USER CAN DELETE MetaUser.object
 class MetaUser(models.Model):
-    meta_username = models.TextField(default='username_not_defined', unique=True)
+    meta_username = models.TextField(
+        default='username_not_defined', unique=True)
     passcode = models.TextField(unique=True)
-    private_hashkey = models.TextField(default=private_metauser_hashkey_generator, unique=True)
-    public_hashkey = models.TextField(default=public_metauser_hashkey_generator, unique=True)
+    private_hashkey = models.TextField(
+        default=private_metauser_hashkey_generator, unique=True)
+    public_hashkey = models.TextField(
+        default=public_metauser_hashkey_generator, unique=True)
     discord_username = models.TextField()
-    created_at = models.DateField()  ##the date when this user was created.
-    modified_at = models.DateTimeField()  ##the timezone when the user_data was modified
+    created_at = models.DateField()  # the date when this user was created.
+    # the timezone when the user_data was modified
+    modified_at = models.DateTimeField()
 
     def __str__(self):
         # returns username & modified_at
@@ -117,7 +121,8 @@ class BLAScore(models.Model):
     levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
     ReviewCycleNo = models.FloatField(default=1.0)
     current_score = models.FloatField(default=3.0)
-    predicted_score = models.FloatField(default=3.0)  # Incoming data from Solomon
+    predicted_score = models.FloatField(
+        default=3.0)  # Incoming data from Solomon
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -133,7 +138,8 @@ class SentinoItemProximity(models.Model):
     content_metadata2 = JSONField(null=True, blank=True)
     content_metadata3 = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -147,7 +153,8 @@ class SentinoItemProjection(models.Model):
     content_metadata2 = JSONField(null=True, blank=True)
     content_metadata3 = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -161,7 +168,8 @@ class SentinoItemClassification(models.Model):
     content_metadata2 = JSONField(null=True, blank=True)
     content_metadata3 = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -175,7 +183,8 @@ class SentinoInventory(models.Model):
     content_metadata2 = JSONField(null=True, blank=True)
     content_metadata3 = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -189,7 +198,8 @@ class SentinoSelfDescription(models.Model):
     content_metadata2 = JSONField(null=True, blank=True)
     content_metadata3 = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -203,7 +213,8 @@ class SentinoProfile(models.Model):
     content_metadata2 = JSONField(null=True, blank=True)
     content_metadata3 = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -257,10 +268,14 @@ class BodegaCognitiveItem(models.Model):
     # incoming data from Sentino Models
     # this table will be populated by fetched the data from our Sentino Model via APIs and fill it here via POST
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    proximityID = models.ForeignKey(SentinoItemProximity, on_delete=models.CASCADE)
-    classificationID = models.ForeignKey(SentinoItemClassification, on_delete=models.CASCADE)
-    projectionID = models.ForeignKey(SentinoItemProjection, on_delete=models.CASCADE)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    proximityID = models.ForeignKey(
+        SentinoItemProximity, on_delete=models.CASCADE)
+    classificationID = models.ForeignKey(
+        SentinoItemClassification, on_delete=models.CASCADE)
+    projectionID = models.ForeignKey(
+        SentinoItemProjection, on_delete=models.CASCADE)
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
     created_at = models.DateField()
@@ -273,10 +288,11 @@ class BodegaCognitiveItem(models.Model):
 # Bodega Inventory Cognitive Services
 class BodegaCognitiveInventory(models.Model):
     # incoming data from Sentino Model
-    ##this table will be populated by fetched the data from our Sentino Model via APIs and fill it here via POST
+    # this table will be populated by fetched the data from our Sentino Model via APIs and fill it here via POST
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     inventoryID = models.ForeignKey(SentinoInventory, on_delete=models.CASCADE)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
     created_at = models.DateField()
@@ -290,11 +306,13 @@ class BodegaCognitiveInventory(models.Model):
 
 class BodegaCognitivePerson(models.Model):
     # incoming data from Sentino Models
-    ##this table will be populated by fetched the data from our Sentino Model via APIs and fill it here via POST
+    # this table will be populated by fetched the data from our Sentino Model via APIs and fill it here via POST
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    self_descriptionID = models.ForeignKey(SentinoSelfDescription, on_delete=models.CASCADE)
+    self_descriptionID = models.ForeignKey(
+        SentinoSelfDescription, on_delete=models.CASCADE)
     profileID = models.ForeignKey(SentinoProfile, on_delete=models.CASCADE)
-    self_statements = JSONField(null=True, blank=True)  # needed so that we can send POST request to Sentino API
+    # needed so that we can send POST request to Sentino API
+    self_statements = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
     created_at = models.DateField()
@@ -360,7 +378,7 @@ class UserPayment(models.Model):
         return 'Last Payment Status: %s' % (self.user_payment_profile_status)
 
 
-# Creating User Type for roles. 
+# Creating User Type for roles.
 # Types of roles:
 # User, Influencer, Creator, Employee, Developer, collective
 
@@ -369,8 +387,10 @@ class UserType(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     bodega_vision_ID = models.ForeignKey(BodegaVision,
                                          on_delete=models.CASCADE)  # All data on what kind of content have you engaged with - Read-Write
-    level_ID = models.ForeignKey(Level, on_delete=models.CASCADE)  # Which level you on  - Read Only
-    solomon_person_ID = models.ForeignKey(Solomonv0, on_delete=models.CASCADE)  # Your personality traits - Read Write
+    # Which level you on  - Read Only
+    level_ID = models.ForeignKey(Level, on_delete=models.CASCADE)
+    # Your personality traits - Read Write
+    solomon_person_ID = models.ForeignKey(Solomonv0, on_delete=models.CASCADE)
     user_role = models.TextField(default='Creator')
     created_at = models.DateField()
     modified_at = models.DateTimeField()
@@ -389,12 +409,17 @@ class ChatRoom(models.Model):
     desc = models.TextField(default='Why was this room created?')
     rules = models.TextField(default='Your room, Your rules')
     type_of_room = models.TextField(choices=[
-        ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),  # only people with meta_key can join the secure_room
-        ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),  # anyone can join the secure room
-        ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')  # leads ro the deletion of the room
+        # only people with meta_key can join the secure_room
+        ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),
+        # anyone can join the secure room
+        ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),
+        # leads ro the deletion of the room
+        ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')
     ])
-    is_room_active = models.BooleanField(default=True)  # gives control of room back to the user
-    room_hashkey = models.TextField(default=chatroom_hashkey_generator, unique=True)
+    # gives control of room back to the user
+    is_room_active = models.BooleanField(default=True)
+    room_hashkey = models.TextField(
+        default=chatroom_hashkey_generator, unique=True)
     modified_on = models.DateTimeField()
     created_on = models.DateField()
 
@@ -425,7 +450,8 @@ class Message(models.Model):
     chat_room_ID = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     message_body = models.TextField()
-    upload_file = models.FileField(upload_to='user_meta_key/message/files', default=None)
+    upload_file = models.FileField(
+        upload_to='user_meta_key/message/files', default=None)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
     hashkey = models.TextField(default=message_hashkey_generator, unique=True)
@@ -454,7 +480,8 @@ class ProductCategory(models.Model):
     category_desc = models.TextField(default='Describe your creation.')
     created_at = models.DateField()  # when was it created
     modified_at = models.DateTimeField()  # when was it last modfied
-    category_image1 = models.FileField(upload_to='category/category_image1')  # set default to Bodega's image
+    category_image1 = models.FileField(
+        upload_to='category/category_image1')  # set default to Bodega's image
     category_image2 = models.FileField(upload_to='category/category_image2')
     category_image3 = models.FileField(upload_to='category/category_image3')
 
@@ -489,7 +516,8 @@ class Discount(models.Model):
     description = models.TextField()
     discount_percent = models.FloatField(default=0.0)
     active_status = models.BooleanField(default=False)
-    created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE)  # which user created this
+    created_by = models.ForeignKey(
+        MetaUser, on_delete=models.CASCADE)  # which user created this
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -511,17 +539,24 @@ class Social(models.Model):
     metauserID = models.ForeignKey(MetaUser,
                                    on_delete=models.CASCADE)  # we cant have metauserIDs deleted - its either ways not connected to their physical copies but STILL
     # bodegacoins_ID = models.ForeignKey(Bodegacoins, on_delete=models.CASCADE)
-    following = JSONField(null=True, blank=True)  # lists of MetametauserIDs of all people we follow
-    followers = JSONField(null=True, blank=True)  # lists of MetametauserIDs which follow us
+    # lists of MetametauserIDs of all people we follow
+    following = JSONField(null=True, blank=True)
+    # lists of MetametauserIDs which follow us
+    followers = JSONField(null=True, blank=True)
     makeprofileprivate = models.BooleanField(default=False)
-    saved_content = JSONField(null=True, blank=True)  # URLs to product_metakeys - stored as an array
-    likes = JSONField(null=True, blank=True)  # List of Product Hashkeys liked by user
-    dislikes = JSONField(null=True, blank=True)  # List and count of Product Hashkeys disliked by user
-    comments = JSONField(null=True, blank=True)  # List of Product MetaKeys commented on
+    # URLs to product_metakeys - stored as an array
+    saved_content = JSONField(null=True, blank=True)
+    # List of Product Hashkeys liked by user
+    likes = JSONField(null=True, blank=True)
+    # List and count of Product Hashkeys disliked by user
+    dislikes = JSONField(null=True, blank=True)
+    # List of Product MetaKeys commented on
+    comments = JSONField(null=True, blank=True)
     products_clickedOn = JSONField(null=True, blank=True)
     bio = models.TextField()
     blocked_list = JSONField(null=True, blank=True)
-    data_mining_status = models.BooleanField(default=False)  # Ask for permissions for data collection
+    # Ask for permissions for data collection
+    data_mining_status = models.BooleanField(default=False)
     # ONLY SELECT USERS whose SOCIAL.data_mining_status == True - Simple solution to privacy, consent! consent! consent!
     account_active = models.BooleanField(default=True)
     delete_metauser = models.BooleanField(default=False)
@@ -540,13 +575,15 @@ class Shop(models.Model):
                                    on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
     # shop_ID will be automatically created by PostGRE - we will add a unique validator on it
 
-    all_products = JSONField(null=True, blank=True)  # list of all products owned by that creator
+    # list of all products owned by that creator
+    all_products = JSONField(null=True, blank=True)
     all_user_data = JSONField(null=True,
                               blank=True)  # list of metauser IDs for your reference. no other data is shown here
     name = models.TextField()
     description = models.TextField()
     logo = models.FileField(upload_to='shop-details/profile_picture')
-    cover_image = models.FileField(upload_to='shop-details/profile_cover_image', default='EMPTY')
+    cover_image = models.FileField(
+        upload_to='shop-details/profile_cover_image', default='EMPTY')
     # Ask user if their Shop address is same as their own address for fucks sake.
     address_line1 = models.TextField()
     address_line2 = models.TextField()
@@ -560,8 +597,10 @@ class Shop(models.Model):
     ])  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
     bodega_vision_tags = JSONField(null=True,
                                    blank=True)  # loaded data from Azure Vision API - All tags stored here - Solomon_vision
-    bodega_customer_tags = JSONField(null=True, blank=True)  # load tags on customers
-    uniquesellingprop = models.TextField(default='Why your meta-shop is special than others?')
+    bodega_customer_tags = JSONField(
+        null=True, blank=True)  # load tags on customers
+    uniquesellingprop = models.TextField(
+        default='Why your meta-shop is special than others?')
     data_mining_status = models.BooleanField(default=False)
     created_on = models.DateField()
     modified_on = models.DateTimeField()
@@ -585,17 +624,22 @@ class ProductMetaData(models.Model):
     total_sales = models.FloatField(default=0.0)
     clicks_on_product = models.IntegerField()
     is_product_digital = models.BooleanField(default=False)
-    assistance_ask = JSONField(null=True, blank=True)  # add tags on what help you need? funding - hiring etc
+    # add tags on what help you need? funding - hiring etc
+    assistance_ask = JSONField(null=True, blank=True)
     nsfw_content = models.BooleanField(default=False)
-    production_cost = models.FloatField(default=0.0)  # helps us tweak our user targeting based on audience group
+    # helps us tweak our user targeting based on audience group
+    production_cost = models.FloatField(default=0.0)
     production_time_days = models.IntegerField()
     hours_invested = models.FloatField(default=1.0)
     encrypt_product = models.BooleanField(default=False)
     unit_sold_expectation = models.IntegerField(default=0)
     size_chart = models.FileField(upload_to='product/size_chart', default=None)
-    product_image2 = models.FileField(upload_to='product/product_image2', default=None)
-    product_image3 = models.FileField(upload_to='product/product_image3', default=None)
-    product_image4 = models.FileField(upload_to='product/product_image4', default=None)
+    product_image2 = models.FileField(
+        upload_to='product/product_image2', default=None)
+    product_image3 = models.FileField(
+        upload_to='product/product_image3', default=None)
+    product_image4 = models.FileField(
+        upload_to='product/product_image4', default=None)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -609,19 +653,24 @@ class ProductMetaData(models.Model):
 
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    productMetaDataID = models.ForeignKey(ProductMetaData, on_delete=models.CASCADE)
-    product_categoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
-    product_themesID = models.ForeignKey(ProductThemes, on_delete=models.CASCADE)
+    productMetaDataID = models.ForeignKey(
+        ProductMetaData, on_delete=models.CASCADE)
+    product_categoryID = models.ForeignKey(
+        ProductCategory, on_delete=models.CASCADE)
+    product_themesID = models.ForeignKey(
+        ProductThemes, on_delete=models.CASCADE)
     discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
     name = models.TextField(default='No Product Name, yet', unique=True)
-    description = models.TextField(default='Explain your creation in great poetic detail.')
+    description = models.TextField(
+        default='Explain your creation in great poetic detail.')
     selling_price = models.FloatField(default=0.0)
     discounted_price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0)
     is_product_digital = models.BooleanField(default=False)
     product_image1 = models.FileField(upload_to='product/product_image1')
-    hashkey = models.TextField(default=product_hashkey_generator, unique=True)  # generates unique SHA1 key for your product - which is immutable in TRILL universe
+    # generates unique SHA1 key for your product - which is immutable in TRILL universe
+    hashkey = models.TextField(default=product_hashkey_generator, unique=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -643,7 +692,8 @@ class Collaboration(models.Model):
         ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)  # creators can paste their hashkey to auth
+    # creators can paste their hashkey to auth
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     product_ID = models.ForeignKey(Product,
                                    on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
     shop_ID = models.ForeignKey(Shop,
@@ -657,7 +707,8 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     bid_amount = models.FloatField(default=0.0)
-    accept_bid = models.BooleanField(default=False)  # only Product Owner has this privilege
+    # only Product Owner has this privilege
+    accept_bid = models.BooleanField(default=False)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -740,9 +791,11 @@ class SysOpsAgent(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
     departmentID = models.ForeignKey(BodegaDept, on_delete=models.PROTECT)
-    agent_hashkey = models.TextField(default=agent_hashkey_generator, unique=True)
+    agent_hashkey = models.TextField(
+        default=agent_hashkey_generator, unique=True)
     bio = models.TextField(default='I am Bodega')
-    reporting_officer = models.TextField(default="PASTE PUBLIC METAUSER HASHKEY")
+    reporting_officer = models.TextField(
+        default="PASTE PUBLIC METAUSER HASHKEY")
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
@@ -777,8 +830,10 @@ class SysOpsProject(models.Model):
     levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
     divisionID = models.ForeignKey(BodegaDept, on_delete=models.PROTECT)
     name = models.TextField(default='Project Name')
-    problem_statement = models.CharField(default='140 Characters', max_length=300)
-    problem_impact_size = models.CharField(default='140 Characters', max_length=300)
+    problem_statement = models.CharField(
+        default='140 Characters', max_length=300)
+    problem_impact_size = models.CharField(
+        default='140 Characters', max_length=300)
     hypothesis = models.TextField()
     key_performance_indicators = models.TextField()
     status = models.TextField(choices=[
@@ -822,18 +877,24 @@ class SysOpsSupplyNode(models.Model):
     creator_identity_status = models.BooleanField(default=False)
     all_digital_url = JSONField(null=True, blank=True)
     influence_size = JSONField(null=True, blank=True)
-    genre = JSONField(null=True, blank=True)  # what market is this? #fashion #anime
-    category_vertical = JSONField(null=True, blank=True)  # What sub niche is this? #streetwear #female
-    category_vertical2 = JSONField(null=True, blank=True)  # What sub niche is this? #eaarings #bucket_hats
-    product_traits = JSONField(null=True, blank=True)  # what do you feel about their creation?
+    # what market is this? #fashion #anime
+    genre = JSONField(null=True, blank=True)
+    # What sub niche is this? #streetwear #female
+    category_vertical = JSONField(null=True, blank=True)
+    # What sub niche is this? #eaarings #bucket_hats
+    category_vertical2 = JSONField(null=True, blank=True)
+    # what do you feel about their creation?
+    product_traits = JSONField(null=True, blank=True)
     creator_traits = JSONField(null=True,
                                blank=True)  # what do we think about the creator? - #trustworthy? #reliability
-    production_type = JSONField(null=True, blank=True)  # Digital? #On-Demand-Production #Wholesale #Abstract?
+    # Digital? #On-Demand-Production #Wholesale #Abstract?
+    production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
     current_aov = JSONField(null=True, blank=True)
     predicted_revenue = JSONField(null=True, blank=True)
     creator_audience_traits = JSONField(null=True, blank=True)
-    sysops_solution_hypothesis = JSONField(null=True,blank=True)  # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
+    # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
+    sysops_solution_hypothesis = JSONField(null=True, blank=True)
     additional_notes = JSONField(null=True, blank=True)
     created_at = models.DateField()
     modified_at = models.DateTimeField()
@@ -859,13 +920,18 @@ class SysOpsDemandNode(models.Model):
     creator_identity_status = models.BooleanField(default=False)
     all_digital_url = JSONField(null=True, blank=True)
     influence_size = JSONField(null=True, blank=True)
-    genre = JSONField(null=True, blank=True)  # what market is this? #fashion #anime
-    category_vertical = JSONField(null=True, blank=True)  # What sub niche is this? #streetwear #female
-    category_vertical2 = JSONField(null=True, blank=True)  # What sub niche is this? #eaarings #bucket_hats
-    product_traits = JSONField(null=True, blank=True)  # what do you feel about their creation?
+    # what market is this? #fashion #anime
+    genre = JSONField(null=True, blank=True)
+    # What sub niche is this? #streetwear #female
+    category_vertical = JSONField(null=True, blank=True)
+    # What sub niche is this? #eaarings #bucket_hats
+    category_vertical2 = JSONField(null=True, blank=True)
+    # what do you feel about their creation?
+    product_traits = JSONField(null=True, blank=True)
     creator_traits = JSONField(null=True,
                                blank=True)  # what do we think about the creator? - #trustworthy? #reliability
-    production_type = JSONField(null=True, blank=True)  # Digital? #On-Demand-Production #Wholesale #Abstract?
+    # Digital? #On-Demand-Production #Wholesale #Abstract?
+    production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
     predicted_revenue = JSONField(null=True, blank=True)
     creator_audience_traits = JSONField(null=True, blank=True)
