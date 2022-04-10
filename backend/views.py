@@ -42,6 +42,7 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
+<<<<<<< HEAD
 def metauseruserauth(request):
     #we will build a form and handle the conditions here 
     #html is only to be used for showing dynamic data  remembder that we are building lean
@@ -93,6 +94,14 @@ def solomon_detail(request, pk):
         solomon.delete()
         return HttpResponse(status=204)
     
+=======
+def metauserauth(request):
+    #this will be linked to the authorization view on any frontend 
+    #this will be the template for any auth needed across any of our platforms  
+    
+    return (request)
+
+>>>>>>> dev
 
 
 
@@ -117,7 +126,10 @@ def metauser_list(request):
 
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 @csrf_exempt
 def metauser_detail(request, pk):
     #GET,PUT,DELETE request for metauser{id}
@@ -165,6 +177,10 @@ def level_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev
 @csrf_exempt
 def level_detail(request, pk):
     #GET, PUT, DELETE request for level{id}
@@ -210,6 +226,11 @@ def blascore_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def blascore_detail(request, pk):
     #GET, PUT, DELETE request for  blascore{id}
@@ -254,7 +275,10 @@ def sentino_item_proximity_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 @csrf_exempt
 def sentino_item_proximity_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_proximity{id}
@@ -301,7 +325,10 @@ def sentino_item_projection_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 @csrf_exempt
 def sentino_item_projection_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_projection{id}
@@ -347,6 +374,11 @@ def sentino_item_classification_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def sentino_item_classification_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_classification{id}
@@ -392,6 +424,11 @@ def sentino_inventory_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def sentino_inventory_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_inventory{id}
@@ -436,6 +473,11 @@ def sentino_description_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def sentino_description_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_description{id}
@@ -478,6 +520,11 @@ def sentino_profile_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def sentino_profile_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_profile{id}
@@ -521,6 +568,11 @@ def bodega_vision_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def bodega_vision_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_vision{id}
@@ -566,6 +618,10 @@ def bodega_face_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev
 @csrf_exempt
 def bodega_face_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_face{id}
@@ -611,6 +667,11 @@ def bodega_personalizer_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def bodega_personalizer_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_personalizer{id}
@@ -699,6 +760,11 @@ def bodega_inventory_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def bodega_inventory_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_inventory{id}
@@ -835,7 +901,7 @@ def address_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-
+@csrf_exempt
 def address_detail(request, pk):
     #GET, PUT, DELETE requests for metauser_address/
 
@@ -1151,7 +1217,10 @@ def participant_detail(request, pk):
 #The code can be replicated for fetching via:  User_ID as well 
 #many messageIDs can have same UserID or ChatRoomID - So, iterate via messageID
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 @csrf_exempt
 def message_list(request):
 
@@ -1648,6 +1717,7 @@ def product_ownershipLedger_detail(request, pk):
 
 
 
+
 #----------------------------------------------------------------------------------
 
 #Collaboration Model Instance 
@@ -1760,6 +1830,11 @@ def cart_item_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dev
 @csrf_exempt
 def cart_item_detail(request, pk):
 
@@ -1862,7 +1937,7 @@ def order_item_detail(request, pk):
         return JsonResponse(status=404)
 
     if request.method == 'GET':
-        return JsonResponse(OrderDetailsSerializer(order_item).data)
+        return JsonResponse(OrderItemSerializer(order_item).data)
 
     elif request.method == 'PUT':
         serializer = OrderItemSerializer(order_item, data=JSONParser().parse(request))

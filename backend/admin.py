@@ -26,6 +26,7 @@ admin.site.register(Product)
 admin.site.register(ProductMetaData)
 admin.site.register(ProductOwnershipLedger)
 
+
 #Cart & Checkout Tables - No need to be filled 
 admin.site.register(ShoppingSession)
 admin.site.register(CartItem)
@@ -61,6 +62,8 @@ admin.site.register(SysOpsAgentRepo)
 admin.site.register(SysOpsProject)
 admin.site.register(SysOpsSupplyNode)
 admin.site.register(SysOpsDemandNode)
+
+
 
 
 

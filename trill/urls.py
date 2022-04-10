@@ -18,7 +18,7 @@ from django.urls import path, include
 from backend import views
 
 
-#router.register(r'info/api/read-access-only/metauser', views.MetaUserViewSet) - URL Format - also segement access points for diff users
+# router.register(r'info/api/read-access-only/metauser', views.MetaUserViewSet) - URL Format - also segement access points for diff users
 
 
 urlpatterns = [

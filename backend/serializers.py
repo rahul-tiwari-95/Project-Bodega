@@ -7,6 +7,8 @@ from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, Bod
     UserType, Particpant, Message, Solomonv0, ProductOwnershipLedger
 from rest_framework import serializers
 
+
+
 # Serializer Class for Developers
 # wherever possible, apply constraints
 # GET functions arent defined explicitly because we are just reading data - so no corruption can be done
@@ -153,6 +155,29 @@ class LevelSerializer(serializers.Serializer):
 
         instance.save()
         return instance
+
+
+#Serializer for Solomon Class
+class SolomonSerializer(serializers.Serializer):
+     id = serializers.IntegerField(read_only=True)
+     psy_traits = serializers.CharField(required=False)
+     engagement_traits = serializers.CharField(required=False)
+     created_at = serializers.CharField(required=False)
+     modified_at = serializers.CharField(required=False)
+
+
+     def create(self, validated_data):
+         return Solomonv0.objects.create(**validated_data)
+
+     def update(self, instance, validated_data):
+         #Updating instances of SolomonVo model
+         instance.psy_traits = validated_data.get('psy_traits', instance.psy_traits)
+         instance.engagement_traits = validated_data.get('engagement_traits', instance.engagement_traits)
+         instance.created_at = validated_data.get('created_at', instance.created_at)
+         instance.modified_at = validated_data.get('modified_at', instance.modified_at)
+
+         instance.save()
+         return instance
 
 
 # Serializer for BLAScore Model
@@ -800,7 +825,12 @@ class ChatRoomSerializer(serializers.Serializer):
     type_of_room = serializers.ChoiceField(
         choices=type_of_room_array, required=True)
     is_room_active = serializers.BooleanField(required=True)
+<<<<<<< HEAD
     room_hashkey = serializers.CharField(required=False, read_only=True)
+=======
+    room_hashkey = serializers.CharField(
+        default='ROOM HASHKEY', read_only=True)
+>>>>>>> dev
     created_on = serializers.CharField(required=True)
     modified_on = serializers.CharField(required=True)
 
@@ -1365,8 +1395,8 @@ class ShoppingSessionSerializer(serializers.Serializer):
 # Cart Item Serializer
 class CartItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    session_ID = serializers.CharField(required=True)
-    product_ID = serializers.CharField(required=True)
+    session_ID = serializers.PrimaryKeyRelatedField(queryset=ShoppingSession.objects.all())
+    product_ID = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     quantity = serializers.IntegerField(required=True)
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
@@ -1393,7 +1423,7 @@ class CartItemSerializer(serializers.Serializer):
 class OrderDetailsSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     total_amount = serializers.FloatField(required=True)
-    payment_info = serializers.CharField(required=True)
+    payment_info = serializers.PrimaryKeyRelatedField(queryset=UserPayment.objects.all())
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
 
@@ -1417,8 +1447,8 @@ class OrderDetailsSerializer(serializers.Serializer):
 # Order Items Serializer Class
 class OrderItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    order_ID = serializers.CharField(required=True)
-    product_ID = serializers.CharField(required=True)
+    order_ID = serializers.PrimaryKeyRelatedField(queryset=OrderDetail.objects.all())
+    product_ID = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     quantity = serializers.IntegerField(required=True)
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
@@ -1445,7 +1475,7 @@ class OrderItemSerializer(serializers.Serializer):
 # Need to revisit after seeing Stipe Connect
 class ShopPayoutSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    order_detail_ID = serializers.CharField(required=True)
+    order_detail_ID = serializers.PrimaryKeyRelatedField(queryset=OrderDetail.objects.all())
 
     def create(self, validated_idea):
         return ShopPayout.objects.create(**validated_idea)
@@ -1468,7 +1498,11 @@ class SysOpsAgentSerializer(serializers.Serializer):
     levelID = serializers.PrimaryKeyRelatedField(queryset=Level.objects.all())
     departmentID = serializers.PrimaryKeyRelatedField(
         queryset=BodegaDept.objects.all())
+<<<<<<< HEAD
     agent_hashkey = serializers.CharField(required=False, read_only=True)
+=======
+    agent_hashkey = serializers.CharField(required=True)
+>>>>>>> dev
     bio = serializers.CharField(required=False)
     reporting_officer = serializers.CharField(required=True)
     created_at = serializers.CharField(required=False)
@@ -1504,7 +1538,11 @@ class SysOpsAgentRepoSerializer(serializers.Serializer):
         queryset=MetaUser.objects.all())
     sysops_agentID = serializers.PrimaryKeyRelatedField(
         queryset=SysOpsAgent.objects.all())
+<<<<<<< HEAD
     project_hashkey = serializers.CharField(required=False, read_only=True)
+=======
+    project_hashkey = serializers.CharField(required=True)
+>>>>>>> dev
     created_at = serializers.CharField(required=False)
     modified_at = serializers.CharField(required=False)
 

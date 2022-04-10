@@ -710,8 +710,15 @@ class Collaboration(models.Model):
     ])
     # creators can paste their hashkey to auth
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+<<<<<<< HEAD
     product_ID = models.ForeignKey(Product,on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
     shop_ID = models.ForeignKey(Shop,on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
+=======
+    product_ID = models.ForeignKey(Product,
+                                   on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
+    shop_ID = models.ForeignKey(Shop,
+                                on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
+>>>>>>> dev
     # product_shop_ID should be EQUAL to shop_ID to verify identity that both metauserIDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[  # the bid from the creator's side - because freedom of choice
@@ -900,8 +907,13 @@ class SysOpsSupplyNode(models.Model):
     category_vertical2 = JSONField(null=True, blank=True)
     # what do you feel about their creation?
     product_traits = JSONField(null=True, blank=True)
+<<<<<<< HEAD
     # what do we think about the creator? - #trustworthy? #reliability
     creator_traits = JSONField(null=True, blank=True)
+=======
+    creator_traits = JSONField(null=True,
+                               blank=True)  # what do we think about the creator? - #trustworthy? #reliability
+>>>>>>> dev
     # Digital? #On-Demand-Production #Wholesale #Abstract?
     production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
@@ -944,8 +956,13 @@ class SysOpsDemandNode(models.Model):
     category_vertical2 = JSONField(null=True, blank=True)
     # what do you feel about their creation?
     product_traits = JSONField(null=True, blank=True)
+<<<<<<< HEAD
     # what do we think about the creator? - #trustworthy? #reliability
     creator_traits = JSONField(null=True, blank=True)
+=======
+    creator_traits = JSONField(null=True,
+                               blank=True)  # what do we think about the creator? - #trustworthy? #reliability
+>>>>>>> dev
     # Digital? #On-Demand-Production #Wholesale #Abstract?
     production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
