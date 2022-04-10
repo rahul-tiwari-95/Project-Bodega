@@ -1784,7 +1784,7 @@ def order_item_detail(request, pk):
         return JsonResponse(status=404)
 
     if request.method == 'GET':
-        return JsonResponse(OrderDetailsSerializer(order_item).data)
+        return JsonResponse(OrderItemSerializer(order_item).data)
 
     elif request.method == 'PUT':
         serializer = OrderItemSerializer(order_item, data=JSONParser().parse(request))

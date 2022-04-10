@@ -7,6 +7,8 @@ from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, Bod
     UserType, Particpant, Message
 from rest_framework import serializers
 
+
+
 # Serializer Class for Developers
 # wherever possible, apply constraints
 # GET functions arent defined explicitly because we are just reading data - so no corruption can be done
@@ -1342,8 +1344,8 @@ class ShoppingSessionSerializer(serializers.Serializer):
 # Cart Item Serializer
 class CartItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    session_ID = serializers.CharField(required=True)
-    product_ID = serializers.CharField(required=True)
+    session_ID = serializers.PrimaryKeyRelatedField(queryset=ShoppingSession.objects.all())
+    product_ID = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     quantity = serializers.IntegerField(required=True)
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
@@ -1370,7 +1372,7 @@ class CartItemSerializer(serializers.Serializer):
 class OrderDetailsSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     total_amount = serializers.FloatField(required=True)
-    payment_info = serializers.CharField(required=True)
+    payment_info = serializers.PrimaryKeyRelatedField(queryset=UserPayment.objects.all())
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
 
@@ -1394,8 +1396,8 @@ class OrderDetailsSerializer(serializers.Serializer):
 # Order Items Serializer Class
 class OrderItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    order_ID = serializers.CharField(required=True)
-    product_ID = serializers.CharField(required=True)
+    order_ID = serializers.PrimaryKeyRelatedField(queryset=OrderDetail.objects.all())
+    product_ID = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     quantity = serializers.IntegerField(required=True)
     created_at = serializers.CharField(required=True)
     modified_at = serializers.CharField(required=True)
@@ -1422,7 +1424,7 @@ class OrderItemSerializer(serializers.Serializer):
 # Need to revisit after seeing Stipe Connect
 class ShopPayoutSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    order_detail_ID = serializers.CharField(required=True)
+    order_detail_ID = serializers.PrimaryKeyRelatedField(queryset=OrderDetail.objects.all())
 
     def create(self, validated_idea):
         return ShopPayout.objects.create(**validated_idea)
