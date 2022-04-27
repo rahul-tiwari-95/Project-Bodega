@@ -57,6 +57,34 @@ class MetaUserList(generics.ListCreateAPIView):
 class MetaUserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = MetaUser.objects.all()
     serializer_class = MetaUserSerializer
+    
+
+@csrf_exempt
+def MetaUserPasscode(request, pk):
+    #GET,PUT,DELETE request for metauser{id}
+    try:
+        metauser = MetaUser.objects.get(passcode=pk)
+    except MetaUser.DoesNotExist:
+        return JsonResponse(status=404)
+
+    
+    if request.method == 'GET':
+        serializer = MetaUserSerializer(metauser)
+        return JsonResponse(serializer.data)
+
+    
+    elif request.method == 'PUT':
+        serializer = MetaUserSerializer(metauser, data=JSONParser().parse(request))
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        metauser.delete()
+        return HttpResponse(status=204)
+
+
 
 #Level Generics Views 
 #@csrf_exempt

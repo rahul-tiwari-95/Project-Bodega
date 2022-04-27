@@ -21,6 +21,9 @@ urlpatterns = [
     # METAUSER API ENDPOINTS
     path('bodega-api/metauser/', views.MetaUserList.as_view()),
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
+    
+    #METAUSER API ENDPOINTS via passcode=pk
+    path('bodega-api/metauserauth/<int:pk>/', views.MetaUserPasscode),
 
     # Level API Endpoints
     path('bodega-api/level/', views.LevelList.as_view()),
