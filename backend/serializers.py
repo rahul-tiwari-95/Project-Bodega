@@ -82,6 +82,14 @@ class MetaUserSerializer(serializers.ModelSerializer):
         model = MetaUser
         fields = ['id', 'meta_username', 'passcode', 'private_hashkey', 'public_hashkey', 'discord_username', 'created_at', 'modified_at']
 
+#MetaUser Auth Serializer 
+class MetaUserAuthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetaUser
+        fields = ['id', 'meta_username', 'public_hashkey']
+
+#MetaUserAuth Serializer TBD - meta_username + public hashkey
+
 #Level Serializer Class
 class LevelSerializer(serializers.ModelSerializer):
     class Meta:

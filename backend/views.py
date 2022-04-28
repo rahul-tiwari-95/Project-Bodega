@@ -13,7 +13,7 @@ import requests
 
 
 from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode
-from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer
+from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
 
 
 
@@ -57,35 +57,30 @@ class MetaUserList(generics.ListCreateAPIView):
 class MetaUserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = MetaUser.objects.all()
     serializer_class = MetaUserSerializer
-    
+
+#MetaUser Auth Generic Views
+class MetaUserAuth(generics.ListAPIView):
+    queryset = MetaUser.objects.all()
+    serializer_class = MetaUserAuthSerializer
+
 
 @csrf_exempt
-def MetaUserPasscode(request, pk):
+def MetaUserAuthHashkey(request, pk):
     #GET,PUT,DELETE request for metauser{id}
     try:
-        metauser = MetaUser.objects.get(passcode=pk)
+        metauser = MetaUser.objects.get(public_hashkey=pk)
     except MetaUser.DoesNotExist:
-        return JsonResponse(status=404)
+        return JsonResponse(status=401)
 
     
     if request.method == 'GET':
-        serializer = MetaUserSerializer(metauser)
+        serializer = MetaUserAuthSerializer(metauser)
         return JsonResponse(serializer.data)
+    else:
+        return JsonResponse(status=401)
 
     
-    elif request.method == 'PUT':
-        serializer = MetaUserSerializer(metauser, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        metauser.delete()
-        return HttpResponse(status=204)
-
-
-
+    
 #Level Generics Views 
 #@csrf_exempt
 class LevelList(generics.ListCreateAPIView):
