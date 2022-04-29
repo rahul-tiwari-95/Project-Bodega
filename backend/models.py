@@ -744,6 +744,21 @@ class CartItem(models.Model):
         # this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
 
 
+# Create temp table called Cart Item --> We wil store the data. Analyze behaviour.
+class ShoppingCartItem(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)  # We dont want our product to be deleted because of our cute temporary cart item table
+    quantity = models.IntegerField(default=0)
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+
+    def __str__(self):
+        # Returns Cart ID and Product ID
+        return 'Cart ID: %s --- Product ID: %s' % (self.id, self.product_ID)
+        # this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
+
+
+
 # Create Order Details table
 # Remember, just like message chat room shit
 # Many Order_Items can have the same Order_Detail

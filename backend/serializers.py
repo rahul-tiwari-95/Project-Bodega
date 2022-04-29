@@ -6,7 +6,7 @@ from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, Bod
     OrderDetail, OrderItem, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, \
     SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, \
     SentinoSelfDescription, ShopPayout, ShoppingSession, Social, Shop, Solomonv0, SysOpsAgent, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, \
-    UserType, Particpant, Message, SysOpsAgentRepo
+    UserType, Particpant, Message, SysOpsAgentRepo, ShoppingCartItem
 from rest_framework import serializers
 
 
@@ -280,8 +280,8 @@ class ShoppingSessionSerializer(serializers.ModelSerializer):
 #Cart Item Serializer Class
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CartItem
-        fields = ['id', 'session_ID', 'product_ID', 'quantity', 'created_at', 'modified_at']
+        model = ShoppingCartItem
+        fields = ['id', 'metauserID', 'product_ID', 'quantity', 'created_at', 'modified_at']
 
 #Order Details Serializer Class
 class OrderDetailsSerializer(serializers.ModelSerializer):

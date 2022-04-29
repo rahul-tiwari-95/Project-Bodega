@@ -12,7 +12,7 @@ import requests
 
 
 
-from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode
+from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, ShoppingCartItem
 from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
 
 
@@ -440,7 +440,7 @@ class ShoppingSessionDetail(generics.RetrieveUpdateDestroyAPIView):
 #Cart Item Generic Views 
 #@csrf_exempt
 class CartItemList(generics.ListCreateAPIView):
-    queryset = CartItem.objects.all()
+    queryset = ShoppingCartItem.objects.all()
     serializer_class = CartItemSerializer
 
 #@csrf_exempt
