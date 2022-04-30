@@ -8,6 +8,7 @@ from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, Bod
     SentinoSelfDescription, ShopPayout, ShoppingSession, Social, Shop, Solomonv0, SysOpsAgent, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, \
     UserType, Particpant, Message, SysOpsAgentRepo, ShoppingCartItem
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 
 
@@ -86,9 +87,15 @@ class MetaUserSerializer(serializers.ModelSerializer):
 class MetaUserAuthSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaUser
-        fields = ['id', 'meta_username', 'public_hashkey']
+        fields = ['id', 'meta_username', 'passcode', 'public_hashkey']
 
-#MetaUserAuth Serializer TBD - meta_username + public hashkey
+
+#MetaUser Auth Serializer 
+class KillSwitchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetaUser
+        fields = ['id', 'meta_username', 'passcode', 'private_hashkey', 'public_hashkey']
+
 
 #Level Serializer Class
 class LevelSerializer(serializers.ModelSerializer):
@@ -337,43 +344,6 @@ class SysOpsDemandNodeSerializer(serializers.ModelSerializer):
 #the code below can be used for further customization of API endpoints 
 #I did not delete the below code because I feel that shows versions of my progress  
 #As we march ahead, my code will get more leaner and efficient  - which is the whole purpose of design  
-
-# # Serializer template for MetaUser
-# class MetaUserSerializer(serializers.Serializer):
-#     id = serializers.IntegerField(read_only=True)
-#     meta_username = serializers.CharField(required=True)
-#     passcode = serializers.CharField(required=False, max_length=100)
-#     private_hashkey = serializers.CharField(required=False, read_only=True)
-#     public_hashkey = serializers.CharField(required=False, read_only=True)
-#     discord_username = serializers.CharField(required=False)
-#     created_at = serializers.CharField(required=False)
-#     modified_at = serializers.CharField(required=False)
-
-#     # creating functions which will execute on Serializers and create model instances.
-#     # this allows us to secure the access to db directly.
-#     def create(self, validated_data):
-#         # Creating new instances of the MetaUser model
-
-#         return MetaUser.objects.create(**validated_data)
-
-#     def update(self, instance, validated_data):
-#         # Updating instances of our model - here instance refers to id number and validated_data refers to body of the instance
-#         instance.meta_username = validated_data.get(
-#             'meta_username', instance.meta_username)
-#         instance.passcode = validated_data.get('passcode', instance.passcode)
-#         instance.private_hashkey = validated_data.get(
-#             'private_hashkey', instance.private_hashkey)
-#         instance.public_hashkey = validated_data.get(
-#             'public_hashkey', instance.public_hashkey)
-#         instance.discord_username = validated_data.get(
-#             'discord_username', instance.discord_username)
-#         instance.created_at = validated_data.get(
-#             'created_at', instance.created_at)
-#         instance.modified = validated_data.get(
-#             'modified_at', instance.modified_at)
-
-#         instance.save()
-#         return instance
 
 
 # # Serializer for Level Model

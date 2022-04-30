@@ -1,4 +1,4 @@
-from rest_framework import status, generics, mixins
+from rest_framework import status, generics, mixins, request, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.views import exception_handler
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -9,11 +9,12 @@ from rest_framework.response import Response
 import datetime
 from django.utils import timezone
 import requests
+from rest_framework.request import Request
 
 
 
 from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, ShoppingCartItem
-from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
+from backend.serializers import KillSwitchSerializer, MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
 
 
 
@@ -59,27 +60,45 @@ class MetaUserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MetaUserSerializer
 
 #MetaUser Auth Generic Views
-class MetaUserAuth(generics.ListAPIView):
+class MetaUserAuth(generics.ListCreateAPIView):
     queryset = MetaUser.objects.all()
     serializer_class = MetaUserAuthSerializer
 
-
-@csrf_exempt
-def MetaUserAuthHashkey(request, pk):
-    #GET,PUT,DELETE request for metauser{id}
-    try:
-        metauser = MetaUser.objects.get(public_hashkey=pk)
-    except MetaUser.DoesNotExist:
-        return JsonResponse(status=401)
-
+# @csrf_exempt
+# def MetaUserAuthHashkey(request):
+#     #GET,PUT,DELETE request for metauser{id}
     
-    if request.method == 'GET':
-        serializer = MetaUserAuthSerializer(metauser)
-        return JsonResponse(serializer.data)
+#     if request.method == 'POST':
+#         data = JSONParser().parse(request)
+#         serializer = MetaUserLoginSerializer(data=data)
+#         if serializer.is_valid():
+#             return JsonResponse(serializer.data, status=201)
+#         return JsonResponse(serializer.errors)
+
+@api_view(['POST'])    
+def metauserauth(request, pk):
+    instance = MetaUser.objects.get(meta_username=pk)
+    serializer = MetaUserAuthSerializer(instance)
+    #print(request.data['passcode'])
+    if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey']:
+        print("Authentication successful")
+        return Response(data='Authentication Successful',status=200)
     else:
-        return JsonResponse(status=401)
+        print("Authentication failed")
+        return Response(data='Authentication Failed',status=404)
 
-    
+
+@api_view(['POST'])    
+def killswitch(request, pk):
+    instance = MetaUser.objects.get(meta_username=pk)
+    serializer = KillSwitchSerializer(instance)
+    #print(request.data['passcode'])
+    if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey'] and instance.private_hashkey == request.data['private_hashkey']:
+        print("Authentication successful")
+        return Response(data='KILL SWITCH Successful',status=200)
+    else:
+        print("Authentication failed")
+        return Response(data='KILL SWITCH Failed',status=404)
     
 #Level Generics Views 
 #@csrf_exempt
@@ -445,7 +464,7 @@ class CartItemList(generics.ListCreateAPIView):
 
 #@csrf_exempt
 class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CartItem.objects.all()
+    queryset = ShoppingCartItem.objects.all()
     serializer_class = CartItemSerializer
 
 

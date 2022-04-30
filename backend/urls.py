@@ -23,10 +23,11 @@ urlpatterns = [
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
     
     #METAUSER API ENDPOINTS via passcode=pk
-    path('bodega-api/metauserkey/', views.MetaUserAuth.as_view()),
+    path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
 
-    #MetaUser Auth via Public hashkey 
-    path('bodega-api/metauserauth/<str:pk>/', views.MetaUserAuthHashkey),
+    #KILL SWITCH API
+    path('bodega-api/killswitch/<str:pk>/', views.killswitch),
+
 
     # Level API Endpoints
     path('bodega-api/level/', views.LevelList.as_view()),
