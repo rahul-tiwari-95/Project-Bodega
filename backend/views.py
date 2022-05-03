@@ -103,8 +103,8 @@ def killswitch(request, pk):
 
 @api_view(['GET'])
 def cartbymetauser(request, pk):
-    instance = ShoppingCartItem.objects.get(metauserID=pk)
-    serializer = CartItemSerializer(instance)
+    instance = ShoppingCartItem.objects.filter(metauserID=pk)
+    serializer = CartItemSerializer(instance, many=True)
     return Response(serializer.data, status=200)
 
 
