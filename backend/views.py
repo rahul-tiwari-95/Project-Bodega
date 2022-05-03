@@ -99,7 +99,15 @@ def killswitch(request, pk):
     else:
         print("Authentication failed")
         return Response(data='KILL SWITCH Failed',status=404)
-    
+
+
+@api_view(['GET'])
+def cartbymetauser(request, pk):
+    instance = ShoppingCartItem.objects.get(metauserID=pk)
+    serializer = CartItemSerializer(instance)
+    return Response(serializer.data, status=200)
+
+
 #Level Generics Views 
 #@csrf_exempt
 class LevelList(generics.ListCreateAPIView):

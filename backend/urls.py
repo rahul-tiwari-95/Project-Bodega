@@ -28,6 +28,7 @@ urlpatterns = [
     #KILL SWITCH API
     path('bodega-api/killswitch/<str:pk>/', views.killswitch),
 
+    path('bodega-api/cartbymetauser/<int:pk>/', views.cartbymetauser),
 
     # Level API Endpoints
     path('bodega-api/level/', views.LevelList.as_view()),
