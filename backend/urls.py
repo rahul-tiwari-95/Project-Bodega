@@ -30,6 +30,8 @@ urlpatterns = [
 
     path('bodega-api/cartbymetauser/<int:pk>/', views.cartbymetauser),
 
+    path('bodega-api/shopbymetauser/', views.FetchShopByMetaUserID),
+
     # Level API Endpoints
     path('bodega-api/level/', views.LevelList.as_view()),
     path('bodega-api/level/<int:pk>/', views.LevelDetail.as_view()),

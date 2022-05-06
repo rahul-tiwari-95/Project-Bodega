@@ -77,6 +77,8 @@ ProductCategory_array = [
 #BDGMRKT API / SERIALIZER CODE V2.0.0
 
 
+#Pocket Serializer Classes
+#These Serializer functions are used to do quick read-only data processing
 #MetaUser Serializer Class
 class MetaUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,8 +91,13 @@ class MetaUserAuthSerializer(serializers.ModelSerializer):
         model = MetaUser
         fields = ['id', 'meta_username', 'passcode', 'public_hashkey']
 
+#Shop Serializer 
+class ShopMetaUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        fields = ['id', 'metauserID', 'all_products', 'all_user_data', 'name', 'description', 'logo', 'cover_image', 'address_line1','address_state', 'address_line2', 'city', 'state', 'postal_code', 'country','bodega_vision_tags', 'bodega_customer_tags', 'uniquesellingprop', 'data_mining_status', 'created_on', 'modified_on']
 
-#MetaUser Auth Serializer 
+#KillSwitch Serializer
 class KillSwitchSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaUser

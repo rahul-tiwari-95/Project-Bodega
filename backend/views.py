@@ -14,7 +14,7 @@ from rest_framework.request import Request
 
 
 from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, ShoppingCartItem
-from backend.serializers import KillSwitchSerializer, MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
+from backend.serializers import ShopMetaUserSerializer, KillSwitchSerializer, MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
 
 
 
@@ -78,11 +78,12 @@ class MetaUserAuth(generics.ListCreateAPIView):
 @api_view(['POST'])    
 def metauserauth(request, pk):
     instance = MetaUser.objects.get(meta_username=pk)
+    instanceID = instance.id
     serializer = MetaUserAuthSerializer(instance)
     #print(request.data['passcode'])
     if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey']:
         print("Authentication successful")
-        return Response(data='Authentication Successful',status=200)
+        return Response(data=instanceID,status=200)
     else:
         print("Authentication failed")
         return Response(data='Authentication Failed',status=404)
@@ -107,6 +108,14 @@ def cartbymetauser(request, pk):
     serializer = CartItemSerializer(instance, many=True)
     return Response(serializer.data, status=200)
 
+
+
+#Fetch Shop data by metauserID
+@api_view(['POST'])
+def FetchShopByMetaUserID(request):
+    instance = Shop.objects.filter(metauserID=request.data.get('metauserID'))
+    serializer = ShopMetaUserSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
 
 #Level Generics Views 
 #@csrf_exempt
