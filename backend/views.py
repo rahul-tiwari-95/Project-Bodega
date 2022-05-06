@@ -78,12 +78,13 @@ class MetaUserAuth(generics.ListCreateAPIView):
 @api_view(['POST'])    
 def metauserauth(request, pk):
     instance = MetaUser.objects.get(meta_username=pk)
-    instanceID = instance.id
+    instanceID = str(instance.id)
+    metausercredentials = "ID: " + instanceID + " " + " meta_username: " + instance.meta_username
     serializer = MetaUserAuthSerializer(instance)
     #print(request.data['passcode'])
     if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey']:
         print("Authentication successful")
-        return Response(data=instanceID,status=200)
+        return Response(data=metausercredentials,status=200)
     else:
         print("Authentication failed")
         return Response(data='Authentication Failed',status=404)
