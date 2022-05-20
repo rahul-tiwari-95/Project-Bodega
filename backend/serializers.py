@@ -211,7 +211,7 @@ class UserAddressSerializer(serializers.ModelSerializer):
 class UserPaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPayment
-        fields = ['id', 'metauserID', 'payment_type', 'payment_provider', 'total_money_out','total_money_in', 'user_payment_profile_status', 'created_at', 'modified_at']
+        fields = ['id', 'metauserID', 'payment_type', 'stripeAccountID', 'total_money_out','total_money_in', 'user_payment_profile_status', 'created_at', 'modified_at']
 
 #User Type Serializer Class
 class UserTypeSerializer(serializers.ModelSerializer):

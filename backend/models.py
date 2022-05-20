@@ -362,7 +362,7 @@ class UserAddress(models.Model):
 class UserPayment(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     payment_type = models.TextField()
-    payment_provider = models.TextField(default='STRIPE')
+    stripeAccountID = models.TextField(default='Project-Bodega Member Stripe Account ID')
     total_money_out = models.FloatField(default=0.00)
     total_money_in = models.FloatField(default=0.0)
     user_payment_profile_status = models.BooleanField(default=False)
@@ -633,13 +633,13 @@ class ProductMetaData(models.Model):
     hours_invested = models.FloatField(default=1.0)
     encrypt_product = models.BooleanField(default=False)
     unit_sold_expectation = models.IntegerField(default=0)
-    size_chart = models.FileField(upload_to='product/size_chart', default=None)
+    size_chart = models.FileField(upload_to='product/size_chart', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     product_image2 = models.FileField(
-        upload_to='product/product_image2', default=None)
+        upload_to='product/product_image2', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     product_image3 = models.FileField(
-        upload_to='product/product_image3', default=None)
+        upload_to='product/product_image3', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     product_image4 = models.FileField(
-        upload_to='product/product_image4', default=None)
+        upload_to='product/product_image4', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     created_at = models.DateField()
     modified_at = models.DateTimeField()
 
