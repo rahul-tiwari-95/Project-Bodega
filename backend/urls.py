@@ -9,6 +9,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from backend import views
 
 
+
 urlpatterns = [
 
     # Landing Page URLs
@@ -21,9 +22,14 @@ urlpatterns = [
     # METAUSER API ENDPOINTS
     path('bodega-api/metauser/', views.MetaUserList.as_view()),
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
+
+    path('bodega-api/metauserTags/', views.MetaUserTagsList.as_view()),
+    path('bodega-api/metauserTags/<int:pk>/', views.MetaUserTagsDetail.as_view()),
     
     #METAUSER API ENDPOINTS via passcode=pk
     path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
+
+    path('bodega-api/searchMetaUser/', views.searchMetaUserByName),
 
     #KILL SWITCH API
     path('bodega-api/killswitch/<str:pk>/', views.killswitch),
@@ -104,9 +110,15 @@ urlpatterns = [
     path('bodega-api/metauser_chat_room/', views.ChatRoomList.as_view()),
     path('bodega-api/metauser_chat_room/<int:pk>/', views.ChatRoomDetail.as_view()),
 
+    #Search Chat Room by name
+    path('bodega-api/searchChatRoom/', views.searchChatRoomByName),
+
     # Particpant Model  Endpoint by Chat Room ID
-    path('bodega-api/participant/', views.ParticpantList.as_view()),
-    path('bodega-api/participant/<int:pk>/', views.ParticpantDetail.as_view()),
+    path('bodega-api/participant/', views.ParticipantList.as_view()),
+    path('bodega-api/participant/<int:pk>/', views.ParticpiantDetail.as_view()),
+
+    path('bodega-api/chatRoomsByMetauserID/', views.FetchParticipantByMetaUserID),
+    path('bodega-api/chatRoomAuth/<int:pk>/', views.AuthenticateParticipantByRoomHashkey),
 
     # Message Model Endpoint by messageID
     path('bodega-api/message/', views.MessageList.as_view()),
@@ -116,9 +128,12 @@ urlpatterns = [
     path('bodega-api/product_category/', views.ProductCategoryList.as_view()),
     path('bodega-api/product_category/<int:pk>/', views.ProductCategoryDetail.as_view()),
 
-    # Product Themes Model Endpoint by ProductID
-    path('bodega-api/product_theme/', views.ProductThemesList.as_view()),
-    path('bodega-api/product_theme/<int:pk>/', views.ProductThemesDetail.as_view()),
+    # Boost Tags Model Endpoint by ProductID
+    path('bodega-api/boostTags/', views.BoostTagsList.as_view()),
+    path('bodega-api/boostTags/<int:pk>/', views.BoostTagsDetail.as_view()),
+
+    #Searching for BoostTags by tags
+    path('bodega-api/searchBoostTags/', views.searchBoostTags),
 
     # Discount Model Endpoint by DiscountID
     path('bodega-api/discount/', views.DiscountList.as_view()),
@@ -136,13 +151,25 @@ urlpatterns = [
     path('bodega-api/product_metadata/', views.ProductMetaDataList.as_view()),
     path('bodega-api/product_metadata/<int:pk>/', views.ProductMetaDataDetail.as_view()),
 
+    path('bodega-api/searchProduct/', views.searchProductByName),
+
+
     # Product Model Endpoint by ProductID
     path('bodega-api/product/', views.ProductList.as_view()),
     path('bodega-api/product/<int:pk>/', views.ProductDetail.as_view()),
 
+    path('bodega-api/munchiesFeed/', views.MunchiesPageList.as_view()), #Show all content from all Munchies Pages
+    path('bodega-api/singleMunchiePage/<int:pk>/', views.MunchiesPageDetail.as_view()), #Shows one single Munchies Page
+
+    path('bodega-api/singleMunchieVideo/', views.MunchiesVideoList.as_view()),
+    path('bodega-api/multipleMunchieVideos/<int:pk>/', views.MunchiesVideoDetail.as_view()),
+
     # collaboration Model Endpoint by collaborationID
     path('bodega-api/collaboration/', views.CollaborationList.as_view()),
     path('bodega-api/collaboration/<int:pk>/', views.CollaborationDetail.as_view()),
+
+    #Fetch all past Collaborations by metauserID
+    path('bodega-api/yerrr/', views.FetchCollaborationByMetaUserID),
 
     # Shopping Session Endpoints
     path('bodega-api/shopping_session/', views.ShoppingSessionList.as_view()),
@@ -160,6 +187,17 @@ urlpatterns = [
     path('bodega-api/order_item/', views.OrderItemList.as_view()),
     path('bodega-api/order_item/<int:pk>/', views.OrderItemDetail.as_view()),
 
+    #Fetch All Past Orders of the Metauser.
+    path('bodega-api/metauserAllOrders/', views.FetchOrderItemsByMetaUserID),
+
+    # Order Success Endpoints
+    path('bodega-api/orderSuccess/', views.OrderSuccessList.as_view()),
+    path('bodega-api/orderSuccess/<int:pk>/', views.OrderSuccessDetail.as_view()),
+
+
+    # Order failure Endpoints
+    path('bodega-api/orderFailure/', views.OrderFailureList.as_view()),
+    path('bodega-api/orderFailure/<int:pk>/', views.OrderFailureDetail.as_view()),
 
     # SysOpsAgent Endpoints
     path('bodega-api/sysops_agent/', views.SysOpsAgentList.as_view()),

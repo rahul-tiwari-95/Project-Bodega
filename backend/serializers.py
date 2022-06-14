@@ -1,12 +1,13 @@
 from dataclasses import fields
 from pyexpat import model
+from attr import field
 from django.contrib.auth.models import User, Group
 from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, \
     BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, MetaUser, \
-    OrderDetail, OrderItem, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, \
+    OrderDetail, OrderItem, Product, ProductCategory, BoostTags, ProductMetaData, SentinoInventory, \
     SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, \
     SentinoSelfDescription, ShopPayout, ShoppingSession, Social, Shop, Solomonv0, SysOpsAgent, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, \
-    UserType, Particpant, Message, SysOpsAgentRepo, ShoppingCartItem
+    UserType, Participant, Message, SysOpsAgentRepo, ShoppingCartItem, MunchiesPage, MunchiesVideo, OrderSuccess, OrderFailure, MetaUserTags
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -83,13 +84,20 @@ ProductCategory_array = [
 class MetaUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaUser
-        fields = ['id', 'meta_username', 'passcode', 'private_hashkey', 'public_hashkey', 'discord_username', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #MetaUser Auth Serializer 
 class MetaUserAuthSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaUser
         fields = ['id', 'meta_username', 'passcode', 'public_hashkey']
+
+
+class MetaUserTagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetaUserTags
+        fields = '__all__'
+
 
 #Shop Serializer 
 class ShopMetaUserSerializer(serializers.ModelSerializer):
@@ -226,9 +234,9 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'desc', 'rules', 'type_of_room','is_room_active','room_hashkey','created_on', 'modified_on']
 
 #ParticpantSerializer Class
-class ParticpantSerializer(serializers.ModelSerializer):
+class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Particpant
+        model = Participant
         fields = ['id', 'metauserID', 'chat_room_ID']
 
 #Message Serializer Class
@@ -244,10 +252,10 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'category_name', 'category_desc', 'category_image1', 'category_image2', 'category_image3', 'created_at', 'modified_at']
 
 #Product Themes Serializer Class
-class ProductThemesSerializer(serializers.ModelSerializer):
+class BoostTagsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductThemes
-        fields = ['id', 'collection_name', 'collection_desc', 'audience_traits', 'marketing_funnel','created_at', 'modified_at']
+        model = BoostTags
+        fields = '__all__'
 
 #Discount Serializer Class
 class DiscountSerializer(serializers.ModelSerializer):
@@ -271,19 +279,32 @@ class ShopSerializer(serializers.ModelSerializer):
 class ProductMetaDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductMetaData
-        fields = ['id', 'numberoflikes', 'numberofcomments','numberofclicks','totaltimespentonproduct_hours','metauserID_of_likes','metauserID_of_dislikes','metauserID_of_comments', 'total_sales', 'clicks_on_product', 'is_product_digital', 'assistance_ask', 'nsfw_content', 'production_cost', 'production_time_days', 'hours_invested', 'encrypt_product', 'unit_sold_expectation', 'size_chart', 'product_image2', 'product_image3', 'product_image4', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Product Serializer Class
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'metauserID', 'productMetaDataID','product_categoryID', 'product_themesID','discount_ID', 'shop_ID','name', 'description','selling_price', 'discounted_price','quantity','is_product_digital','product_image1','hashkey','created_at', 'modified_at']
+        fields = '__all__'
+
+#Munchies Page Serializer Classes
+class MunchiesPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MunchiesPage
+        fields = '__all__'
+
+#Munchies Page Video Serializer Classes 
+class MunchiesVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MunchiesVideo
+        fields = '__all__'
+
 
 #Collaboration Serializer Class
 class CollaborationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collaboration
-        fields = ['id', 'name', 'description', 'creator_collab_choice', 'metauserID', 'product_ID', 'shop_ID', 'creator_pitch', 'bid_type', 'bid_amount', 'accept_bid', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Shopping Session Serializer Class  
 class ShoppingSessionSerializer(serializers.ModelSerializer):
@@ -307,7 +328,20 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['id','order_ID','product_ID', 'quantity','created_at', 'modified_at']
+        fields = '__all__'
+
+#Order Success Serializer Class
+class OrderSuccessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderSuccess
+        fields = '__all__'
+
+#Order Failure Serializer Class
+class OrderFailureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderFailure
+        fields = '__all__'
+
 
 
 #Shop Payout Serializer Class -- Not completed
@@ -1168,7 +1202,7 @@ class SysOpsDemandNodeSerializer(serializers.ModelSerializer):
 
 
 # # Serializer for Product Themes Model
-# class ProductThemesSerializer(serializers.Serializer):
+# class BoostTagsSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     collection_name = serializers.CharField()
 #     collection_desc = serializers.CharField()
@@ -1179,7 +1213,7 @@ class SysOpsDemandNodeSerializer(serializers.ModelSerializer):
 
 #     def create(self, validated_data):
 #         # returns a new model instance
-#         return ProductThemes.objects.create(**validated_data)
+#         return BoostTags.objects.create(**validated_data)
 
 #     def update(self, instance, validated_data):
 #         instance.collection_name = validated_data.get(
@@ -1455,7 +1489,7 @@ class SysOpsDemandNodeSerializer(serializers.ModelSerializer):
 #     product_categoryID = serializers.PrimaryKeyRelatedField(
 #         queryset=ProductCategory.objects.all())
 #     product_themesID = serializers.PrimaryKeyRelatedField(
-#         queryset=ProductThemes.objects.all())
+#         queryset=BoostTags.objects.all())
 #     discount_ID = serializers.PrimaryKeyRelatedField(
 #         queryset=Discount.objects.all())
 #     shop_ID = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all())

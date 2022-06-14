@@ -13,8 +13,9 @@ from rest_framework.request import Request
 
 
 
-from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, ShoppingCartItem
-from backend.serializers import ShopMetaUserSerializer, KillSwitchSerializer, MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer
+from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Participant, Message, ProductCategory, BoostTags, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, ShoppingCartItem, OrderSuccess, OrderFailure, MetaUserTags
+from backend.serializers import ShopMetaUserSerializer, KillSwitchSerializer, MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticipantSerializer, MessageSerializer, ProductCategorySerializer, BoostTagsSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveInventorySerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassificationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SentinoItemClassificationSerializer, BodegaCongnitiveItemSerializer, OrderDetailsSerializer, SysOpsSupplyNodeSerializer, MetaUserAuthSerializer, OrderSuccessSerializer, OrderFailureSerializer, MetaUserTagsSerializer
+
 
 
 
@@ -89,6 +90,53 @@ def metauserauth(request, pk):
         print("Authentication failed")
         return Response(data='Authentication Failed',status=404)
 
+#For searching metauser by their metausername 
+@api_view(['POST'])
+def searchMetaUserByName(request):
+    try :
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        serializer = MetaUserSerializer(instance)
+        return Response(serializer.data, status=200)
+
+    except MetaUser.DoesNotExist:
+        return Response(status=404, data= request.data['meta_username']+ ' MetaUser not found.')
+
+    
+#For Searching ChatRoom by names
+@api_view(['POST'])
+def searchChatRoomByName(request):
+    try:
+        instance = ChatRoom.objects.filter(name=request.data['name'])
+        serializer = ChatRoomSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    
+    except ChatRoom.DoesNotExist:
+        return Response(data="No ChatRoom Found.", status=404)
+
+#For Searching Product by productName
+@api_view(['POST'])
+def searchProductByName(request):
+    try:
+        instance = Product.objects.filter(productName=request.data['productName'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+
+    except Product.DoesNotExist:
+        return Response(status=404)
+#For searching Boost tags by tags
+@api_view(['POST'])
+def searchBoostTags(request):
+    try:
+        instance = BoostTags.objects.filter(tags=request.data['tags'])
+        serializer = BoostTagsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BoostTags.DoesNotExist:
+        return Response(status=404)
+
+
+
+#For searching BoostTags name
+
 
 @api_view(['POST'])    
 def killswitch(request, pk):
@@ -117,6 +165,56 @@ def FetchShopByMetaUserID(request):
     instance = Shop.objects.filter(metauserID=request.data.get('metauserID'))
     serializer = ShopMetaUserSerializer(instance, many=True)
     return Response(serializer.data, status=200)
+
+
+#Fetch Order Items by metauserID - User's past orders 
+@api_view(['POST'])
+def FetchOrderItemsByMetaUserID(request):
+    instance = OrderItem.objects.filter(metauserID=request.data.get('metauserID'))
+    serializer = OrderItemSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+
+
+
+#Fetch Collaboration / Yerrr items by metauserID - User's all past collaborations
+@api_view(['POST'])
+def FetchCollaborationByMetaUserID(request):
+    instance = Collaboration.objects.filter(metauserID=request.data.get)
+    serializer = CollaborationSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+#Fetch all ChatRooms by MetaUser ID
+@api_view(['POST'])
+def FetchParticipantByMetaUserID(request):
+    instance = Participant.objects.filter(metauserID=request.data.get)
+    serializer = ParticipantSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+#Authenticate New Participant by Room Hashkey
+@api_view(['POST'])
+def AuthenticateParticipantByRoomHashkey(request, pk):
+    instance = ChatRoom.objects.filter(pk=pk)
+    serializer = ChatRoomSerializer(instance, many=True)
+    
+    if instance.room_hashkey == request.data.get('room_hashkey'):
+        print("Authentication Successful")
+        return Response(serializer.data, status=200)
+    else:
+        print("Authentication Failed")
+        return Response(serializer.data, status=200)
+
+
+
+#MetaUser Tags Generic Views
+class MetaUserTagsList(generics.ListCreateAPIView):
+    queryset = MetaUserTags.objects.all()
+    serializer_class = MetaUserTagsSerializer
+
+class MetaUserTagsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MetaUserTags.objects.all()
+    serializer_class = MetaUserTagsSerializer
+
 
 #Level Generics Views 
 #@csrf_exempt
@@ -343,14 +441,14 @@ class ChatRoomDetail(generics.RetrieveUpdateDestroyAPIView):
 
 #Particpant Generic Views
 #@csrf_exempt
-class ParticpantList(generics.ListCreateAPIView):
-    queryset = Particpant.objects.all()
-    serializer_class = ParticpantSerializer
+class ParticipantList(generics.ListCreateAPIView):
+    queryset = Participant.objects.all()
+    serializer_class = ParticipantSerializer
 
 #@csrf_exempt
-class ParticpantDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Particpant.objects.all()
-    serializer_class = ParticpantSerializer
+class ParticpiantDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Participant.objects.all()
+    serializer_class = ParticipantSerializer
 
 
 #Message Generic Views 
@@ -380,14 +478,14 @@ class ProductCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
 #Product Theme Generic Views
 #@csrf_exempt
-class ProductThemesList(generics.ListCreateAPIView):
-    queryset = ProductThemes.objects.all()
-    serializer_class = ProductThemesSerializer
+class BoostTagsList(generics.ListCreateAPIView):
+    queryset = BoostTags.objects.all()
+    serializer_class = BoostTagsSerializer
 
 #@csrf_exempt
-class ProductThemesDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ProductThemes.objects.all()
-    serializer_class = ProductThemesSerializer
+class BoostTagsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BoostTags.objects.all()
+    serializer_class = BoostTagsSerializer
 
 
 #Discount Generic Views
@@ -449,6 +547,35 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+#MunchiesPage Generics Views
+class MunchiesPageList(generics.ListCreateAPIView):
+    from .models import MunchiesPage
+    queryset = MunchiesPage.objects.all()
+    from .serializers import MunchiesPageSerializer
+    serializer_class = MunchiesPageSerializer
+
+class MunchiesPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    from .models import MunchiesPage
+    queryset = MunchiesPage.objects.all()
+    from .serializers import MunchiesPageSerializer
+    serializer_class = MunchiesPageSerializer
+
+
+class MunchiesVideoList(generics.ListCreateAPIView):
+    from .models import MunchiesVideo
+    queryset = MunchiesVideo.objects.all()
+    from .serializers import MunchiesVideoSerializer
+    serializer_class = MunchiesVideoSerializer
+
+class MunchiesVideoDetail(generics.RetrieveUpdateDestroyAPIView):
+    from .models import MunchiesVideo
+    queryset = MunchiesVideo.objects.all()
+    from .serializers import MunchiesVideoSerializer
+    serializer_class = MunchiesVideoSerializer
+
+
+#Munchies Videos Generics Views
+    
 
 #Collaboration Generic Views
 #@csrf_exempt
@@ -508,6 +635,23 @@ class OrderItemList(generics.ListCreateAPIView):
 class OrderItemDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+
+
+class OrderSuccessList(generics.ListCreateAPIView):
+    queryset = OrderSuccess.objects.all()
+    serializer_class = OrderSuccessSerializer
+
+class OrderSuccessDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderSuccess.objects.all()
+    serializer_class = OrderSuccessSerializer
+
+class OrderFailureList(generics.ListCreateAPIView):
+    queryset = OrderFailure.objects.all()
+    serializer_class = OrderFailureSerializer
+
+class OrderFailureDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderFailure.objects.all()
+    serializer_class = OrderFailureSerializer
 
 
 #SysOps Agnet Generic Views
@@ -1751,12 +1895,12 @@ class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
 # def product_theme_list(request):
 
 #     if request.method == 'GET':
-#         product_theme = ProductThemes.objects.all()
-#         serializer = ProductThemesSerializer(product_theme, many=True)
+#         product_theme = BoostTags.objects.all()
+#         serializer = BoostTagsSerializer(product_theme, many=True)
 #         return JsonResponse(serializer.data, safe=False)
 
 #     elif request.method == 'POST':
-#         serializer = ProductThemesSerializer(data=JSONParser().parse(request))
+#         serializer = BoostTagsSerializer(data=JSONParser().parse(request))
 #         if serializer.is_valid():
 #             serializer.save()
 #             return JsonResponse(serializer.data, status=201)
@@ -1768,16 +1912,16 @@ class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 #     try:
-#         product_theme = ProductThemes.objects.get(pk=pk)
+#         product_theme = BoostTags.objects.get(pk=pk)
     
-#     except ProductThemes.DoesNotExist:
+#     except BoostTags.DoesNotExist:
 #         return JsonResponse(status=404)
 
 #     if request.method == 'GET':
-#         return JsonResponse(ProductThemesSerializer(product_theme).data)
+#         return JsonResponse(BoostTagsSerializer(product_theme).data)
 
 #     elif request.method == 'PUT':
-#         serializer = ProductThemesSerializer(product_theme, data=JSONParser().parse(request))
+#         serializer = BoostTagsSerializer(product_theme, data=JSONParser().parse(request))
 #         if serializer.is_valid():
 #             serializer.save()
 #             return JsonResponse(serializer.data)
