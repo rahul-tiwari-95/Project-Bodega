@@ -7,6 +7,9 @@
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from backend import views
+from .views import *
+#import stripeServer.views as stripeViews
+
 
 
 
@@ -19,20 +22,88 @@ urlpatterns = [
     path('home/aboutbodega/', views.about_us),
     path('home/contact-us/', views.contact_us),
 
+
+
+
+
+
+
+
+
+
+    #Stripe Integration Endpoints
+
+    #Create a new Stripe Express Account 
+    path('bodegaCreators/createStripeAccount/', views.createStripeAccount),
+    #Authenticate Stripe AccountLink
+    path('bodegaCreators/authenticateStripeAccount/', views.authenticateStripeAccount),
+
+    #Retreive Stripe Account IDs
+    path('bodegaCreators/fetchStripeAccount/', views.retreiveStripeAccount),
+
+    #Retreive Stripe Account Info on Bodega 
+    path('bodegaCreators/stripeAccount/', views.StripeAccountInfoList.as_view()),
+    path('bodegaCreators/stripeAccount/<int:pk>/', views.StripeAccountInfoDetail.as_view()),
+
+    #Create Fund Transfer to Eligible Stripe Account
+    path('bodegaCreators/createPayoutTransfer/', views.payoutStripeAccount),
+
+    path('bodegaCreators/stripeTransfer/', views.StripeAccountTransferList.as_view()),
+    path('bodegaCreators/stripeTransfer/<int:pk>/', views.StripeAccountTransferDetail.as_view()),
+
+    #Stripe Endpoint to list all transfers
+    path('bodegaCreators/allStripeTransfers/', views.allStripeTransfers),
+
+    #Stripe Endpoint for Refunding funds
+    path('bodegaCreators/reverseFunds/', views.reverseFunds),
+
+    #Stripe Endpoint for retrieving our Stripe Balance.
+    path('bodegaCreators/stripeBalance/', views.retrieveStripeBalance),
+
+    #Create Stripe Charge
+    path('bodegaCreators/createCharge/', views.createCharge),
+
+    #List all Charges and manipulate them 
+    path('bodegaCreators/allCharges/', views.StripeChargesList.as_view()),
+    path('bodegaCreators/allCharges/<int:pk>/', views.StripeChargesDetail.as_view()),
+
+    #Create Stripe Customer Objects
+    path('bodegaCreators/createCustomer/', views.createStripeCustomer),
+
+    #Create Subscription Product and Price it - For Creators
+    path('bodegaCreators/createSubscription/', views.createStripeSubscriptionProduct),
+
+    #For Customers to subscribe to Creator's subscription
+    path('bodegaCreators/subscribe/', views.subscribe),
+
+    #All Stripe Creator SubscriptionsList
+    path('bodegaCreators/allSubscriptions/', views.creatorSubscriptionList.as_view()),
+    path('bodegaCreators/allSubscriptions/<int:pk>/', views.creatorSubscriptionDetail.as_view()),
+
+
+
+
+
+
+
+
+
+
+
+
     # METAUSER API ENDPOINTS
     path('bodega-api/metauser/', views.MetaUserList.as_view()),
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
 
-    path('bodega-api/metauserTags/', views.MetaUserTagsList.as_view()),
-    path('bodega-api/metauserTags/<int:pk>/', views.MetaUserTagsDetail.as_view()),
+
     
     #METAUSER API ENDPOINTS via passcode=pk
     path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
 
-    path('bodega-api/searchMetaUser/', views.searchMetaUserByName),
+    
 
     #KILL SWITCH API
-    path('bodega-api/killswitch/<str:pk>/', views.killswitch),
+    path('bodega-api/killswitch/', views.killswitch),
 
     path('bodega-api/cartbymetauser/<int:pk>/', views.cartbymetauser),
 
@@ -110,8 +181,7 @@ urlpatterns = [
     path('bodega-api/metauser_chat_room/', views.ChatRoomList.as_view()),
     path('bodega-api/metauser_chat_room/<int:pk>/', views.ChatRoomDetail.as_view()),
 
-    #Search Chat Room by name
-    path('bodega-api/searchChatRoom/', views.searchChatRoomByName),
+    
 
     # Particpant Model  Endpoint by Chat Room ID
     path('bodega-api/participant/', views.ParticipantList.as_view()),
@@ -168,8 +238,7 @@ urlpatterns = [
     path('bodega-api/collaboration/', views.CollaborationList.as_view()),
     path('bodega-api/collaboration/<int:pk>/', views.CollaborationDetail.as_view()),
 
-    #Fetch all past Collaborations by metauserID
-    path('bodega-api/yerrr/', views.FetchCollaborationByMetaUserID),
+    
 
     # Shopping Session Endpoints
     path('bodega-api/shopping_session/', views.ShoppingSessionList.as_view()),
@@ -187,9 +256,7 @@ urlpatterns = [
     path('bodega-api/order_item/', views.OrderItemList.as_view()),
     path('bodega-api/order_item/<int:pk>/', views.OrderItemDetail.as_view()),
 
-    #Fetch All Past Orders of the Metauser.
-    path('bodega-api/metauserAllOrders/', views.FetchOrderItemsByMetaUserID),
-
+    
     # Order Success Endpoints
     path('bodega-api/orderSuccess/', views.OrderSuccessList.as_view()),
     path('bodega-api/orderSuccess/<int:pk>/', views.OrderSuccessDetail.as_view()),
@@ -220,7 +287,44 @@ urlpatterns = [
     # SysOps SupplyNode Endpoints
     path('bodega-api/sysopssupplynode/', views.SysOpsSupplyNodeList.as_view()),
     path('bodega-api/sysopssupplynode/<int:pk>/', views.SysOpsSupplyNodeDetail.as_view()),
+
+    
+    #Endpoints grouped by UI Views
+
+    #Profile Page
+
+    #Filter Products by metauserIDs
+    path('bodega-api/productsByMetaUser/', views.productsByMetaUser),
+
+    #Show MetaUserTags 
+    path('bodega-api/metauserTags/', views.MetaUserTagsList.as_view()),
+    path('bodega-api/metauserTags/<int:pk>/', views.MetaUserTagsDetail.as_view()),
+
+    #Search MetaUser by MetaUserName 
+    path('bodega-api/searchMetaUser/', views.searchMetaUserByName),
+
+    #Fetch All Past Orders of the Metauser.
+    path('bodega-api/metauserAllOrders/', views.FetchOrderItemsByMetaUserID),
+
+    #Fetch all past Collaborations by metauserID
+    path('bodega-api/yerrr/', views.FetchCollaborationByMetaUserID),
+
+    #Show all notifications 
+    path('bodega-api/notifications/', views.notificationsList.as_view()),
+    path('bodega-api/notifications/<int:pk>/', views.notificationsDetail.as_view()),
+
+    #Show all notifications by MetaUserID
+    path('bodega-api/metauserNotifications/', views.FetchNotificationsByMetaUserID),
+
+    #Search Chat Room by name
+    path('bodega-api/searchChatRoom/', views.searchChatRoomByName),
+
+    #Show messages by chatRoomID
+    path('bodega-api/messagesChatRoom/', views.messagesByChatRoomID),
+
+
 ]
+
 
 
 urlpatterns=format_suffix_patterns(urlpatterns)

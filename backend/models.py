@@ -145,6 +145,93 @@ class BLAScore(models.Model):
         return 'BLA Score: %s -- MetaUserID: %s ' % (self.current_score, self.metauserID)
 
 
+
+#STRIPE INTEGRATION CLASSES
+class stripeAccountInfo(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    stripeAccountID = models.CharField(unique=True, max_length=400)
+    businessType = models.CharField(max_length=300, default='Digital Services')
+    businessName = models.CharField(blank=True, max_length=255)
+    businessDescription = models.CharField(blank=True, max_length=255)
+    businessCity = models.CharField(blank=True, max_length=255)
+    businessCountry = models.CharField(blank=True, max_length=255)
+    businessLine1 = models.CharField(blank=True, max_length=255)
+    businessLine2 = models.CharField(blank=True, max_length=255)
+    businessPostalCode = models.CharField(blank=True, max_length=255)
+    businessEmail = models.CharField(blank=True, max_length=255)
+    businessBankName = models.CharField(blank=True, max_length=255)
+    businessPhone = models.CharField(blank=True, max_length=255)
+    businessURL = models.CharField(blank=True, max_length=255)
+    businessLogo = models.ImageField(blank=True)
+    accountPaymentStatus = models.CharField(blank=True, max_length=255)
+    accountTransfersStatus = models.CharField(blank=True, max_length=255)
+    accountCurrency = models.CharField(blank=True, max_length=255)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+#Instance is created whenever a new transfer Stripe API is triggered.
+class stripeAccountTransfer(models.Model):
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    transactionID = models.CharField(max_length=500)
+    payoutAmount = models.FloatField(default=0.0)
+    payoutOrderInfo = models.CharField(max_length=255)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateField(auto_now=True)
+
+#Model design to act as a ledger of our account's Stripe Balance.
+class stripeAccountBalance(models.Model):
+    balance = models.FloatField(default=0.0)
+    currency= models.TextField()
+    pendingAmount = models.FloatField(default=0.0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class stripeCharges(models.Model):
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    stripeChargeID = models.CharField(max_length=300)
+    stripeCustomerID = models.CharField(max_length=400)
+    amount = models.FloatField(default=0.0)
+    currency = models.TextField(default='us')
+    description = models.CharField(max_length=400)
+    capturedStatus = models.BooleanField(default=False)
+    riskScore = models.IntegerField(default=0)
+    last4 = models.IntegerField(default=0)
+    paymentStatus = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
+class creatorSubscription(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    subscriptionName = models.CharField(max_length=300)
+    subscriptionDescription = models.CharField(max_length=500)
+    amount = models.IntegerField(default=0)
+    currency = models.CharField(max_length=255)
+    chargingFrequency = models.CharField(max_length=300)
+    stripeProductID = models.CharField(max_length=400)
+    stripePriceID = models.CharField(max_length=400)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+class Subscribers(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    customerID = models.CharField(max_length=400)
+    priceID = models.CharField(max_length=400)
+    subscriptionID = models.CharField(max_length=400)
+    productID = models.CharField(max_length=400) 
+    amount = models.IntegerField(default=0)
+    invoiceID = models.CharField(max_length=400)
+    status = models.CharField(max_length=400)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
+
+
+
 # Models for Sentino APIs - These tables act as a backup and allows us to measure all different personality profiles of the customer/user
 
 class SentinoItemProximity(models.Model):
@@ -581,14 +668,9 @@ class Social(models.Model):
 # Commerce Model - key data weights on your commerce activity to be tracked for cluster analysis
 
 class Shop(models.Model):
-    metauserID = models.ForeignKey(MetaUser,
-                                   on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
-    # shop_ID will be automatically created by PostGRE - we will add a unique validator on it
-
-    # list of all products owned by that creator
+    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
     all_products = JSONField(null=True, blank=True)
-    all_user_data = JSONField(null=True,
-                              blank=True)  # list of metauser IDs for your reference. no other data is shown here
+    all_user_data = JSONField(null=True,blank=True)  # list of metauser IDs for your reference. no other data is shown here
     name = models.TextField()
     description = models.TextField()
     logo = models.FileField(upload_to='shop-details/profile_picture')
@@ -620,29 +702,9 @@ class Shop(models.Model):
         return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
 
 
+#Creator Merchant Model
 
-    # Creating Product model - Simple Product
 
-
-# {
-#             "id": 6,
-#             "name": "NFTOne",
-#             "description": "sample dreams",
-#             "selling_price": 500.0,
-#             "discounted_price": 100.0,
-#             "quantity": 3,
-#             "is_product_digital": true,
-#             "product_image1": "https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/DeadlyDeafeningAtlanticblackgoby-max-1mb.gif",
-#             "hashkey": "cca13efde331742258a907d1ccb41a06d28a85807e95e5d4e7bddeb411301285cb3bc62b40b7fa1b4f4e719f51d478dc",
-#             "created_at": "2022-05-31",
-#             "modified_at": "2022-05-31T10:11:50-05:00",
-#             "metauserID": 1,
-#             "productMetaDataID": 1,
-#             "product_categoryID": 1,
-#             "boostTagsID": 1,
-#             "discount_ID": 1,
-#             "shop_ID": 1
-#         }
 
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
@@ -658,7 +720,7 @@ class Product(models.Model):
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
     size_chart = models.FileField(upload_to='product/size_chart', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image1 = models.FileField(upload_to='product/product_image1')
+    product_image1 = models.FileField(upload_to='product/product_image1', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     product_image2 = models.FileField(upload_to='product/product_image2', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     product_image3 = models.FileField( upload_to='product/product_image3', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
     product_image4 = models.FileField(upload_to='product/product_image4', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
@@ -731,21 +793,17 @@ class Collaboration(models.Model):
     creator_collab_choice = models.TextField(choices=[
         # the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
         ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
         ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
-    # creators can paste their hashkey to auth
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     product_ID = models.ForeignKey(Product,
                                    on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
-    shop_ID = models.ForeignKey(Shop,
-                                on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
+    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
     # product_shop_ID should be EQUAL to shop_ID to verify identity that both metauserIDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[  # the bid from the creator's side - because freedom of choice
         ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
         ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
@@ -1044,3 +1102,22 @@ class SysOpsDemandNode(models.Model):
 
 # whatcanyoubecome?
 # whatwillyoudowithit?
+
+
+
+
+
+#Replacement for SHOP MODEL 
+#New Shop model with only imp information and auto-create
+
+class Notifications(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    text = models.CharField(max_length=400)
+    image = models.FileField(upload_to='notifications/image_metadata', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Notification Text: %s ' % (self.text)
+
+        

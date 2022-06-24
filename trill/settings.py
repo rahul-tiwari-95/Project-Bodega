@@ -30,6 +30,10 @@ SECRET_KEY = 'django-insecure-g5mid7ca(k)m94_hw$zdl*!y$ol&86py-c@@h=+nz+q*@ag=pj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+if DEBUG:
+    STRIPE_PUBLISHABLE_KEY = 'test_publishable_key'
+    STRIPE_SECRET_KEY = 'test_secret_key'
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -50,6 +54,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'storages',
     'rest_framework',
+    'stripe'
 
 ]
 REST_FRAMEWORK = {
@@ -84,6 +89,7 @@ CORS_ORIGIN_ALLOW_ALL=True
 #Activate this script to stop CORS request 
 
 ROOT_URLCONF = 'trill.urls'
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 TEMPLATES = [
     {
