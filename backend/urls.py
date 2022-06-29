@@ -5,7 +5,9 @@
 # ]
 
 from django.urls import path, include
+
 from rest_framework.urlpatterns import format_suffix_patterns
+
 from backend import views
 from .views import *
 #import stripeServer.views as stripeViews
@@ -21,6 +23,7 @@ urlpatterns = [
     path('home/', views.landing_page),
     path('home/aboutbodega/', views.about_us),
     path('home/contact-us/', views.contact_us),
+
 
 
 
@@ -92,6 +95,94 @@ urlpatterns = [
 
 
 
+
+
+
+    # SOLOMON API ENDPOINTS
+    path('bodega-api/solomon/', views.solomon_list),
+    path('bodega-api/solomon/<int:pk>/', views.solomon_detail),
+
+    # METAUSER API ENDPOINTS
+    path('bodega-api/metauser/', views.metauser_list),
+    path('bodega-api/metauser/<int:pk>/', views.metauser_detail),
+
+
+    # Level API Endpoints
+    path('bodega-api/level/', views.level_list),
+    path('bodega-api/level/<int:pk>/', views.level_detail),
+
+    # BLA Score Endpoints
+    path('bodega-api/blascore/', views.blascore_list),
+    path('bodega-api/blascore/<int:pk>/', views.blascore_detail),
+
+    # Sentino Item Proximity Endpoints
+    path('bodega-api/sentino_item_proximity/', views.sentino_item_proximity_list),
+    path('bodega-api/sentino_item_proximity/<int:pk>/', views.sentino_item_proximity_detail),
+
+    # Sentino Item Projection Endpoints
+    path('bodega-api/sentino_item_projection/',
+         views.sentino_item_projection_list),
+    path('bodega-api/sentino_item_projection/<int:pk>/',
+         views.sentino_item_projection_detail),
+
+    # Sentino Item Classification Endpoints
+    path('bodega-api/sentino_item_classification/',
+         views.sentino_item_classification_list),
+    path('bodega-api/sentino_item_classification/<int:pk>/',
+         views.sentino_item_classification_detail),
+
+    # Sentino Description Endpoints
+    path('bodega-api/sentino_description/', views.sentino_description_list),
+    path('bodega-api/sentino_description/<int:pk>/',
+         views.sentino_description_detail),
+
+    # Sentino Inventory Endpoints
+    path('bodega-api/sentino_profile/', views.sentino_profile_list),
+    path('bodega-api/sentino_profile/<int:pk>/', views.sentino_profile_detail),
+
+    # Sentino Profile Endpoints
+    path('bodega-api/sentino_inventory/', views.sentino_inventory_list),
+    path('bodega-api/sentino_inventory/<int:pk>/',
+         views.sentino_inventory_detail),
+
+    # Bodega Vision Endpoints
+    path('bodega-api/bodega_face/', views.bodega_face_list),
+    path('bodega-api/bodega_face/<int:pk>/', views.bodega_face_detail),
+
+    # Bodega Personalizer Endpoints
+    path('bodega-api/bodega_personalizer/', views.bodega_personalizer_list),
+    path('bodega-api/bodega_personalizer/<int:pk>/', views.bodega_personalizer_detail),
+
+    # Bodega Cognitive Item Endpoints
+    path('bodega-api/bodega_item/', views.bodega_item_list),
+    path('bodega-api/bodega_item/<int:pk>/', views.bodega_item_detail),
+
+    # Bodega Cognitive Inventory Endpoints
+    path('bodega-api/bodega_inventory/', views.bodega_inventory_list),
+    path('bodega-api/bodega_inventory/<int:pk>/', views.bodega_inventory_detail),
+
+    # Bodega Cognitive Person Endpoints
+    path('bodega-api/bodega_person/', views.bodega_person_list),
+    path('bodega-api/bodega_person/<int:pk>/', views.bodega_person_detail),
+
+    # Bodega Department Endpoints
+    path('bodega-api/bodega_dept/', views.bodega_dept_list),
+    path('bodega-api/bodega_dept/<int:pk>/', views.bodega_dept_detail),
+
+    # User Address Endpoint by user_ID
+    path('bodega-api/metauser_address/', views.address_list),
+    path('bodega-api/metauser_address/<int:pk>/', views.address_detail),
+
+    # User Address endpoint by User_AddressID
+    path('bodega-api/metauser_address/child_id=<int:pk>/',
+         views.child_address_detail),
+
+    # User Payment Endpoint by user_ID
+    path('bodega-api/metauser_payment/', views.user_payment_list),
+    path('bodega-api/metauser_payment/<int:pk>/', views.user_payment_detail),
+
+    # User Address endpoint by User_AddressID
+    path('bodega-api/metauser_payment/child_id=<int:pk>/', views.child_payment_detail),
 
 
     # METAUSER API ENDPOINTS
@@ -173,6 +264,7 @@ urlpatterns = [
     path('bodega-api/metauser_payment/', views.UserPaymentList.as_view()),
     path('bodega-api/metauser_payment/<int:pk>/', views.UserPaymentDetail.as_view()),
 
+
     # User Type Endpoint by user_ID
     path('bodega-api/metauser_type/', views.UserTypeList.as_view()),
     path('bodega-api/metauser_type/<int:pk>/', views.UserTypeDetail.as_view()),
@@ -225,6 +317,7 @@ urlpatterns = [
 
 
     # Product Model Endpoint by ProductID
+
     path('bodega-api/product/', views.ProductList.as_view()),
     path('bodega-api/product/<int:pk>/', views.ProductDetail.as_view()),
 
@@ -233,6 +326,15 @@ urlpatterns = [
 
     path('bodega-api/singleMunchieVideo/', views.MunchiesVideoList.as_view()),
     path('bodega-api/multipleMunchieVideos/<int:pk>/', views.MunchiesVideoDetail.as_view()),
+
+    path('bodega-api/product_ownershipLedger/', views.product_ownershipLedger_list),
+    path('bodega-api/product_ownershipLedger/<int:pk>/', views.product_ownershipLedger_detail),
+    
+    # Product Ownership Ledger Endpoint by ProductOwner
+
+    path('bodega-api/product/', views.product_list),
+    path('bodega-api/product/<int:pk>/', views.product_detail),
+
 
     # collaboration Model Endpoint by collaborationID
     path('bodega-api/collaboration/', views.CollaborationList.as_view()),
@@ -272,6 +374,7 @@ urlpatterns = [
 
 
     # SysOpsAgent Repo Endpoints
+
     path('bodega-api/sysops_agent_repo/', views.SysOpsAgentRepoList.as_view()),
     path('bodega-api/sysops_agent_repo/<int:pk>/',views.SysOpsAgentRepoDetail.as_view()),
 
@@ -280,11 +383,25 @@ urlpatterns = [
     path('bodega-api/sysops_agent_project/', views.SysOpsAgentProjectList.as_view()),
     path('bodega-api/sysops_agent_project/<int:pk>/',views.SysOpsAgentProjectDetail.as_view()),
 
+    path('bodega-api/sysops_agent_repo/', views.sysops_agent_repo_list),
+
+    path('bodega-api/sysops_agent_repo/<int:pk>/',
+         views.sysops_agent_repo_detail),
+
+
+
+    # SysOps ProjectRepo Endpoints
+    path('bodega-api/sysops_agent_project/', views.sysops_agent_project_list),
+
+    path('bodega-api/sysops_agent_project/<int:pk>/', views.sysops_agent_project_detail),
+
+
     # SysOps DemandNode Endpoints
     path('bodega-api/sysopsdemandnode/', views.SysOpsDemandNodeList.as_view()),
     path('bodega-api/sysopsdemandnode/<int:pk>/', views.SysOpsDemandNodeDetail.as_view()),
 
     # SysOps SupplyNode Endpoints
+
     path('bodega-api/sysopssupplynode/', views.SysOpsSupplyNodeList.as_view()),
     path('bodega-api/sysopssupplynode/<int:pk>/', views.SysOpsSupplyNodeDetail.as_view()),
 

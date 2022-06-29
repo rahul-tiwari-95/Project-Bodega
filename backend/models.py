@@ -800,6 +800,22 @@ class MunchiesVideo(models.Model):
 
 
 
+#Model for storing Product Ownership Data
+class ProductOwnershipLedger(models.Model):
+    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    metauserLedger = JSONField(null=True, blank=True) #contains metauser public hashkey IDs in JSON and we will show it sequentially on the front-end
+    bidPriceHistory = JSONField(null=True, blank=True) #contains all price history for that productID and we will show that in chart on the front end
+    created_at = models.DateField()
+    modified_at = models.DateTimeField()
+    
+    def __str__(self):
+        #returns nothing  
+        return 'Product Ownership Ledger for P.ID: %s' % (self.productID)
+    
+    
+    
+
+
 # Collaboration model allows all types of users to collaborate on any asset on the TRILL ecosystem and do business
 # many creators can collaborate with many products. but one product / asset at one time can have only one ownership / collab ID
 class Collaboration(models.Model):
@@ -812,9 +828,12 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+
     product_ID = models.ForeignKey(Product,
                                    on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
+
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
+
     # product_shop_ID should be EQUAL to shop_ID to verify identity that both metauserIDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[  # the bid from the creator's side - because freedom of choice
@@ -1030,10 +1049,11 @@ class SysOpsSupplyNode(models.Model):
     location = models.TextField(default='New York BABY')
     status = models.BooleanField(default=True)
     tokens_allocated = models.FloatField(default=1.0)
-    creator_hypothesis = models.TextField(
-        default='CREATORS PERSPECTIVE')  # what the creator thinks of us? the team & Bodega
+    # what the creator thinks of us? the team & Bodega
+    creator_hypothesis = models.TextField(default='CREATORS PERSPECTIVE')
+    # what we think of his primary drives? - how will he pull his weight?
     sysops_agent_hypothesis = models.TextField(
-        default='SysOp Agent PERSPECTIVE')  # what we think of his primary drives? - how will he pull his weight?
+        default='SysOp Agent PERSPECTIVE')
     creator_identity_status = models.BooleanField(default=False)
     all_digital_url = JSONField(null=True, blank=True)
     influence_size = JSONField(null=True, blank=True)
@@ -1045,8 +1065,10 @@ class SysOpsSupplyNode(models.Model):
     category_vertical2 = JSONField(null=True, blank=True)
     # what do you feel about their creation?
     product_traits = JSONField(null=True, blank=True)
+
     creator_traits = JSONField(null=True,
                                blank=True)  # what do we think about the creator? - #trustworthy? #reliability
+
     # Digital? #On-Demand-Production #Wholesale #Abstract?
     production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
@@ -1073,10 +1095,11 @@ class SysOpsDemandNode(models.Model):
     location = models.TextField(default='New York BABY')
     status = models.BooleanField(default=True)
     tokens_allocated = models.FloatField(default=1.0)
-    creator_hypothesis = models.TextField(
-        default='CREATORS PERSPECTIVE')  # what the creator thinks of us? the team & Bodega
+    # what the creator thinks of us? the team & Bodega
+    creator_hypothesis = models.TextField(default='CREATORS PERSPECTIVE')
+    # what we think of his primary drives? - how will he pull his weight?
     sysops_agent_hypothesis = models.TextField(
-        default='SysOp Agent PERSPECTIVE')  # what we think of his primary drives? - how will he pull his weight?
+        default='SysOp Agent PERSPECTIVE')
     creator_identity_status = models.BooleanField(default=False)
     all_digital_url = JSONField(null=True, blank=True)
     influence_size = JSONField(null=True, blank=True)
@@ -1088,15 +1111,17 @@ class SysOpsDemandNode(models.Model):
     category_vertical2 = JSONField(null=True, blank=True)
     # what do you feel about their creation?
     product_traits = JSONField(null=True, blank=True)
+
     creator_traits = JSONField(null=True,
                                blank=True)  # what do we think about the creator? - #trustworthy? #reliability
+
     # Digital? #On-Demand-Production #Wholesale #Abstract?
     production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
     predicted_revenue = JSONField(null=True, blank=True)
     creator_audience_traits = JSONField(null=True, blank=True)
-    sysops_solution_hypothesis = JSONField(null=True,
-                                           blank=True)  # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
+    # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
+    sysops_solution_hypothesis = JSONField(null=True, blank=True)
     additional_notes = JSONField(null=True, blank=True)
     bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.PROTECT)
     created_at = models.DateField(auto_now_add=True)
@@ -1106,15 +1131,14 @@ class SysOpsDemandNode(models.Model):
         return 'DemandNode MetaUserID: %s ' % (self.demand_metauserID)
 
 # making every human, a creator.
-# Monetizing Data --> AI + Investments + Protocol + COIN value will go up + more value
-# Digitization Of Monetization
+# monetizing data --> AI + Investments + Protocol + COIN value will go up + more value
+# digitization Of monetization
 # making human to human connection global & honest
-# One Humanity, Infinite stories
-# serving free-will
-# question everything
+# one humanity, infinite stories
+# serving free-will?
+# question everything?
 # whoareyou?
 # chaseyourself
-
 # whatcanyoubecome?
 # whatwillyoudowithit?
 

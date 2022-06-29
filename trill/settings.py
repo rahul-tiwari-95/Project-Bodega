@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from backend.custom_azure import AzureMediaStorage, AzureStaticStorage
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -51,10 +53,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'corsheaders',
+
     'storages',
     'rest_framework',
     'stripe'
+
+
 
 ]
 REST_FRAMEWORK = {
@@ -76,9 +82,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware'
-
 ]
 
 CORS_ORIGIN_ALLOW_ALL=True
@@ -105,6 +111,7 @@ TEMPLATES = [
             ],
         },
     },
+   
 ]
 
 WSGI_APPLICATION = 'trill.wsgi.application'
@@ -166,8 +173,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+
 #STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+DEFAULT_FILE_STORAGE = 'backend.custom_azure.AzureMediaStorage'
+STATICFILES_STORAGE = 'backend.custom_azure.AzureStaticStorage'
+
+
+STATIC_LOCATION = "static"
+MEDIA_LOCATION = "media"
+
+
+AZURE_ACCOUNT_NAME = "bdgdaostorage"
+AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
+STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+
+
+
+
 
 DEFAULT_FILE_STORAGE = 'backend.azure_blob.AzureMediaStorage'
 STATICFILES_STORAGE = 'backend.azure_blob.AzureStaticStorage'
@@ -186,3 +211,5 @@ MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
