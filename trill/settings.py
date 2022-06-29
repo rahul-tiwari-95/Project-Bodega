@@ -32,6 +32,10 @@ SECRET_KEY = 'django-insecure-g5mid7ca(k)m94_hw$zdl*!y$ol&86py-c@@h=+nz+q*@ag=pj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+if DEBUG:
+    STRIPE_PUBLISHABLE_KEY = 'test_publishable_key'
+    STRIPE_SECRET_KEY = 'test_secret_key'
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -49,11 +53,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-<<<<<<< HEAD
-    'storages',
-=======
+
     'corsheaders',
->>>>>>> dev
+
+    'storages',
+    'rest_framework',
+    'stripe'
+
+
 
 ]
 REST_FRAMEWORK = {
@@ -75,11 +82,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-<<<<<<< HEAD
-    
-=======
+
     'corsheaders.middleware.CorsMiddleware',
->>>>>>> dev
+    'corsheaders.middleware.CorsPostCsrfMiddleware'
 ]
 
 CORS_ORIGIN_ALLOW_ALL=True
@@ -90,6 +95,7 @@ CORS_ORIGIN_ALLOW_ALL=True
 #Activate this script to stop CORS request 
 
 ROOT_URLCONF = 'trill.urls'
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 TEMPLATES = [
     {
@@ -167,6 +173,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+
+#STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 DEFAULT_FILE_STORAGE = 'backend.custom_azure.AzureMediaStorage'
 STATICFILES_STORAGE = 'backend.custom_azure.AzureStaticStorage'
 
@@ -181,6 +191,19 @@ STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
 
 
+
+
+
+DEFAULT_FILE_STORAGE = 'backend.azure_blob.AzureMediaStorage'
+STATICFILES_STORAGE = 'backend.azure_blob.AzureStaticStorage'
+
+STATIC_LOCATION = "static"
+MEDIA_LOCATION = "media"
+
+AZURE_ACCOUNT_NAME = 'bdgdaostorage'
+AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
+STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
 
 
 

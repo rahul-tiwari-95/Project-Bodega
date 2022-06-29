@@ -13,8 +13,7 @@ import time
 subscription_key = "6d2fb313853647cca33e608f11f1b8b4"
 endpoint = "https://bodega-vision.cognitiveservices.azure.com"
 
-computervision_client = ComputerVisionClient(
-    endpoint, CognitiveServicesCredentials(subscription_key))
+computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(subscription_key))
 # auth creds for raven88 / sudo88
 
 

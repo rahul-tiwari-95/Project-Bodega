@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 import datetime
 
+
 # 95% efficiency
 # 99% particpation - HUNTER X
 
@@ -70,8 +71,8 @@ def message_hashkey_generator():
 class Solomonv0(models.Model):
     psy_traits = JSONField(null=True, blank=True)
     engagement_traits = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'Solomon v0 WIP'
@@ -82,21 +83,36 @@ class Solomonv0(models.Model):
 
 # Creating MetaUser - ONLY AUTH USER CAN DELETE MetaUser.object
 class MetaUser(models.Model):
-    meta_username = models.TextField(
-        default='username_not_defined', unique=True)
+    meta_username = models.TextField(default='username_not_defined', unique=True)
     passcode = models.TextField(unique=True)
-    private_hashkey = models.TextField(
-        default=private_metauser_hashkey_generator, unique=True)
-    public_hashkey = models.TextField(
-        default=public_metauser_hashkey_generator, unique=True)
+    private_hashkey = models.TextField(default=private_metauser_hashkey_generator, unique=True)
+    public_hashkey = models.TextField( default=public_metauser_hashkey_generator, unique=True)
     discord_username = models.TextField()
-    created_at = models.DateField()  # the date when this user was created.
-    # the timezone when the user_data was modified
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)  
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns username & modified_at
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
+
+# Creating MetaUser Tags for Profile 
+class MetaUserTags(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserStatus = models.CharField(default="ACTIVE GUEST CREATOR", max_length=255)
+    trophiesAllocated = models.TextField(default="BABYSTEPS REVOLUTIONARY")
+    projectBodegaLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
+    metauserProfileLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
+    subscribersNumber = models.IntegerField(default=0)
+    followersNumber = models.IntegerField(default=0)
+    subscriptionActive = models.BooleanField(default=False)
+    accessLevelClearance = models.FloatField(default=3.5)
+    isProfilePrivate = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "MetaUser Tags for metauser: %s" % (self.metauserID)
+
+
+
 
 
 # Designing Bodega's ML Models
@@ -123,11 +139,113 @@ class BLAScore(models.Model):
     current_score = models.FloatField(default=3.0)
     predicted_score = models.FloatField(
         default=3.0)  # Incoming data from Solomon
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'BLA Score: %s -- MetaUserID: %s ' % (self.current_score, self.metauserID)
+
+
+
+#STRIPE INTEGRATION CLASSES
+class stripeAccountInfo(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    stripeAccountID = models.CharField(unique=True, max_length=400)
+    businessType = models.CharField(max_length=300, default='Digital Services')
+    businessName = models.CharField(blank=True, max_length=255)
+    businessDescription = models.CharField(blank=True, max_length=255)
+    businessCity = models.CharField(blank=True, max_length=255)
+    businessCountry = models.CharField(blank=True, max_length=255)
+    businessLine1 = models.CharField(blank=True, max_length=255)
+    businessLine2 = models.CharField(blank=True, max_length=255)
+    businessPostalCode = models.CharField(blank=True, max_length=255)
+    businessEmail = models.CharField(blank=True, max_length=255)
+    businessBankName = models.CharField(blank=True, max_length=255)
+    businessPhone = models.CharField(blank=True, max_length=255)
+    businessURL = models.CharField(blank=True, max_length=255)
+    businessLogo = models.ImageField(blank=True)
+    accountPaymentStatus = models.CharField(blank=True, max_length=255)
+    accountTransfersStatus = models.CharField(blank=True, max_length=255)
+    accountCurrency = models.CharField(blank=True, max_length=255)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+#Instance is created whenever a new transfer Stripe API is triggered.
+class stripeAccountTransfer(models.Model):
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    transactionID = models.CharField(max_length=500)
+    payoutAmount = models.FloatField(default=0.0)
+    payoutOrderInfo = models.CharField(max_length=255)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateField(auto_now=True)
+
+#Model design to act as a ledger of our account's Stripe Balance.
+class stripeAccountBalance(models.Model):
+    balance = models.FloatField(default=0.0)
+    currency= models.TextField()
+    pendingAmount = models.FloatField(default=0.0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+
+
+
+class bodegaCustomer(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    name = models.CharField(default='John Doe', max_length=255)
+    email = models.CharField(default="johndoe@email.com", max_length=255)
+    customerID = models.CharField(max_length=500)
+    paymentMethodID = models.CharField(max_length=500)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
+
+
+class stripeCharges(models.Model):
+    bodegaCustomerID = models.ForeignKey(bodegaCustomer, on_delete=models.PROTECT)
+    stripeChargeID = models.CharField(max_length=300)
+    stripeCustomerID = models.CharField(max_length=400)
+    stripePaymentMethodID = models.CharField(max_length=400, default='None', blank=True)
+    amount = models.FloatField(default=0.0)
+    currency = models.TextField(default='us')
+    description = models.CharField(max_length=400)
+    capturedStatus = models.BooleanField(default=False)
+    paymentStatus = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
+
+
+
+class creatorSubscription(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    subscriptionName = models.CharField(max_length=300)
+    subscriptionDescription = models.CharField(max_length=500)
+    amount = models.IntegerField(default=0)
+    currency = models.CharField(max_length=255)
+    chargingFrequency = models.CharField(max_length=300)
+    stripeProductID = models.CharField(max_length=400)
+    stripePriceID = models.CharField(max_length=400)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+class Subscribers(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    customerID = models.CharField(max_length=400)
+    priceID = models.CharField(max_length=400)
+    subscriptionID = models.CharField(max_length=400)
+    productID = models.CharField(max_length=400) 
+    amount = models.IntegerField(default=0)
+    invoiceID = models.CharField(max_length=400)
+    status = models.CharField(max_length=400)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
+
 
 
 # Models for Sentino APIs - These tables act as a backup and allows us to measure all different personality profiles of the customer/user
@@ -140,8 +258,8 @@ class SentinoItemProximity(models.Model):
     syslog_metadata = JSONField(null=True, blank=True)
     # needed so that we can send POST request to Sentino API
     self_statements = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'RESTRICTED ACCESS TO THIS DATABASE'
@@ -155,8 +273,8 @@ class SentinoItemProjection(models.Model):
     syslog_metadata = JSONField(null=True, blank=True)
     # needed so that we can send POST request to Sentino API
     self_statements = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'RESTRICTED ACCESS TO THIS DATABASE'
@@ -170,8 +288,8 @@ class SentinoItemClassification(models.Model):
     syslog_metadata = JSONField(null=True, blank=True)
     # needed so that we can send POST request to Sentino API
     self_statements = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'RESTRICTED ACCESS TO THIS DATABASE'
@@ -185,8 +303,8 @@ class SentinoInventory(models.Model):
     syslog_metadata = JSONField(null=True, blank=True)
     # needed so that we can send POST request to Sentino API
     self_statements = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'RESTRICTED ACCESS TO THIS DATABASE'
@@ -200,8 +318,8 @@ class SentinoSelfDescription(models.Model):
     syslog_metadata = JSONField(null=True, blank=True)
     # needed so that we can send POST request to Sentino API
     self_statements = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'RESTRICTED ACCESS TO THIS DATABASE'
@@ -215,8 +333,8 @@ class SentinoProfile(models.Model):
     syslog_metadata = JSONField(null=True, blank=True)
     # needed so that we can send POST request to Sentino API
     self_statements = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'RESTRICTED ACCESS TO THIS DATABASE'
@@ -230,8 +348,8 @@ class BodegaVision(models.Model):
     video_metadata = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'MetaUserID: %s' % (self.metauserID)
@@ -243,8 +361,8 @@ class BodegaFace(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     facial_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'MetaUserID: %s ' % (self.metauserID)
@@ -256,8 +374,8 @@ class BodegaPersonalizer(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'MetaUserID: %s ' % (self.metauserID)
@@ -278,8 +396,8 @@ class BodegaCognitiveItem(models.Model):
     self_statements = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'Bodega Cognitive Service Accessed'
@@ -295,8 +413,8 @@ class BodegaCognitiveInventory(models.Model):
     self_statements = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'Bodega Cognitive Service Accessed'
@@ -315,8 +433,8 @@ class BodegaCognitivePerson(models.Model):
     self_statements = JSONField(null=True, blank=True)
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return ' Bodega Cognitive Services Accessed'
@@ -332,8 +450,8 @@ class BodegaDept(models.Model):
     ])
     content_metadata = JSONField(null=True, blank=True)
     syslog_metadata = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns department name and metauserID
@@ -349,8 +467,8 @@ class UserAddress(models.Model):
     city = models.TextField()
     postal_code = models.TextField()
     country = models.TextField()
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns metauserID and their address
@@ -362,7 +480,7 @@ class UserAddress(models.Model):
 class UserPayment(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     payment_type = models.TextField()
-    payment_provider = models.TextField(default='STRIPE')
+    stripeAccountID = models.TextField(default='Project-Bodega Member Stripe Account ID')
     total_money_out = models.FloatField(default=0.00)
     total_money_in = models.FloatField(default=0.0)
     user_payment_profile_status = models.BooleanField(default=False)
@@ -370,8 +488,8 @@ class UserPayment(models.Model):
     # code for routing money to users - whether they're producing or consuming
     # we need to verify bank connection via Plaid and then use Stripe Connect
 
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns last payment_status
@@ -392,8 +510,8 @@ class UserType(models.Model):
     # Your personality traits - Read Write
     solomon_person_ID = models.ForeignKey(Solomonv0, on_delete=models.CASCADE)
     user_role = models.TextField(default='Creator')
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns user_type
@@ -405,9 +523,9 @@ class UserType(models.Model):
 
 class ChatRoom(models.Model):
     # Chat_Room ID will be created automatically by PostGre
-    name = models.TextField(default='Unnamed-Secure-Room')
+    name = models.TextField(unique=True)
     desc = models.TextField(default='Why was this room created?')
-    rules = models.TextField(default='Your room, Your rules')
+    tags = models.TextField(default='#ROOM')
     type_of_room = models.TextField(choices=[
         # only people with meta_key can join the secure_room
         ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),
@@ -416,12 +534,11 @@ class ChatRoom(models.Model):
         # leads ro the deletion of the room
         ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')
     ])
-    # gives control of room back to the user
-    is_room_active = models.BooleanField(default=True)
+    isRoomPrivate = models.BooleanField(default=True)
     room_hashkey = models.TextField(
         default=chatroom_hashkey_generator, unique=True)
-    modified_on = models.DateTimeField()
-    created_on = models.DateField()
+    modified_on =models.DateTimeField(auto_now_add=True)
+    created_on = models.DateField(auto_now_add=True)
 
     def __str__(self):
         # returns room name and room status
@@ -430,7 +547,7 @@ class ChatRoom(models.Model):
 
 
 # Who all with particpate in which rooms? - See secuirty can be fucking easy
-class Particpant(models.Model):
+class Participant(models.Model):
     # Particpant_ID will be created automaticaly
     # one metauserID can have multiple particpantIDs
     # one room can have multiple particpants - multiple users can have multiple participantID but same chat_room_ID for group chat
@@ -452,8 +569,8 @@ class Message(models.Model):
     message_body = models.TextField()
     upload_file = models.FileField(
         upload_to='user_meta_key/message/files', default=None)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
     hashkey = models.TextField(default=message_hashkey_generator, unique=True)
 
     def __str__(self):
@@ -478,8 +595,8 @@ class ProductCategory(models.Model):
         ('POTRAIT-VIDEO-FILE', 'POTRAIT-VIDEO-FILE'),
     ])
     category_desc = models.TextField(default='Describe your creation.')
-    created_at = models.DateField()  # when was it created
-    modified_at = models.DateTimeField()  # when was it last modfied
+    created_at = models.DateField(auto_now_add=True)  # when was it created
+    modified_at =models.DateTimeField(auto_now_add=True)  # when was it last modfied
     category_image1 = models.FileField(
         upload_to='category/category_image1')  # set default to Bodega's image
     category_image2 = models.FileField(upload_to='category/category_image2')
@@ -491,23 +608,18 @@ class ProductCategory(models.Model):
         return 'Product Category Name: %s ' % (self.category_name)
 
 
-# Product Collection definition - How are different assets segmented by themes?
-class ProductThemes(models.Model):
-    collection_name = models.TextField(default='Collection Name')
-    collection_desc = models.TextField(default='Collection Decsription')
-    audience_traits = JSONField(null=True, blank=True)
-    marketing_funnel = models.TextField(choices=[
-        ('Community', 'Creator-Community'),
-        ('Performance-ADs', 'Performance-ADs-IG/FB'),
-        ('Influencer-Marketing', 'Influencer-Marketing'),
-    ])
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+#BoostTags Model Instance
+class BoostTags(models.Model):
+    
+    tags = models.CharField(max_length=11) #Name of BoostTags
+    created_by = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns collection name
 
-        return 'Collection Name: %s' % (self.collection_name)
+        return 'BoostTags Name: %s' % (self.tags)
 
 
 # Product Discount definition - How much discount?
@@ -518,8 +630,8 @@ class Discount(models.Model):
     active_status = models.BooleanField(default=False)
     created_by = models.ForeignKey(
         MetaUser, on_delete=models.CASCADE)  # which user created this
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns Discount code and Discount %
@@ -560,8 +672,8 @@ class Social(models.Model):
     # ONLY SELECT USERS whose SOCIAL.data_mining_status == True - Simple solution to privacy, consent! consent! consent!
     account_active = models.BooleanField(default=True)
     delete_metauser = models.BooleanField(default=False)
-    created_on = models.DateField()
-    modified_on = models.DateTimeField()
+    created_on = models.DateField(auto_now_add=True)
+    modified_on =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns metauserID annd account_status
@@ -571,14 +683,9 @@ class Social(models.Model):
 # Commerce Model - key data weights on your commerce activity to be tracked for cluster analysis
 
 class Shop(models.Model):
-    metauserID = models.ForeignKey(MetaUser,
-                                   on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
-    # shop_ID will be automatically created by PostGRE - we will add a unique validator on it
-
-    # list of all products owned by that creator
+    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
     all_products = JSONField(null=True, blank=True)
-    all_user_data = JSONField(null=True,
-                              blank=True)  # list of metauser IDs for your reference. no other data is shown here
+    all_user_data = JSONField(null=True,blank=True)  # list of metauser IDs for your reference. no other data is shown here
     name = models.TextField()
     description = models.TextField()
     logo = models.FileField(upload_to='shop-details/profile_picture')
@@ -602,17 +709,50 @@ class Shop(models.Model):
     uniquesellingprop = models.TextField(
         default='Why your meta-shop is special than others?')
     data_mining_status = models.BooleanField(default=False)
-    created_on = models.DateField()
-    modified_on = models.DateTimeField()
+    created_on = models.DateField(auto_now_add=True)
+    modified_on =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns Shop nane and metauserID
         return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
 
 
+#Creator Merchant Model
+
+
+
+class Product(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    product_categoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
+    boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
+    discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
+    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    productName = models.TextField(max_length=15, unique=True)
+    producDescription = models.CharField(max_length=300)
+    sellingPrice = models.FloatField(default=0.0)
+    discounted_price = models.FloatField(default=0.0)
+    quantity = models.IntegerField(default=0)
+    subscriptionProduct = models.BooleanField(default=False)
+    privateProduct = models.BooleanField(default=False)
+    size_chart = models.FileField(upload_to='product/size_chart', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    product_image1 = models.FileField(upload_to='product/product_image1', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    product_image2 = models.FileField(upload_to='product/product_image2', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    product_image3 = models.FileField( upload_to='product/product_image3', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    product_image4 = models.FileField(upload_to='product/product_image4', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    productHashkey = models.TextField(default=product_hashkey_generator, unique=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # returns Product Name & Product Meta Key
+
+        return 'Product Name: %s -- Meta-Key: %s' % (self.productName, self.productHashkey)
+
+
 # Creating ProductMetaData model - how does a product look like? what are the traits?
 
 class ProductMetaData(models.Model):
+    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
     numberoflikes = models.IntegerField(default=0)
     numberofdislikes = models.IntegerField(default=0)
     numberofcomments = models.IntegerField(default=0)
@@ -623,61 +763,41 @@ class ProductMetaData(models.Model):
     metauserID_of_comments = JSONField(null=True, blank=True)
     total_sales = models.FloatField(default=0.0)
     clicks_on_product = models.IntegerField()
-    is_product_digital = models.BooleanField(default=False)
-    # add tags on what help you need? funding - hiring etc
-    assistance_ask = JSONField(null=True, blank=True)
-    nsfw_content = models.BooleanField(default=False)
-    # helps us tweak our user targeting based on audience group
-    production_cost = models.FloatField(default=0.0)
-    production_time_days = models.IntegerField()
-    hours_invested = models.FloatField(default=1.0)
-    encrypt_product = models.BooleanField(default=False)
-    unit_sold_expectation = models.IntegerField(default=0)
-    size_chart = models.FileField(upload_to='product/size_chart', default=None)
-    product_image2 = models.FileField(
-        upload_to='product/product_image2', default=None)
-    product_image3 = models.FileField(
-        upload_to='product/product_image3', default=None)
-    product_image4 = models.FileField(
-        upload_to='product/product_image4', default=None)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns Product Name & Product Meta Key
 
         return 'Product Meta Data '
 
-    # Creating Product model - Simple Product
 
-
-class Product(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    productMetaDataID = models.ForeignKey(
-        ProductMetaData, on_delete=models.CASCADE)
-    product_categoryID = models.ForeignKey(
-        ProductCategory, on_delete=models.CASCADE)
-    product_themesID = models.ForeignKey(
-        ProductThemes, on_delete=models.CASCADE)
-    discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
-    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    name = models.TextField(default='No Product Name, yet', unique=True)
-    description = models.TextField(
-        default='Explain your creation in great poetic detail.')
-    selling_price = models.FloatField(default=0.0)
-    discounted_price = models.FloatField(default=0.0)
-    quantity = models.IntegerField(default=0)
-    is_product_digital = models.BooleanField(default=False)
-    product_image1 = models.FileField(upload_to='product/product_image1')
-    # generates unique SHA1 key for your product - which is immutable in TRILL universe
-    hashkey = models.TextField(default=product_hashkey_generator, unique=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+class MunchiesPage(models.Model):
+    munchiesPageName = models.CharField(max_length=255)
+    munchiesCoverImage = models.FileField(upload_to = 'munchies/coverImage')
+    munchiesPageViews = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        # returns Product Name & Product Meta Key
+        return 'Munchies Page Name: %s -- Total Views: %s' %(self.munchiesPageName, self.munchiesPageViews)
 
-        return 'Product Name: %s -- Meta-Key: %s' % (self.name, self.hashkey)
+
+
+#Creating Munchies Tabel
+class MunchiesVideo(models.Model):
+    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.PROTECT)
+    munchiesVideo = models.FileField(upload_to='munchies/videos')
+    munchiesCaption = models.CharField(max_length=200)
+    munchiesVideoTags = models.CharField(max_length=200)
+    munchiesDislikes = models.IntegerField(default=0)
+    munchiesVideoViews = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Munchies Video: %s -- Total Views: %s' %(self.munchiesVideo, self.munchiesVideoViews)
+
 
 
 #Model for storing Product Ownership Data
@@ -704,34 +824,28 @@ class Collaboration(models.Model):
     creator_collab_choice = models.TextField(choices=[
         # the bid our creator wants to do but depends on mutual consent of other party - because freedom of fucking choice
         ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
         ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
-    # creators can paste their hashkey to auth
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-<<<<<<< HEAD
-    product_ID = models.ForeignKey(Product,on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
-    shop_ID = models.ForeignKey(Shop,on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
-=======
+
     product_ID = models.ForeignKey(Product,
                                    on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
-    shop_ID = models.ForeignKey(Shop,
-                                on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
->>>>>>> dev
+
+    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
+
     # product_shop_ID should be EQUAL to shop_ID to verify identity that both metauserIDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[  # the bid from the creator's side - because freedom of choice
         ('FIXED-PAYMENT', 'FIXED-PAYMENT'),
-        ('BARTER-DEAL', 'BARTER-DEAL'),
         ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     bid_amount = models.FloatField(default=0.0)
     # only Product Owner has this privilege
     accept_bid = models.BooleanField(default=False)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns collab type & collab status
@@ -742,8 +856,8 @@ class Collaboration(models.Model):
 class ShoppingSession(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     total_amount = models.FloatField(default=0.0)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns metauserID and total amount
@@ -756,13 +870,28 @@ class CartItem(models.Model):
     product_ID = models.ForeignKey(Product,
                                    on_delete=models.CASCADE)  # We dont want our product to be deleted because of our cute temporary cart item table
     quantity = models.IntegerField(default=0)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # Returns Cart ID and Product ID
         return 'Cart ID: %s --- Product ID: %s' % (self.id, self.product_ID)
         # this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
+
+
+# Create temp table called Cart Item --> We wil store the data. Analyze behaviour.
+class ShoppingCartItem(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)  # We dont want our product to be deleted because of our cute temporary cart item table
+    quantity = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # Returns Cart ID and Product ID
+        return 'Cart ID: %s --- Product ID: %s' % (self.id, self.product_ID)
+        # this may blast but logically it wont  because the moment we initiate this table PostGre will assign this table a id field. lets see
+
 
 
 # Create Order Details table
@@ -771,9 +900,9 @@ class CartItem(models.Model):
 # A Tee and A Dildo can be order number 5566 for user name xyz - fucking modular. less risks of falling
 class OrderDetail(models.Model):
     total_amount = models.FloatField(default=0.0)
-    payment_info = models.ForeignKey(UserPayment, on_delete=models.CASCADE)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    payment_info = models.ForeignKey(UserPayment, on_delete=models.PROTECT)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns order id
@@ -784,16 +913,45 @@ class OrderDetail(models.Model):
 # Here, we are accounting for each and every product purchased and bundling them.
 # Because payment is done in arrays and then added up to the total amount. Duh lol
 class OrderItem(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
-    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
+    product_ID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     quantity = models.IntegerField(default=0)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns Order_ID and Product ID
         return 'Order ID: %s -- Product ID: %s' % (self.order_ID, self.product_ID)
 
+#Order Success table model
+
+class OrderSuccess(models.Model):
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    stripeChargeID = models.TextField(blank=True)
+    orderCompleted = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        #Returns stripeChargeID and OrderID
+
+        return 'Stripe Charge ID: %s --  Order ID: %s' % (self.stripeChargeID, self.order_ID)
+
+
+#Order Failure Table Model
+
+class OrderFailure(models.Model):
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    stripeChargeID = models.TextField(blank=True)
+    orderCompleted = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Stripe Charge ID: %s -- Order ID: %s' % (self.stripeChargeID, self.order_ID)
 
 # Create models for Vendor payouts if needed
 # maybe Shop_Payout Table
@@ -817,8 +975,8 @@ class SysOpsAgent(models.Model):
     bio = models.TextField(default='I am Bodega')
     reporting_officer = models.TextField(
         default="PASTE PUBLIC METAUSER HASHKEY")
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # Returns SysOps-Hashkey
@@ -833,8 +991,8 @@ class SysOpsAgentRepo(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     sysops_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.PROTECT)
     project_hashkey = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # returns sysops_agentID
@@ -870,8 +1028,8 @@ class SysOpsProject(models.Model):
     genesis_project_hashkey = JSONField(null=True, blank=True)
     parent_project_hashkey = JSONField(null=True, blank=True)
     child_project_hashkey = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         # Return Project Hashkey
@@ -907,13 +1065,10 @@ class SysOpsSupplyNode(models.Model):
     category_vertical2 = JSONField(null=True, blank=True)
     # what do you feel about their creation?
     product_traits = JSONField(null=True, blank=True)
-<<<<<<< HEAD
-    # what do we think about the creator? - #trustworthy? #reliability
-    creator_traits = JSONField(null=True, blank=True)
-=======
+
     creator_traits = JSONField(null=True,
                                blank=True)  # what do we think about the creator? - #trustworthy? #reliability
->>>>>>> dev
+
     # Digital? #On-Demand-Production #Wholesale #Abstract?
     production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
@@ -923,8 +1078,8 @@ class SysOpsSupplyNode(models.Model):
     # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
     sysops_solution_hypothesis = JSONField(null=True, blank=True)
     additional_notes = JSONField(null=True, blank=True)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'SupplyNode ShopID: %s ' % (self.supply_shopID)
@@ -956,13 +1111,10 @@ class SysOpsDemandNode(models.Model):
     category_vertical2 = JSONField(null=True, blank=True)
     # what do you feel about their creation?
     product_traits = JSONField(null=True, blank=True)
-<<<<<<< HEAD
-    # what do we think about the creator? - #trustworthy? #reliability
-    creator_traits = JSONField(null=True, blank=True)
-=======
+
     creator_traits = JSONField(null=True,
                                blank=True)  # what do we think about the creator? - #trustworthy? #reliability
->>>>>>> dev
+
     # Digital? #On-Demand-Production #Wholesale #Abstract?
     production_type = JSONField(null=True, blank=True)
     current_revenue = JSONField(null=True, blank=True)
@@ -972,8 +1124,8 @@ class SysOpsDemandNode(models.Model):
     sysops_solution_hypothesis = JSONField(null=True, blank=True)
     additional_notes = JSONField(null=True, blank=True)
     bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.PROTECT)
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'DemandNode MetaUserID: %s ' % (self.demand_metauserID)
@@ -989,3 +1141,22 @@ class SysOpsDemandNode(models.Model):
 # chaseyourself
 # whatcanyoubecome?
 # whatwillyoudowithit?
+
+
+
+
+
+#Replacement for SHOP MODEL 
+#New Shop model with only imp information and auto-create
+
+class Notifications(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    text = models.CharField(max_length=400)
+    image = models.FileField(upload_to='notifications/image_metadata', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Notification Text: %s ' % (self.text)
+
+        

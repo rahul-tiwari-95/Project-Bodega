@@ -1,21 +1,33 @@
-from matplotlib.style import context
-from phonenumbers import format_national_number_with_carrier_code
-from rest_framework import status
+
+from dataclasses import fields
+from locale import currency
+from rest_framework import status, generics, mixins, request, viewsets
+
 from rest_framework.decorators import api_view
+from rest_framework.views import exception_handler
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 import datetime
 from django.utils import timezone
 from .forms import UserAddressFormSet
 import requests
+from rest_framework.request import Request
+from django.urls import reverse, reverse_lazy
+from django.views.generic import ListView, CreateView, DetailView, TemplateView
+from django.conf import settings
+import stripe
+import json
 
 
 
-from backend.models import MetaUser, UserAddress, UserPayment, UserType, ChatRoom, Particpant, Message, ProductCategory, ProductThemes, Discount, Social, ShopPayout, Shop, Product,  Collaboration, private_metauser_hashkey_generator, public_metauser_hashkey_generator, agent_hashkey_generator, project_hashkey_generator, product_hashkey_generator, project_hashkey_generator, chatroom_hashkey_generator, message_hashkey_generator, Level, BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription, CartItem, ShoppingSession, OrderDetail, OrderItem, SysOpsAgent, SysOpsAgentRepo, SysOpsProject, SysOpsDemandNode, SysOpsSupplyNode, Solomonv0, ProductOwnershipLedger
-from backend.serializers import MetaUserSerializer, UserAddressSerializer, UserPaymentSerializer, UserTypeSerializer, ChatRoomSerializer, ParticpantSerializer, MessageSerializer, ProductCategorySerializer, ProductThemesSerializer, DiscountSerializer, SocialSerializer, ShopSerializer, ProductSerializer, CollaborationSerializer, ProductMetaDataSerializer, BLASerializer, BodegaCognitiveInventorySerializer, BodegaCognitiveItemSerializer, BodegaCognitivePersonSerializer, BodegaDeptSerializer, BodegaFaceSerializer, BodegaPersonalizerSerializer, BodegaVisionSerializer, LevelSerializer, SentinoDescriptionSerializer, SentinoDescriptionSerializer, SentinoInventorySerializer, SentinoItemClassficationSerializer, SentinoItemClassficationSerializer, SentinoItemProjectionSerializer, SentinoItemProximitySerializer, SentinoProfileSerializer, CartItemSerializer, ShoppingSessionSerializer, OrderDetailsSerializer, OrderItemSerializer, SysOpsAgentSerializer, SysOpsAgentRepoSerializer, SysOpsProjectSerializer, SysOpsDemandNodeSerializer, SysOpsSupplyNodeSerializer, SolomonSerializer, ProductOwnershipLedgerSerializer
+
+from backend.models import *
+from backend.serializers import *
+
 
 
 
@@ -42,94 +54,69 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
-<<<<<<< HEAD
-def metauseruserauth(request):
-    #we will build a form and handle the conditions here 
-    #html is only to be used for showing dynamic data  remembder that we are building lean
-    return render(request, 'backend/metauserAuth.html')
 
-
-
-
-#SolomonV0 Views
-@csrf_exempt
-def solomon_list(request):
-    #GET POST request for Solomon/
-    if request.method == 'GET':
-        solomon = Solomonv0.objects.all()
-        serializer = SolomonSerializer(solomon, many=True)
-        return JsonResponse(serializer.data, safe=False)
-    
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = SolomonSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-    
-    
-@csrf_exempt
-def solomon_detail(request, pk):
-    #GET,PUT,DELETE request for Solomonv0{id}
-    try:
-        solomon = Solomonv0.objects.get(pk=pk)
-    except Solomonv0.DoesNotExist:
-        return JsonResponse(status=404)
-
-    
-    if request.method == 'GET':
-        serializer = SolomonSerializer(solomon)
-        return JsonResponse(serializer.data)
-
-    
-    elif request.method == 'PUT':
-        serializer = SolomonSerializer(solomon, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        solomon.delete()
-        return HttpResponse(status=204)
-    
-=======
 def metauserauth(request):
     #this will be linked to the authorization view on any frontend 
     #this will be the template for any auth needed across any of our platforms  
     
     return (request)
 
->>>>>>> dev
+
+#MetaUser Generic Views  
+
+class MetaUserList(generics.ListCreateAPIView):
+    queryset = MetaUser.objects.all()
+    serializer_class = MetaUserSerializer
+
+#@csrf_exempt
+class MetaUserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MetaUser.objects.all()
+    serializer_class = MetaUserSerializer
+
+#MetaUser Auth Generic Views
+class MetaUserAuth(generics.ListCreateAPIView):
+    queryset = MetaUser.objects.all()
+    serializer_class = MetaUserAuthSerializer
+
+# @csrf_exempt
+# def MetaUserAuthHashkey(request):
+#     #GET,PUT,DELETE request for metauser{id}
+    
+#     if request.method == 'POST':
+#         data = JSONParser().parse(request)
+#         serializer = MetaUserLoginSerializer(data=data)
+#         if serializer.is_valid():
+#             return JsonResponse(serializer.data, status=201)
+#         return JsonResponse(serializer.errors)
+
+@api_view(['POST'])    
+def metauserauth(request, pk):
+    instance = MetaUser.objects.get(meta_username=pk)
+    instanceID = str(instance.id)
+    metausercredentials = "ID: " + instanceID + " " + " meta_username: " + instance.meta_username
+    serializer = MetaUserAuthSerializer(instance)
+    #print(request.data['passcode'])
+    if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey']:
+        print("Authentication successful")
+        return Response(serializer.data,status=200)
+    else:
+        print("Authentication failed")
+        return Response(data='Authentication Failed',status=404)
+
+#For searching metauser by their metausername 
+@api_view(['POST'])
+def searchMetaUserByName(request):
+    try :
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        serializer = MetaUserSerializer(instance)
+        return Response(serializer.data, status=200)
+
+
+    except MetaUser.DoesNotExist:
+        return Response(status=404, data= request.data['meta_username']+ ' MetaUser not found.')
 
 
 
-
-#MetaUser Views
-@csrf_exempt
-def metauser_list(request):
-    #GET, POST request for metauser/
-    if request.method == 'GET':
-        metauser = MetaUser.objects.all()
-        serializer = MetaUserSerializer(metauser, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = MetaUserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        
-        return JsonResponse(serializer.errors, status=400)
-
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
 @csrf_exempt
 def metauser_detail(request, pk):
     #GET,PUT,DELETE request for metauser{id}
@@ -177,10 +164,7 @@ def level_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> dev
 @csrf_exempt
 def level_detail(request, pk):
     #GET, PUT, DELETE request for level{id}
@@ -226,11 +210,7 @@ def blascore_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> dev
 @csrf_exempt
 def blascore_detail(request, pk):
     #GET, PUT, DELETE request for  blascore{id}
@@ -275,10 +255,7 @@ def sentino_item_proximity_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> dev
 @csrf_exempt
 def sentino_item_proximity_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_proximity{id}
@@ -325,10 +302,6 @@ def sentino_item_projection_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
 @csrf_exempt
 def sentino_item_projection_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_projection{id}
@@ -374,11 +347,7 @@ def sentino_item_classification_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> dev
 @csrf_exempt
 def sentino_item_classification_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_item_classification{id}
@@ -424,11 +393,6 @@ def sentino_inventory_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> dev
 @csrf_exempt
 def sentino_inventory_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_inventory{id}
@@ -473,11 +437,7 @@ def sentino_description_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> dev
 @csrf_exempt
 def sentino_description_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_description{id}
@@ -520,11 +480,7 @@ def sentino_profile_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> dev
 @csrf_exempt
 def sentino_profile_detail(request, pk):
     #GET, PUT, DELETE request for  sentino_profile{id}
@@ -568,11 +524,7 @@ def bodega_vision_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> dev
 @csrf_exempt
 def bodega_vision_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_vision{id}
@@ -618,10 +570,6 @@ def bodega_face_list(request):
         return JSONParser(serializer.errors, status=400)
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
 @csrf_exempt
 def bodega_face_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_face{id}
@@ -667,11 +615,6 @@ def bodega_personalizer_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> dev
 @csrf_exempt
 def bodega_personalizer_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_personalizer{id}
@@ -760,11 +703,7 @@ def bodega_inventory_list(request):
         
         return JSONParser(serializer.errors, status=400)
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> dev
 @csrf_exempt
 def bodega_inventory_detail(request, pk):
     #GET, PUT, DELETE request for  bodega_inventory{id}
@@ -928,299 +867,142 @@ def address_detail(request, pk):
 
 
 
-#Fetching data via User_AddressID - Child Table ID - FREE USE
 
-@csrf_exempt
-def child_address_detail(request, pk):
-    #GET, PUT, DELETE requests for metauser_address/
 
+
+
+#For Searching ChatRoom by names
+@api_view(['POST'])
+def searchChatRoomByName(request):
     try:
-        user_address = UserAddress.objects.get(pk=pk)
-    
-    except UserAddress.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(UserAddressSerializer(user_address).data)
-
-    elif request.method == 'PUT':
-        serializer = UserAddressSerializer(user_address, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        user_address.delete()
-        return HttpResponse(status=204)
-
-
-
-#-------------------------------------------------------------------------------------------------------------------------------------------------
-
-#User_Payment Model Instance 
-#Fetching data via UserID - Parent ID - RESTRICTED USE
-
-
-@csrf_exempt
-def user_payment_list(request):
-    #GET, POST request for metauser_address/
-    if request.method == 'GET':
-        user_payment = UserPayment.objects.all()
-        serializer = UserPaymentSerializer(user_payment, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = UserPaymentSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def user_payment_detail(request, pk):
-    #GET, PUT, DELETE requests for metauser_address/
-
-    try:
-        user_payment = UserPayment.objects.get(user_ID=pk)
-    
-    except UserPayment.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(UserPaymentSerializer(user_payment).data)
-
-    elif request.method == 'PUT':
-        serializer = UserPaymentSerializer(user_payment, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        user_payment.delete()
-        return HttpResponse(status=204)
-
-
-
-
-#Fetching data via User_AddressID - Child Table ID - FREE USE
-
-@csrf_exempt
-def child_payment_detail(request, pk):
-    #GET, PUT, DELETE requests for metauser_address/
-
-    try:
-        user_payment = UserPayment.objects.get(pk=pk)
-    
-    except UserPayment.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(UserPaymentSerializer(user_payment).data)
-
-    elif request.method == 'PUT':
-        serializer = UserPaymentSerializer(user_payment, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        user_payment.delete()
-        return HttpResponse(status=204)
-
-
-
-#------------------------------------------------------------------------------------
-
-
-#User_Payment Model Instance 
-#Fetching data via UserID - Parent ID - RESTRICTED USE
-
-
-@csrf_exempt
-def user_type_list(request):
-
-    if request.method == 'GET':
-        user_type = UserType.objects.all()
-        serializer = UserTypeSerializer(user_type, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = UserTypeSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def user_type_detail(request, pk):
-
-
-    try:
-        user_type = UserType.objects.get(user_ID=pk)
-    
-    except UserType.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(UserTypeSerializer(user_type).data)
-
-    elif request.method == 'PUT':
-        serializer = UserTypeSerializer(user_type, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        user_type.delete()
-        return HttpResponse(status=204)
-
-
-
-
-#Fetching data via User_AddressID - Child Table ID - FREE USE
-
-@csrf_exempt
-def child_type_detail(request, pk):
-
-
-    try:
-        user_type = UserType.objects.get(pk=pk)
-    
-    except UserType.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(UserTypeSerializer(user_type).data)
-
-    elif request.method == 'PUT':
-        serializer = UserTypeSerializer(user_type, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        user_type.delete()
-        return HttpResponse(status=204)
-
-
-
-#------------------------------------------------------------------------------------
-
-
-#Chat Room Model Instance 
-#No primary ket attached to this table
-#Fetching data by ChatRoomID, simply  
-
-
-@csrf_exempt
-def chat_room_list(request):
-
-    if request.method == 'GET':
-        chat_room_type = ChatRoom.objects.all()
-        serializer = ChatRoomSerializer(chat_room_type, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ChatRoomSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def chat_room_detail(request, pk):
-
-
-    try:
-        chat_room_type = ChatRoom.objects.get(pk=pk)
+        instance = ChatRoom.objects.filter(name=request.data['name'])
+        serializer = ChatRoomSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
     
     except ChatRoom.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ChatRoomSerializer(chat_room_type).data)
-
-    elif request.method == 'PUT':
-        serializer = ChatRoomSerializer(chat_room_type, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        chat_room_type.delete()
-        return HttpResponse(status=204)
-
-#------------------------------------------------------------------------------------
+        return Response(data="No ChatRoom Found.", status=404)
 
 
-#Particpant Model Instance 
-#Fetching data via chat_room_ID - Parent ID - FREE USE
-#The code can be replicated for fetching via:  User_ID as well - but thats restricted.
-
-
-@csrf_exempt
-def participant_list(request):
-
-    if request.method == 'GET':
-        participant = Particpant.objects.all()
-        serializer = ParticpantSerializer(participant, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ParticpantSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def participant_detail(request, pk):
-
-
+#Filtering Messages by ChatRoom IDs
+@api_view(['POST'])
+def messagesByChatRoomID(request):
     try:
-        participant = Particpant.objects.get(chat_room_ID=pk)
+        instance = Message.objects.filter(chat_room_ID=request.data['chatRoomID'])
+        serializer = MessageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Message.DoesNotExist:
+        return Response(data="No Message Found.", status=404)
+
+#For Searching Product by productName
+@api_view(['POST'])
+def searchProductByName(request):
+    try:
+        instance = Product.objects.filter(productName=request.data['productName'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+
+    except Product.DoesNotExist:
+        return Response(status=404)
+#For searching Boost tags by tags
+@api_view(['POST'])
+def searchBoostTags(request):
+    try:
+        instance = BoostTags.objects.filter(tags=request.data['tags'])
+        serializer = BoostTagsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BoostTags.DoesNotExist:
+        return Response(status=404)
+
+
+
+#For searching BoostTags name
+
+
+@api_view(['POST'])    
+def killswitch(request):
+    instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+    serializer = KillSwitchSerializer(instance)
+    #print(request.data['passcode'])
+    if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey'] and instance.private_hashkey == request.data['private_hashkey']:
+        print("Authentication successful")
+        instance.delete()
+        return Response(data='KILL SWITCH Successful',status=200)
+    else:
+        print("Authentication failed")
+        return Response(data='KILL SWITCH Failed',status=404)
+
+
+@api_view(['GET'])
+def cartbymetauser(request, pk):
+    instance = ShoppingCartItem.objects.filter(metauserID=pk)
+    serializer = CartItemSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+
+
+#Fetch Shop data by metauserID
+@api_view(['POST'])
+def FetchShopByMetaUserID(request):
+    instance = Shop.objects.filter(metauserID=request.data.get('metauserID'))
+    serializer = ShopMetaUserSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+
+#Fetch Order Items by metauserID - User's past orders 
+@api_view(['POST'])
+def FetchOrderItemsByMetaUserID(request):
+    instance = OrderItem.objects.filter(metauserID=request.data.get('metauserID'))
+    serializer = OrderItemSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+
+
+
+#Fetch Collaboration / Yerrr items by metauserID - User's all past collaborations
+@api_view(['POST'])
+def FetchCollaborationByMetaUserID(request):
+    instance = Collaboration.objects.filter(metauserID=request.data['metauserID'])
+    serializer = CollaborationSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+#Fetch all ChatRooms by MetaUser ID
+@api_view(['POST'])
+def FetchParticipantByMetaUserID(request):
+    instance = Participant.objects.filter(metauserID=request.data.get)
+    serializer = ParticipantSerializer(instance, many=True)
+    return Response(serializer.data, status=200)
+
+#Authenticate New Participant by Room Hashkey
+@api_view(['POST'])
+def AuthenticateParticipantByRoomHashkey(request, pk):
+    instance = ChatRoom.objects.filter(pk=pk)
+    serializer = ChatRoomSerializer(instance, many=True)
     
-    except Particpant.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ParticpantSerializer(participant).data)
-
-    elif request.method == 'PUT':
-        serializer = ParticpantSerializer(participant, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        participant.delete()
-        return HttpResponse(status=204)
+    if instance.room_hashkey == request.data.get('room_hashkey'):
+        print("Authentication Successful")
+        return Response(serializer.data, status=200)
+    else:
+        print("Authentication Failed")
+        return Response(serializer.data, status=200)
 
 
 
+#Show all products by filtering via metauserID
+@api_view(['POST'])
+def productsByMetaUser(request):
+    try: 
+        instance = Product.objects.filter(metauserID=request.data['metauserID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="No Products", status=200)
 
-#----------------------------------------------------------------------------------
+#================================================================================================================================
+#STRIPE Connect Integration Code
+#Sample views testing the Stripe integration [TEST MODE]
+#Comment these views when you go to production mode with SWIFT as the Frontend.
 
-#Message Model Instance 
-#Fetching data via messageID - Child ID - FREE USE
-#The code can be replicated for fetching via:  User_ID as well 
-#many messageIDs can have same UserID or ChatRoomID - So, iterate via messageID
 
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
 @csrf_exempt
 def message_list(request):
 
@@ -1229,957 +1011,878 @@ def message_list(request):
         serializer = MessageSerializer(message, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    elif request.method == 'POST':
-        serializer = MessageSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
-def message_detail(request, pk):
 
+
+
+#================================================================================================================================
+
+#MetaUser Tags Generic Views
+class MetaUserTagsList(generics.ListCreateAPIView):
+    queryset = MetaUserTags.objects.all()
+    serializer_class = MetaUserTagsSerializer
+
+class MetaUserTagsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MetaUserTags.objects.all()
+    serializer_class = MetaUserTagsSerializer
+
+
+#Level Generics Views 
+#@csrf_exempt
+class LevelList(generics.ListCreateAPIView):
+    queryset = Level.objects.all()
+    serializer_class = LevelSerializer
+
+#@csrf_exempt
+class LevelDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Level.objects.all()
+    serializer_class = LevelSerializer
+
+#BLA Generics Views  
+#@csrf_exempt
+class BLAScoreList(generics.ListCreateAPIView):
+    queryset = BLAScore.objects.all()
+    serializer_class = BLASerializer
+
+#@csrf_exempt
+class BLAScoreDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BLAScore.objects.all()
+    serializer_class = BLASerializer
+
+#Sentino Item Proximity Generics Views
+#@csrf_exempt
+class SentinoItemProximityList(generics.ListCreateAPIView):
+    queryset = SentinoItemProximity.objects.all()
+    serializer_class = SentinoItemProximitySerializer
+
+#@csrf_exempt
+class SentinoItemProximityDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoItemProximity.objects.all()
+    serializer_class = SentinoItemProximitySerializer
+
+#Sentino Item Projection Generic Views
+#@csrf_exempt
+class SentinoItemProjectionList(generics.ListCreateAPIView):
+    queryset = SentinoItemProjection.objects.all()
+    serializer_class = SentinoItemProjectionSerializer
+
+#@csrf_exempt
+class SentinoItemProjectionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoItemProjection.objects.all()
+    serializer_class = SentinoItemProjectionSerializer
+
+#Sentino Item Classification Generic Views    
+#@csrf_exempt
+class SentinoItemClassificationList(generics.ListCreateAPIView):
+    queryset = SentinoItemClassification.objects.all()
+    serializer_class = SentinoItemClassificationSerializer
+
+#@csrf_exempt
+class SentinoItemClassificationDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoItemClassification.objects.all()
+    serializer_class = SentinoItemClassificationSerializer
+
+
+#Sentino Inventory Model Generic Views 
+#@csrf_exempt
+class SentinoInventoryList(generics.ListCreateAPIView):
+    queryset = SentinoInventory.objects.all()
+    serializer_class = SentinoInventorySerializer
+    
+#@csrf_exempt
+class SentinoInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoInventory.objects.all()
+    serializer_class = SentinoInventorySerializer
+
+
+#Sentino Description Generic Views
+#@csrf_exempt
+class SentinoDescriptionList(generics.ListCreateAPIView):
+    queryset = SentinoSelfDescription.objects.all()
+    serializer_class = SentinoDescriptionSerializer
+
+#@csrf_exempt
+class SentinoDescriptionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoSelfDescription.objects.all()
+    serializer_class = SentinoDescriptionSerializer
+
+
+#Sentino Profile Generic Views
+#@csrf_exempt
+class SentinoProfileList(generics.ListCreateAPIView):
+    queryset = SentinoProfile.objects.all()
+    serializer_class = SentinoProfileSerializer
+
+#@csrf_exempt
+class SentinoProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoProfile.objects.all()
+    serializer_class = SentinoProfileSerializer
+
+#Bodega Vision Generic Views
+#@csrf_exempt
+class BodegaVisionList(generics.ListCreateAPIView):
+    queryset = BodegaVision.objects.all()
+    serializer_class = BodegaVisionSerializer
+
+#@csrf_exempt
+class BodegaVisionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaVision.objects.all()
+    serializer_class = BodegaVisionSerializer
+
+
+#Bodega Face Generic Views
+#@csrf_exempt
+class BodegaFaceList(generics.ListCreateAPIView):
+    queryset = BodegaFace.objects.all()
+    serializer_class = BodegaFaceSerializer
+
+#@csrf_exempt
+class BodegaFaceDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaFace.objects.all()
+    serializer_class = BodegaFaceSerializer
+
+
+#Bodega Personalizer Generic Views
+#@csrf_exempt
+class BodegaPersonalizerList(generics.ListCreateAPIView):
+    queryset = BodegaPersonalizer.objects.all()
+    serializer_class = BodegaPersonalizerSerializer
+
+#@csrf_exempt
+class BodegaPersonalizerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaPersonalizer.objects.all()
+    serializer_class = BodegaPersonalizerSerializer
+
+
+#Bodega Cognitive Item Generic Views 
+#@csrf_exempt
+class BodegaCognitiveItemList(generics.ListCreateAPIView):
+    queryset = BodegaCognitiveItem.objects.all()
+    serializer_class = BodegaCongnitiveItemSerializer
+
+#@csrf_exempt
+class BodegaCognitiveItemDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitiveItem.objects.all()
+    serializer_class = BodegaCongnitiveItemSerializer
+    
+
+#Bodega Cognitive Inventory Generic Views
+#@csrf_exempt
+class BodegaCognitiveInventoryList(generics.ListCreateAPIView):
+    queryset = BodegaCognitiveInventory.objects.all()
+    serializer_class = BodegaCognitiveInventorySerializer
+
+#@csrf_exempt
+class BodegaCognitiveInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitiveInventory.objects.all()
+    serializer_class = BodegaCognitiveInventorySerializer
+
+
+#Bodega Cognitive Person Generic Views
+#@csrf_exempt
+class BodegaCognitivePersonList(generics.ListCreateAPIView):
+    queryset = BodegaCognitivePerson.objects.all()
+    serializer_class = BodegaCognitivePersonSerializer
+
+#@csrf_exempt
+class BodegaCognitivePersonDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitivePerson.objects.all()
+    serializer_class = BodegaCognitivePersonSerializer
+
+
+#Bodega Dept Generic Views
+#@csrf_exempt
+class BodegaDeptList(generics.ListCreateAPIView):
+    queryset = BodegaDept.objects.all()
+    serializer_class = BodegaDeptSerializer
+
+#@csrf_exempt
+class BodegaDeptDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaDept.objects.all()
+    serializer_class = BodegaDeptSerializer
+
+
+#User Address Generic Views
+#@csrf_exempt
+class UserAddressList(generics.ListCreateAPIView):
+    queryset = UserAddress.objects.all()
+    serializer_class = UserAddressSerializer
+
+#@csrf_exempt
+class UserAddressDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserAddress.objects.all()
+    serializer_class = UserAddressSerializer
+
+
+#User Payment Generic Views
+#@csrf_exempt
+class UserPaymentList(generics.ListCreateAPIView):
+    queryset = UserPayment.objects.all()
+    serializer_class = UserPaymentSerializer
+
+#@csrf_exempt
+class UserPaymentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserPayment.objects.all()
+    serializer_class = UserPaymentSerializer
+
+
+#User Type Generic Views
+#@csrf_exempt
+class UserTypeList(generics.ListCreateAPIView):
+    queryset = UserType.objects.all()
+    serializer_class = UserTypeSerializer
+
+#@csrf_exempt
+class UserTypeDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserType.objects.all()
+    serializer_class = UserTypeSerializer
+
+
+#Chat Room Generic Views
+#@csrf_exempt
+class ChatRoomList(generics.ListCreateAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+
+#@csrf_exempt
+class ChatRoomDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+
+
+#Particpant Generic Views
+#@csrf_exempt
+class ParticipantList(generics.ListCreateAPIView):
+    queryset = Participant.objects.all()
+    serializer_class = ParticipantSerializer
+
+#@csrf_exempt
+class ParticpiantDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Participant.objects.all()
+    serializer_class = ParticipantSerializer
+
+
+#Message Generic Views 
+#@csrf_exempt
+class MessageList(generics.ListCreateAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+#@csrf_exempt
+class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+
+
+#Product Category Generic Views
+#@csrf_exempt
+class ProductCategoryList(generics.ListCreateAPIView):
+    queryset = ProductCategory.objects.all()
+    serializer_class = ProductCategorySerializer
+
+#@csrf_exempt
+class ProductCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductCategory.objects.all()
+    serializer_class = ProductCategorySerializer 
+
+
+#Product Theme Generic Views
+#@csrf_exempt
+class BoostTagsList(generics.ListCreateAPIView):
+    queryset = BoostTags.objects.all()
+    serializer_class = BoostTagsSerializer
+
+#@csrf_exempt
+class BoostTagsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BoostTags.objects.all()
+    serializer_class = BoostTagsSerializer
+
+
+#Discount Generic Views
+#@csrf_exempt
+class DiscountList(generics.ListCreateAPIView):
+    queryset = Discount.objects.all()
+    serializer_class = DiscountSerializer
+
+#@csrf_exempt
+class DiscountDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Discount.objects.all()
+    serializer_class = DiscountSerializer
+
+
+#Social Generic Views 
+#@csrf_exempt
+class SocialList(generics.ListCreateAPIView):
+    queryset = Social.objects.all()
+    serializer_class = SocialSerializer
+
+#@csrf_exempt
+class SocialDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Social.objects.all()
+    serializer_class = SocialSerializer
+
+
+#Shop Generic Views
+#@csrf_exempt
+class ShopList(generics.ListCreateAPIView):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
+
+#@csrf_exempt
+class ShopDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
+
+
+#Product MetaData Generic Views
+#@csrf_exempt
+class ProductMetaDataList(generics.ListCreateAPIView):
+    queryset = ProductMetaData.objects.all()
+    serializer_class = ProductMetaDataSerializer
+
+#@csrf_exempt
+class ProductMetaDataDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductMetaData.objects.all()
+    serializer_class = ProductMetaDataSerializer
+
+
+#Product Generic Views 
+#@csrf_exempt
+class ProductList(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+#@csrf_exempt
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+#MunchiesPage Generics Views
+class MunchiesPageList(generics.ListCreateAPIView):
+    from .models import MunchiesPage
+    queryset = MunchiesPage.objects.all()
+    from .serializers import MunchiesPageSerializer
+    serializer_class = MunchiesPageSerializer
+
+class MunchiesPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    from .models import MunchiesPage
+    queryset = MunchiesPage.objects.all()
+    from .serializers import MunchiesPageSerializer
+    serializer_class = MunchiesPageSerializer
+
+
+class MunchiesVideoList(generics.ListCreateAPIView):
+    from .models import MunchiesVideo
+    queryset = MunchiesVideo.objects.all()
+    from .serializers import MunchiesVideoSerializer
+    serializer_class = MunchiesVideoSerializer
+
+class MunchiesVideoDetail(generics.RetrieveUpdateDestroyAPIView):
+    from .models import MunchiesVideo
+    queryset = MunchiesVideo.objects.all()
+    from .serializers import MunchiesVideoSerializer
+    serializer_class = MunchiesVideoSerializer
+
+
+#Munchies Videos Generics Views
+    
+
+#Collaboration Generic Views
+#@csrf_exempt
+class CollaborationList(generics.ListCreateAPIView):
+    queryset = Collaboration.objects.all()
+    serializer_class = CollaborationSerializer
+
+#@csrf_exempt
+class CollaborationDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Collaboration.objects.all()
+    serializer_class = CollaborationSerializer
+
+
+#Shopping Session Generic Views 
+#@csrf_exempt
+class ShoppingSessionList(generics.ListCreateAPIView):
+    queryset = ShoppingSession.objects.all()
+    serializer_class = ShoppingSessionSerializer
+
+#@csrf_exempt
+class ShoppingSessionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ShoppingSession.objects.all()
+    serializer_class = ShoppingSessionSerializer
+
+
+#Cart Item Generic Views 
+#@csrf_exempt
+class CartItemList(generics.ListCreateAPIView):
+    queryset = ShoppingCartItem.objects.all()
+    serializer_class = CartItemSerializer
+
+#@csrf_exempt
+class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ShoppingCartItem.objects.all()
+    serializer_class = CartItemSerializer
+
+
+#Order Detail Generic Views
+#@csrf_exempt
+class OrderDetailList(generics.ListCreateAPIView):
+    queryset = OrderDetail.objects.all()
+    serializer_class = OrderDetailsSerializer
+
+#@csrf_exempt
+class OrderDetailDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderDetail.objects.all()
+    serializer_class = OrderDetailsSerializer
+
+
+#Order Item Generic View
+#@csrf_exempt
+class OrderItemList(generics.ListCreateAPIView):
+    queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
+
+#@csrf_exempt
+class OrderItemDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
+
+
+class OrderSuccessList(generics.ListCreateAPIView):
+    queryset = OrderSuccess.objects.all()
+    serializer_class = OrderSuccessSerializer
+
+class OrderSuccessDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderSuccess.objects.all()
+    serializer_class = OrderSuccessSerializer
+
+class OrderFailureList(generics.ListCreateAPIView):
+    queryset = OrderFailure.objects.all()
+    serializer_class = OrderFailureSerializer
+
+class OrderFailureDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderFailure.objects.all()
+    serializer_class = OrderFailureSerializer
+
+
+#SysOps Agnet Generic Views
+#@csrf_exempt
+class SysOpsAgentList(generics.ListCreateAPIView):
+    queryset = SysOpsAgent.objects.all()
+    serializer_class = SysOpsAgentSerializer
+
+#@csrf_exempt
+class SysOpsAgentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SysOpsAgent.objects.all()
+    serializer_class = SysOpsAgentSerializer
+
+
+#SysOps Agent Repo Generic View
+#@csrf_exempt
+class SysOpsAgentRepoList(generics.ListCreateAPIView):
+    queryset = SysOpsAgentRepo.objects.all()
+    serializer_class = SysOpsAgentRepoSerializer
+
+#@csrf_exempt
+class SysOpsAgentRepoDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SysOpsAgentRepo.objects.all()
+    serializer_class = SysOpsAgentRepoSerializer
+
+
+#SysOps Agent Project Generic Views
+#@csrf_exempt
+class SysOpsAgentProjectList(generics.ListCreateAPIView):
+    queryset = SysOpsProject.objects.all()
+    serializer_class = SysOpsProjectSerializer
+
+#@csrf_exempt
+class SysOpsAgentProjectDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SysOpsProject.objects.all()
+    serializer_class = SysOpsProjectSerializer
+
+
+#SysOps Demand Node Generic Views 
+#@csrf_exempt
+class SysOpsDemandNodeList(generics.ListCreateAPIView):
+    queryset = SysOpsDemandNode.objects.all()
+    serializer_class = SysOpsDemandNodeSerializer
+
+#@csrf_exempt
+class SysOpsDemandNodeDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SysOpsDemandNode.objects.all()
+    serializers_class = SysOpsDemandNodeSerializer
+
+
+#SysOps Supply Node Generic Views
+#@csrf_exempt
+class SysOpsSupplyNodeList(generics.ListCreateAPIView):
+    queryset = SysOpsSupplyNode.objects.all()
+    serializers_class = SysOpsSupplyNodeSerializer
+
+#@csrf_exempt
+class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SysOpsSupplyNode.objects.all()
+    serializer_class = SysOpsSupplyNodeSerializer
+
+
+
+#Stripe Integration Viewset
+
+stripe.api_key='sk_test_51L08MiHqfk1hk8aABrqHYR0aGbxNY3YkKdSmX8VRRSKEVUTmYnvfxert4KnNnAh1R2qSbyRpKiohlYpG8Nfk89vB00W13HuLdg'
+
+
+
+
+#Create a New Stripe Account Endpoint - For Digital Services
+@api_view(['POST'])
+def createStripeAccount(request):
+    newStripeAccount = stripe.Account.create(type="express", 
+                                            country=request.data['country'], 
+                                            email=request.data['email'],
+                                            )
+    
+
+    return Response(newStripeAccount, status=200)
+
+    
+
+#Proceed with Stripe Account Authentication -- Outsourced to Stripe via in-app browser
+#Generates an URL which facilitates on-boaridng via Stripe
+@api_view(['POST'])
+def authenticateStripeAccount(request):
+    stripeAuthLink = stripe.AccountLink.create(
+                                            account=request.data['stripeAccountID'],
+                                            refresh_url="https://example.com/reauth",
+                                            return_url="https://example.com/return",
+                                            type="account_onboarding")
+
+    return Response(stripeAuthLink.url, status=200)
+
+
+
+#Retreive a StripeAccount and store that data in our Database
+@api_view(['POST'])
+def retreiveStripeAccount(request):
+    stripeAccount = stripe.Account.retrieve(request.data['stripeAccountID'])
+
+
+    if stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") == 'active':
+
+        #Check if the StripeAccount already exisst or not?
+        try:
+            existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
+            stripeAccountAuth = "Existing Austhorized Bodega Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
+            return Response(data=stripeAccountAuth, status=200)
+        except:
+            stripeAccountInfo.objects.create(
+            metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+            stripeAccountID = stripeAccount.id, 
+            accountPaymentStatus = True,
+            accountTransfersStatus = True, 
+        )
+            stripeAccountAuth = "New Authorized Bodega Account ID: "+ stripeAccount.id + " | Payout Status: Active"
+            return Response(data=stripeAccountAuth, status=200)
+
+        
+
+    else:
+        return Response(data='Project-Bodega Creator Status: INELIGIBLE FOR PAYOUTS', status=200)
+
+
+#Generic Views for stripeAccountInfo model instance.
+class StripeAccountInfoList(generics.ListCreateAPIView):
+    queryset = stripeAccountInfo.objects.all()
+    serializer_class = stripeAccountInfoSerializer
+
+class StripeAccountInfoDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = stripeAccountInfo.objects.all()
+    serializer_class = stripeAccountInfoSerializer
+
+
+
+
+#Transfer funds to Bodega Merchants via stripeAccountID
+@api_view(['POST'])
+def payoutStripeAccount(request):
+    transferFunds = stripe.Transfer.create(
+        amount=request.data['payoutAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['stripeAccountID'],
+        transfer_group = request.data['orderID'],
+    )
+
+
+    stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['stripeAccountInfoID']),
+                                        transactionID = transferFunds.id, 
+                                        payoutAmount = transferFunds.amount,
+                                        payoutOrderInfo = transferFunds.transfer_group,
+
+    )
+
+    return Response(data="Successfull. TransactionID: "+ transferFunds.id, status=200 )
+    #return Response(data=transferFunds, status=200)
+
+
+#Generic views for Stripe Account Transfer Model  Instance
+class StripeAccountTransferList(generics.ListCreateAPIView):
+    queryset = stripeAccountTransfer.objects.all()
+    serializer_class = stripeAccountTransferSerializer
+
+
+class StripeAccountTransferDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = stripeAccountTransfer.objects.all()
+    serializer_class = stripeAccountTransferSerializer
+
+
+
+#Stripe API Endpoint for listing all transfers
+
+@api_view(['GET'])
+def allStripeTransfers(request):
+    alltransfers = stripe.Transfer.list()
+    return Response(data=alltransfers, status=200)
+
+
+
+#Reversing Transfer Funds to Connected Accounts.
+@api_view(['POST'])
+def reverseFunds(request):
+    refundAmount = stripe.Transfer.create_reversal(
+                                                request.data['transactionID'], 
+                                                amount=request.data['refundAmount']
+    )
+    try:
+        refundObject=stripeAccountTransfer.objects.get(transactionID=request.data['transactionID'])
+        refundObject.payoutAmount=request.data['refundAmount']
+        serializer = stripeAccountTransferSerializer(refundObject)
+        return Response(serializer.data, status=200)
+    except stripeAccountTransfer.DoesNotExist:
+        return Response(data="Transaction ID Invalid", status=404)
+
+
+#Retreive our Stripe Balance and maintain Stripe Balance ledgers
+@api_view(['GET'])
+def retrieveStripeBalance(request):
+    balance = stripe.Balance.retrieve()
+    #accountBalance = stripeAccountBalance.objects.create(
+        #store in Database later. For now, return JSON instead
+    
+    return Response(data=balance, status=200)
+
+
+
+
+#Stripe Code for Creating a new Charge to user's Payment methods.
+
+@api_view(['POST'])
+def createCharge(request):
+    stripeCharge = stripe.PaymentIntent.create(
+                                        amount=request.data['amount'], 
+                                        currency=request.data['currency'], 
+                                        #source='tok_visa,
+                                        payment_method_types=["card"],
+                                        description=request.data['description'],
+                                        customer=request.data['customerID'],
+                                        payment_method= request.data['paymentMethodID']
+    )
+    captureCharge = stripe.PaymentIntent.confirm(stripeCharge.id)
 
     try:
-        message = Message.objects.get(pk=pk)
+        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = bodegaCustomer.objects.get(pk=request.data['bodegaCustomerID']), 
+                                                        amount=request.data['amount'], 
+                                                        currency=request.data['currency'],
+                                                        description=request.data['description'],
+                                                        stripeChargeID = stripeCharge.id, 
+                                                        paymentStatus=True, 
+                                                        capturedStatus=True, 
+                                                        stripeCustomerID = request.data['customerID'],
+                                                        stripePaymentMethodID = request.data['paymentMethodID'])
+                                                        
+        serializer = stripeChargesSerializer(chargeObject)
+        return Response (serializer.data, status=200)
+    except:
+        return Response(data=serializer.errors, status=404)
+
+#Generic Views for stripeCHarges model instance.
+
+class StripeChargesList(generics.ListCreateAPIView):
+    queryset = stripeCharges.objects.all()
+    serializer_class = stripeChargesSerializer
+
+class StripeChargesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = stripeCharges.objects.all()
+    serializer_class = stripeChargesSerializer
+
+
+
+#STRIPE SUBSCRIPTION CODE 
+
+
+#Create a Payment Method which will have customer's credit card information and then pass the PM ID to a new Customer.
+@api_view(['POST'])
+def createStripeCustomer(request):
+
+    customer = stripe.Customer.create(
+                                      name = request.data['name'], 
+                                      email = request.data['email'], 
+                                      
+    )
+    paymentMethod = stripe.PaymentMethod.create(
+                                                type="card", 
+                                                card ={
+                                                    "number" : request.data['number'], 
+                                                    "exp_month": request.data['exp_month'], 
+                                                    "exp_year": request.data['exp_year'],
+                                                    "cvc": request.data['cvc'],
+                                                },
+    )
+    #Attaching Payment method to the Customer ID 
+    attachPaymentMethod = stripe.PaymentMethod.attach(
+                                                        paymentMethod.id, 
+                                                        customer=customer.id,
+    )
+
+    #Setting Invoice Settings for Customer for Subscription Services
+    modifiedCustomer = stripe.Customer.modify(
+                                                customer.id, 
+                                                invoice_settings =
+                                                                    {
+                                                                        "default_payment_method": paymentMethod.id,
+                                                                    }
+                                                
+    )
+    try:
+        customerObject = bodegaCustomer.objects.create(
+                                                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                                        name = request.data['name'],
+                                                        email = request.data['email'],
+                                                        customerID = customer.id,
+                                                        paymentMethodID = paymentMethod.id
+        )
+        serializer = bodegaCustomerSerializer(customerObject)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Payment Method Failed", status=404)
+
+
+#Views for bodegaCustomer Data 
+class bodegaCustomerList(generics.ListCreateAPIView):
+    queryset = bodegaCustomer.objects.all()
+    serializer_class = bodegaCustomerSerializer
+
+class bodegaCustomerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = bodegaCustomer.objects.all()
+    serializer_class = bodegaCustomerSerializer
+
+
+
+#1/2 - first part of creating subscription for creators.
+#the creator creates a Product and Prices it  - Like a tier in subscription design
+@api_view(['POST'])
+def createStripeSubscriptionProduct(request):
+    stripeProduct = stripe.Product.create( 
+                                        name = request.data['subscriptionName'], 
+                                        description = request.data['subscriptionDescription']
+    )
+
+    #Create Price and charging intervals for subscription
+    stripePrice = stripe.Price.create(
+                                        product = stripeProduct.id, 
+                                        unit_amount = request.data['amount'], 
+                                        currency = request.data['currency'], 
+                                        recurring = {"interval": request.data['chargingFrequency']},
+                                        tax_behavior = "inclusive"
+
+    )
+
+    #Store the creators's subscription detail to the DB
+    try:
+        creatorSubscriptionObject = creatorSubscription.objects.create(
+                                                                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                                                        subscriptionName = request.data['subscriptionName'], 
+                                                                        subscriptionDescription = request.data['subscriptionDescription'],
+                                                                        amount =request.data['amount'],
+                                                                        currency=request.data['currency'],
+                                                                        chargingFrequency = request.data['chargingFrequency'],
+                                                                        stripeProductID = stripeProduct.id, 
+                                                                        stripePriceID = stripePrice.id
+        )
+        serializer = creatorSubscriptionSerializer(creatorSubscriptionObject)
+        return Response(serializer.data, status=200)
     
-    except Message.DoesNotExist:
-        return JsonResponse(status=404)
+    except:
+        return Response(data="Unable to create Subscription product", status=404)
 
-    if request.method == 'GET':
-        return JsonResponse(MessageSerializer(message).data)
 
-    elif request.method == 'PUT':
-        serializer = MessageSerializer(message, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+class creatorSubscriptionList(generics.ListCreateAPIView):
+    queryset = creatorSubscription.objects.all()
+    serializer_class = creatorSubscriptionSerializer
 
-    elif request.method == 'DELETE':
-        message.delete()
-        return HttpResponse(status=204)
+class creatorSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = creatorSubscription.objects.all()
+    serializer_class = creatorSubscriptionSerializer
 
 
 
-#----------------------------------------------------------------------------------
+#2/2 - second part of subscription design process
+#Now, the customer comes to the creator and subscribes to their subscription plans
+#We pass the Customer ID and Price ID to the Subscription Object.
 
-#Product Category Model Instance 
-#Fetching data via ProductCategoryID - Child ID - FREE USE
-#No FK relationships here to worry about.
+@api_view(['POST'])
+def subscribe(request):
+    #Pass customerID of the user who wants to subscribe to their subscriptionand price ID which was created by the Creator
+    stripeSubscription = stripe.Subscription.create(
+                                                    customer = request.data['customerID'],
+                                                    items =[
+                                                            {
+                                                                "price": request.data['stripePriceID']
+                                                            }
+                                                    ],
+                                                    payment_settings =[
+                                                                        {
 
-
-@csrf_exempt
-def product_category_list(request):
-
-    if request.method == 'GET':
-        product_category = ProductCategory.objects.all()
-        serializer = ProductCategorySerializer(product_category, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ProductCategorySerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def product_category_detail(request, pk):
-
+                                                                        }
+                                                    ]
+    )
 
     try:
-        product_category = ProductCategory.objects.get(pk=pk)
+        subscribersObject = Subscribers.objects.create(
+                                                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                                        customerID = request.data['customerID'], 
+                                                        priceID = request.data['stripePriceID'],
+                                                        subscriptionID = stripeSubscription.id,
+                                                        productID = stripeSubscription.plan["product"],
+                                                        amount = stripeSubscription.plan["amount"], 
+                                                        invoiceID = stripeSubscription.latest_invoice,
+                                                        status = stripeSubscription.status
+        )
+        serializer = subscribersSerializer(subscribersObject)
+        return Response(serializer.data, status=200)
     
-    except ProductCategory.DoesNotExist:
-        return JsonResponse(status=404)
+    except:
+        return Response(data="Unable to Subscribe", status=404)
 
-    if request.method == 'GET':
-        return JsonResponse(ProductCategorySerializer(product_category).data)
 
-    elif request.method == 'PUT':
-        serializer = ProductCategorySerializer(product_category, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
 
-    elif request.method == 'DELETE':
-        product_category.delete()
-        return HttpResponse(status=204)
 
+#Notification View Settings
+class notificationsList(generics.ListCreateAPIView):
+    queryset = Notifications.objects.all()
+    serializer_class = notificationsSerializer
 
+class notificationsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Notifications.objects.all()
+    serializer_class = notificationsSerializer
 
 
 
-#----------------------------------------------------------------------------------
-
-#Product Theme Model Instance 
-#Fetching data via ProductThemeID - Child ID - FREE USE
-#No FK relationships here to worry about.
-
-
-@csrf_exempt
-def product_theme_list(request):
-
-    if request.method == 'GET':
-        product_theme = ProductThemes.objects.all()
-        serializer = ProductThemesSerializer(product_theme, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ProductThemesSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def product_theme_detail(request, pk):
-
-
-    try:
-        product_theme = ProductThemes.objects.get(pk=pk)
-    
-    except ProductThemes.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ProductThemesSerializer(product_theme).data)
-
-    elif request.method == 'PUT':
-        serializer = ProductThemesSerializer(product_theme, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        product_theme.delete()
-        return HttpResponse(status=204)
-
-
-
-
-
-#----------------------------------------------------------------------------------
-
-#Discount Model Instance 
-#Fetching data via DiscountID - Child ID - FREE USE
-#One FK with MetaUser --> But read_only is sufficient.
-
-
-@csrf_exempt
-def discount_list(request):
-
-    if request.method == 'GET':
-        discount = Discount.objects.all()
-        serializer = DiscountSerializer(discount, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = DiscountSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def discount_detail(request, pk):
-
-
-    try:
-        discount = Discount.objects.get(pk=pk)
-    
-    except Discount.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(DiscountSerializer(discount).data)
-
-    elif request.method == 'PUT':
-        serializer = DiscountSerializer(discount, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        discount.delete()
-        return HttpResponse(status=204)
-
-
-
-
-
-#----------------------------------------------------------------------------------
-
-#Social Model Instance 
-#Fetching data via SocialID - Child ID - FREE USE
-#One FK with MetaUser --> use metauser_social/<parent_ID=pk>/ to access via UserID
-#But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser 
-
-
-@csrf_exempt
-def social_list(request):
-
-    if request.method == 'GET':
-        social = Social.objects.all()
-        serializer = SocialSerializer(social, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = SocialSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def social_detail(request, pk):
-
-
-    try:
-        social = Social.objects.get(pk=pk)
-    
-    except Social.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SocialSerializer(social).data)
-
-    elif request.method == 'PUT':
-        serializer = SocialSerializer(social, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        social.delete()
-        return HttpResponse(status=204)
-
-
-
-#Fetching data via User_ID - Parent Table ID - RESTRICTED USE
-
-@csrf_exempt
-def parent_social_detail(request, pk):
-
-
-    try:
-        social = Social.objects.get(user_ID=pk)
-    
-    except Social.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SocialSerializer(social).data)
-
-    elif request.method == 'PUT':
-        serializer = SocialSerializer(social, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        social.delete()
-        return HttpResponse(status=204)
-
-
-
-
-#----------------------------------------------------------------------------------
-
-#Shop Model Instance 
-#Fetching data via ShopID - Child ID - FREE USE
-#One FK with MetaUser --> use metauser_shop/<parent_ID=pk>/ to access via UserID
-#But access via UserID is RESTRCITED ACCESS - We onky want one source of manipulation for MetaUser - For security purposes
-
-
-@csrf_exempt
-def shop_list(request):
-
-    if request.method == 'GET':
-        shop = Shop.objects.all()
-        serializer = ShopSerializer(shop, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ShopSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def shop_detail(request, pk):
-
-
-    try:
-        shop = Shop.objects.get(pk=pk)
-    
-    except Shop.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ShopSerializer(shop).data)
-
-    elif request.method == 'PUT':
-        serializer = ShopSerializer(shop, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        shop.delete()
-        return HttpResponse(status=204)
-
-
-
-#Fetching data via User_ID - Parent Table ID - RESTRICTED USE
-
-@csrf_exempt
-def parent_shop_detail(request, pk):
-
-
-    try:
-        shop = Shop.objects.get(user_ID=pk)
-    
-    except Shop.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ShopSerializer(shop).data)
-
-    elif request.method == 'PUT':
-        serializer = ShopSerializer(shop, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        shop.delete()
-        return HttpResponse(status=204)
-
-
-#----------------------------------------------------------------------------------
-
-#Product MetaData Instance 
-@csrf_exempt
-def product_metadata_list(request):
-
-    if request.method == 'GET':
-        product_metadata = ProductMetaData.objects.all()
-        serializer = ProductMetaDataSerializer(product_metadata, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ProductMetaDataSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def product_metadata_detail(request, pk):
-
-
-    try:
-        product_metadata = ProductMetaData.objects.get(pk=pk)
-    
-    except ProductMetaData.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ProductMetaDataSerializer(product_metadata).data)
-
-    elif request.method == 'PUT':
-        serializer = ProductMetaDataSerializer(product_metadata, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        product_metadata.delete()
-        return HttpResponse(status=204)
-
-
-#----------------------------------------------------------------------------------
-
-#Product Model Instance 
-#Fetching data via ProductID - Child ID - FREE USE - syntax: bodega-api/product/1/
-#5 FK's - user_ID, product_categoryID, product_themesID, discount_ID, shop_ID
-#Access Shop by user_ID and shop_ID as well
-#Syntax1: bodega-api/product/user_ID=<int:pk>/
-#Syntax2: bodega-api/product/shop_ID=<int:pk>
-#These endpoints can be coded later - they need few edits to QuerySet - but this is not urgent  
-
-
-@csrf_exempt
-def product_list(request):
-
-    if request.method == 'GET':
-        product = Product.objects.all()
-        serializer = ProductSerializer(product, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ProductSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def product_detail(request, pk):
-
-
-    try:
-        product = Product.objects.get(pk=pk)
-    
-    except Product.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ProductSerializer(product).data)
-
-    elif request.method == 'PUT':
-        serializer = ProductSerializer(product, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        product.delete()
-        return HttpResponse(status=204)
-
-#-----------------------------------------------------------------------------------------------------------------------------------
-
-#Product Ownership Ledger Instance 
-#I designed another table for it -- because I wanted this to be as loosely coupled as possible  
-#Because this data will be changed dynamically - 
-#this is DevSecOps --> quality over quantity
-
-@csrf_exempt
-def product_ownershipLedger_list(request):
-
-    if request.method == 'GET':
-        product_ownershipLedger = ProductOwnershipLedger.objects.all()
-        serializer = ProductOwnershipLedgerSerializer(product_ownershipLedger, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ProductOwnershipLedgerSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def product_ownershipLedger_detail(request, pk):
-
-
-    try:
-        product_ownershipLedger = ProductOwnershipLedger.objects.get(pk=pk)
-    
-    except ProductOwnershipLedger.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ProductOwnershipLedgerSerializer(product_ownershipLedger).data)
-
-    elif request.method == 'PUT':
-        serializer = ProductOwnershipLedgerSerializer(product_ownershipLedger, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        product_ownershipLedger.delete()
-        return HttpResponse(status=204)
-
-
-
-
-
-#----------------------------------------------------------------------------------
-
-#Collaboration Model Instance 
-#Fetching data via CollaborationID - Child ID - FREE USE - syntax: bodega-api/collaboration/1/
-
-
-
-@csrf_exempt
-def collaboration_list(request):
-
-    if request.method == 'GET':
-        collaboration = Collaboration.objects.all()
-        serializer = CollaborationSerializer(collaboration, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = CollaborationSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def collaboration_detail(request, pk):
-
-
-    try:
-        collaboration = Collaboration.objects.get(pk=pk)
-    
-    except Collaboration.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(CollaborationSerializer(collaboration).data)
-
-    elif request.method == 'PUT':
-        serializer = CollaborationSerializer(collaboration, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        collaboration.delete()
-        return HttpResponse(status=204)
-
-
-
-#Shopping Session Views 
-@csrf_exempt
-def shopping_session_list(request):
-
-    if request.method == 'GET':
-        shopping_session = ShoppingSession.objects.all()
-        serializer = ShoppingSessionSerializer(shopping_session, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = ShoppingSessionSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def shopping_session_detail(request, pk):
-
-
-    try:
-        shopping_session = ShoppingSession.objects.get(pk=pk)
-    
-    except ShoppingSession.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(ShoppingSessionSerializer(shopping_session).data)
-
-    elif request.method == 'PUT':
-        serializer = ShoppingSessionSerializer(shopping_session, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        shopping_session.delete()
-        return HttpResponse(status=204)
-
-
-
-
-
-
-#Cart Item Views 
-@csrf_exempt
-def cart_item_list(request):
-
-    if request.method == 'GET':
-        cart_item = CartItem.objects.all()
-        serializer = CartItemSerializer(cart_item, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = CartItemSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> dev
-@csrf_exempt
-def cart_item_detail(request, pk):
-
-
-    try:
-        cart_item = CartItem.objects.get(pk=pk)
-    
-    except CartItem.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(CartItemSerializer(cart_item).data)
-
-    elif request.method == 'PUT':
-        serializer = CartItemSerializer(cart_item, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        cart_item.delete()
-        return HttpResponse(status=204)
-
-
-
-
-#Order Detail Views 
-@csrf_exempt
-def order_detail_list(request):
-
-    if request.method == 'GET':
-        order_detail = OrderDetail.objects.all()
-        serializer = OrderDetailsSerializer(order_detail, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = OrderDetailsSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def order_detail_detail(request, pk):
-
-
-    try:
-        order_detail = OrderDetail.objects.get(pk=pk)
-    
-    except OrderDetail.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(OrderDetailsSerializer(order_detail).data)
-
-    elif request.method == 'PUT':
-        serializer = OrderDetailsSerializer(order_detail, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        order_detail.delete()
-        return HttpResponse(status=204)
-
-
-
-
-
-
-
-#Order Item Views 
-@csrf_exempt
-def order_item_list(request):
-
-    if request.method == 'GET':
-        order_item = OrderItem.objects.all()
-        serializer = OrderItemSerializer(order_item, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = OrderItemSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def order_item_detail(request, pk):
-
-
-    try:
-        order_item = OrderItem.objects.get(pk=pk)
-    
-    except OrderItem.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(OrderItemSerializer(order_item).data)
-
-    elif request.method == 'PUT':
-        serializer = OrderItemSerializer(order_item, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        order_item.delete()
-        return HttpResponse(status=204)
-    
-    
-    
-
-
-#SysOpsAgent Views
-@csrf_exempt
-def sysops_agent_list(request):
-
-    if request.method == 'GET':
-        sysops_agent = SysOpsAgent.objects.all()
-        serializer = SysOpsAgentSerializer(sysops_agent, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = SysOpsAgentSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def sysops_agent_detail(request, pk):
-
-
-    try:
-        sysops_agent = SysOpsAgent.objects.get(pk=pk)
-    
-    except SysOpsAgent.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SysOpsAgentSerializer(sysops_agent).data)
-
-    elif request.method == 'PUT':
-        serializer = SysOpsAgentSerializer(sysops_agent, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        sysops_agent.delete()
-        return HttpResponse(status=204)
-    
-    
-    
-    
-
-
-
-
-#SysOpsAgent Repo Views
-@csrf_exempt
-def sysops_agent_repo_list(request):
-
-    if request.method == 'GET':
-        sysops_agent_repo = SysOpsAgentRepo.objects.all()
-        serializer = SysOpsAgentRepoSerializer(sysops_agent_repo, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = SysOpsAgentRepoSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def sysops_agent_repo_detail(request, pk):
-
-
-    try:
-        sysops_agent_repo = SysOpsAgentRepo.objects.get(pk=pk)
-    
-    except SysOpsAgentRepo.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SysOpsAgentRepoSerializer(sysops_agent_repo).data)
-
-    elif request.method == 'PUT':
-        serializer = SysOpsAgentRepoSerializer(sysops_agent_repo, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        sysops_agent_repo.delete()
-        return HttpResponse(status=204)
-    
-    
-    
-
-
-
-
-#SysOpsAgent Project Views
-@csrf_exempt
-def sysops_agent_project_list(request):
-
-    if request.method == 'GET':
-        sysops_agent_project = SysOpsProject.objects.all()
-        serializer = SysOpsProjectSerializer(sysops_agent_project, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = SysOpsProjectSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def sysops_agent_project_detail(request, pk):
-
-
-    try:
-        sysops_agent_project = SysOpsProject.objects.get(pk=pk)
-    
-    except SysOpsProject.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SysOpsProjectSerializer(sysops_agent_project).data)
-
-    elif request.method == 'PUT':
-        serializer = SysOpsProjectSerializer(sysops_agent_project, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        sysops_agent_project.delete()
-        return HttpResponse(status=204)
-    
-    
-    
-    
-
-
-#SysOpsDemandNode Views
-@csrf_exempt
-def sysopsdemandnode_list(request):
-
-    if request.method == 'GET':
-        sysopsdemandnode = SysOpsDemandNode.objects.all()
-        serializer = SysOpsDemandNodeSerializer(sysopsdemandnode, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = SysOpsDemandNodeSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def sysopsdemandnode_detail(request, pk):
-
-
-    try:
-        sysopsdemandnode = SysOpsDemandNode.objects.get(pk=pk)
-    
-    except SysOpsDemandNode.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SysOpsDemandNodeSerializer(sysopsdemandnode).data)
-
-    elif request.method == 'PUT':
-        serializer = SysOpsDemandNodeSerializer(sysopsdemandnode, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        sysopsdemandnode.delete()
-        return HttpResponse(status=204)
-    
-    
-    
-    
-
-
-
-#SysOpsSupplyNode Views
-@csrf_exempt
-def sysopssupplynode_list(request):
-
-    if request.method == 'GET':
-        sysopssupplynode = SysOpsSupplyNode.objects.all()
-        serializer = SysOpsSupplyNodeSerializer(sysopssupplynode, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        serializer = SysOpsSupplyNodeSerializer(data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def sysopssupplynode_detail(request, pk):
-
-
-    try:
-        sysopssupplynode = SysOpsSupplyNode.objects.get(pk=pk)
-    
-    except SysOpsSupplyNode.DoesNotExist:
-        return JsonResponse(status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(SysOpsSupplyNodeSerializer(sysopssupplynode).data)
-
-    elif request.method == 'PUT':
-        serializer = SysOpsSupplyNodeSerializer(sysopssupplynode, data=JSONParser().parse(request))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        sysopssupplynode.delete()
-        return HttpResponse(status=204)
-    
+@api_view(['POST'])
+def FetchNotificationsByMetaUserID(request):
+    try: 
+        instance = Notifications.objects.filter(metauserID=request.data['metauserID'])
+        serializer = notificationsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Notifications.DoesNotExist:
+        return Response(data="No Notifications Found", status=404)

@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, Message, MetaUser, OrderDetail, OrderItem, Particpant, Product, ProductCategory, ProductThemes, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription,  Shop, ShopPayout, ShoppingSession, Social, Solomonv0, SysOpsAgent, SysOpsAgentRepo, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, UserType, SentinoSelfDescription, ProductOwnershipLedger
+
+from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, Message, MetaUser, OrderDetail, OrderItem, Participant, Product, ProductCategory, BoostTags, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription,  Shop, ShopPayout, ShoppingSession, Social, Solomonv0, SysOpsAgent, SysOpsAgentRepo, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, UserType, SentinoSelfDescription
+
 
 
 #User Type Models
@@ -12,12 +14,12 @@ admin.site.register(UserType)
 
 #Message Model
 admin.site.register(ChatRoom)
-admin.site.register(Particpant)
+admin.site.register(Participant)
 admin.site.register(Message)
 
 #Products Assets
 admin.site.register(ProductCategory)
-admin.site.register(ProductThemes)
+admin.site.register(BoostTags)
 admin.site.register(Discount)
 admin.site.register(Collaboration)
 admin.site.register(Social)
