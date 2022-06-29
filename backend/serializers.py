@@ -412,3 +412,8 @@ class notificationsSerializer(serializers.ModelSerializer):
         model = Notifications
         fields = '__all__'
 
+
+class bodegaCustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bodegaCustomer
+        fields = '__all__'

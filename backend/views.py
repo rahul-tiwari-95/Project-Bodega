@@ -907,30 +907,33 @@ def retrieveStripeBalance(request):
 
 @api_view(['POST'])
 def createCharge(request):
-    stripeCharge = stripe.Charge.create(
+    stripeCharge = stripe.PaymentIntent.create(
                                         amount=request.data['amount'], 
                                         currency=request.data['currency'], 
-                                        source='tok_visa', 
-                                        description=request.data['description']
+                                        #source='tok_visa,
+                                        payment_method_types=["card"],
+                                        description=request.data['description'],
+                                        customer=request.data['customerID'],
+                                        payment_method= request.data['paymentMethodID']
     )
-    stripeCustomer = stripe.Customer.create()
+    captureCharge = stripe.PaymentIntent.confirm(stripeCharge.id)
 
     try:
-        chargeObject=stripeCharges.objects.create(amount=request.data['amount'], 
+        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = bodegaCustomer.objects.get(pk=request.data['bodegaCustomerID']), 
+                                                        amount=request.data['amount'], 
                                                         currency=request.data['currency'],
                                                         description=request.data['description'],
-                                                        stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['stripeAccountInfoID']),
                                                         stripeChargeID = stripeCharge.id, 
-                                                        capturedStatus=stripeCharge.captured,
-                                                        riskScore=stripeCharge.outcome['risk_score'], 
-                                                        last4=stripeCharge.source['last4'], 
                                                         paymentStatus=True, 
-                                                        stripeCustomerID = stripeCustomer.id)
+                                                        capturedStatus=True, 
+                                                        stripeCustomerID = request.data['customerID'],
+                                                        stripePaymentMethodID = request.data['paymentMethodID'])
+                                                        
         serializer = stripeChargesSerializer(chargeObject)
         return Response (serializer.data, status=200)
     except:
-        return Response(data="Payment Failed", status=200)
-    
+        return Response(data=serializer.errors, status=404)
+
 #Generic Views for stripeCHarges model instance.
 
 class StripeChargesList(generics.ListCreateAPIView):
@@ -979,11 +982,28 @@ def createStripeCustomer(request):
                                                                     }
                                                 
     )
+    try:
+        customerObject = bodegaCustomer.objects.create(
+                                                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                                        name = request.data['name'],
+                                                        email = request.data['email'],
+                                                        customerID = customer.id,
+                                                        paymentMethodID = paymentMethod.id
+        )
+        serializer = bodegaCustomerSerializer(customerObject)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Payment Method Failed", status=404)
 
-    return Response(data=modifiedCustomer, status=200)
 
+#Views for bodegaCustomer Data 
+class bodegaCustomerList(generics.ListCreateAPIView):
+    queryset = bodegaCustomer.objects.all()
+    serializer_class = bodegaCustomerSerializer
 
-
+class bodegaCustomerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = bodegaCustomer.objects.all()
+    serializer_class = bodegaCustomerSerializer
 
 
 

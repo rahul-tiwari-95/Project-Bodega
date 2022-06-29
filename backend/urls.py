@@ -70,6 +70,9 @@ urlpatterns = [
     #Create Stripe Customer Objects
     path('bodegaCreators/createCustomer/', views.createStripeCustomer),
 
+    path('bodegaCreators/allCustomers/', views.bodegaCustomerList.as_view()),
+    path('bodegaCreators/allCustomers/<int:pk>/', views.bodegaCustomerDetail.as_view()),
+
     #Create Subscription Product and Price it - For Creators
     path('bodegaCreators/createSubscription/', views.createStripeSubscriptionProduct),
 
@@ -99,9 +102,6 @@ urlpatterns = [
     
     #METAUSER API ENDPOINTS via passcode=pk
     path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
-
-    
-
     #KILL SWITCH API
     path('bodega-api/killswitch/', views.killswitch),
 

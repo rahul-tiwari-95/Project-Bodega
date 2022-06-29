@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 import datetime
 
+
 # 95% efficiency
 # 99% particpation - HUNTER X
 
@@ -189,19 +190,34 @@ class stripeAccountBalance(models.Model):
 
 
 
+
+class bodegaCustomer(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    name = models.CharField(default='John Doe', max_length=255)
+    email = models.CharField(default="johndoe@email.com", max_length=255)
+    customerID = models.CharField(max_length=500)
+    paymentMethodID = models.CharField(max_length=500)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
+
+
 class stripeCharges(models.Model):
-    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    bodegaCustomerID = models.ForeignKey(bodegaCustomer, on_delete=models.PROTECT)
     stripeChargeID = models.CharField(max_length=300)
     stripeCustomerID = models.CharField(max_length=400)
+    stripePaymentMethodID = models.CharField(max_length=400, default='None', blank=True)
     amount = models.FloatField(default=0.0)
     currency = models.TextField(default='us')
     description = models.CharField(max_length=400)
     capturedStatus = models.BooleanField(default=False)
-    riskScore = models.IntegerField(default=0)
-    last4 = models.IntegerField(default=0)
     paymentStatus = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+
+
+
 
 
 class creatorSubscription(models.Model):
@@ -509,7 +525,7 @@ class ChatRoom(models.Model):
     # Chat_Room ID will be created automatically by PostGre
     name = models.TextField(unique=True)
     desc = models.TextField(default='Why was this room created?')
-    rules = models.TextField(default='Your room, Your rules')
+    tags = models.TextField(default='#ROOM')
     type_of_room = models.TextField(choices=[
         # only people with meta_key can join the secure_room
         ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),
@@ -518,8 +534,7 @@ class ChatRoom(models.Model):
         # leads ro the deletion of the room
         ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')
     ])
-    # gives control of room back to the user
-    is_room_active = models.BooleanField(default=True)
+    isRoomPrivate = models.BooleanField(default=True)
     room_hashkey = models.TextField(
         default=chatroom_hashkey_generator, unique=True)
     modified_on =models.DateTimeField(auto_now_add=True)
