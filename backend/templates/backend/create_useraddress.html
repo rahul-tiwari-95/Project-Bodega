@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a MetaUser Address</title>
+</head>
+
+<body>
+    <h1>Create Address for {{ metauserID.meta_username }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {{ formset.as_p }}
+        <button>Submit</button>
+    </form>
+    
+    <hr>
+
+    <h2>User Addresses</h2>
+    {% for address in useraddress %}
+    <p>{{ address.address_line1 }} - {{ book.city }}</p>
+    {% endfor %}
+</body>
+
+</html>

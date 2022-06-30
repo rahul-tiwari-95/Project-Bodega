@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import BLAScore, BodegaCognitiveInventory, BodegaCognitiveItem, BodegaCognitivePerson, BodegaDept, BodegaFace, BodegaPersonalizer, BodegaVision, CartItem, ChatRoom, Collaboration, Discount, Level, Message, MetaUser, OrderDetail, OrderItem, Participant, Product, ProductCategory, BoostTags, ProductMetaData, SentinoInventory, SentinoItemClassification, SentinoItemProjection, SentinoItemProximity, SentinoProfile, SentinoSelfDescription,  Shop, ShopPayout, ShoppingSession, Social, Solomonv0, SysOpsAgent, SysOpsAgentRepo, SysOpsDemandNode, SysOpsProject, SysOpsSupplyNode, UserAddress, UserPayment, UserType, SentinoSelfDescription
+
 
 
 #User Type Models
