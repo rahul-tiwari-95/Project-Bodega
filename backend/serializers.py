@@ -415,5 +415,5 @@ class notificationsSerializer(serializers.ModelSerializer):
 
 class bodegaCustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bodegaCustomer
+        model = customerPayment
         fields = '__all__'

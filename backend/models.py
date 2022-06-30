@@ -191,7 +191,9 @@ class stripeAccountBalance(models.Model):
 
 
 
-class bodegaCustomer(models.Model):
+
+
+class customerPayment(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     name = models.CharField(default='John Doe', max_length=255)
     email = models.CharField(default="johndoe@email.com", max_length=255)
@@ -202,9 +204,8 @@ class bodegaCustomer(models.Model):
 
 
 
-
 class stripeCharges(models.Model):
-    bodegaCustomerID = models.ForeignKey(bodegaCustomer, on_delete=models.PROTECT)
+    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.PROTECT)
     stripeChargeID = models.CharField(max_length=300)
     stripeCustomerID = models.CharField(max_length=400)
     stripePaymentMethodID = models.CharField(max_length=400, default='None', blank=True)
@@ -800,6 +801,8 @@ class MunchiesVideo(models.Model):
 
 
 
+
+
 # Collaboration model allows all types of users to collaborate on any asset on the TRILL ecosystem and do business
 # many creators can collaborate with many products. but one product / asset at one time can have only one ownership / collab ID
 class Collaboration(models.Model):
@@ -812,9 +815,9 @@ class Collaboration(models.Model):
         ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
     ])
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    product_ID = models.ForeignKey(Product,
-                                   on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
-    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
+
+    product_ID = models.ForeignKey(Product,on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
+    shop_ID = models.ForeignKey(Shop,on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
     # product_shop_ID should be EQUAL to shop_ID to verify identity that both metauserIDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[  # the bid from the creator's side - because freedom of choice

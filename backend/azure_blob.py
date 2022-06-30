@@ -1,16 +1,16 @@
 from storages.backends.azure_storage import AzureStorage
 
 class AzureMediaStorage(AzureStorage):
-    account_name = 'bdgdaostorage'
-    account_key = '6vYZVHMx6RyHkelHJtPzufT+TWFrX8lg3Abxci8pQDzq1RUcPHCQMB54vKZIfYfapl+uRZzHRB0VpHD+RwNoqA=='
+    account_name = 'projectbodegadb'
+    account_key = 'oPxyq+14Ob7BGY2fkSKsEQPiObqqUPfS+s1zvKd4jUdLb1UZ+XzC5Lg4p2WVGgeUjDF5A2wNpPqO+AStDGmBJw=='
     azure_container ='media'
     expiration_secs = None
     
     
 
 class AzureStaticStorage(AzureStorage):
-    account_name = 'bdgdaostorage'
-    account_key = '6vYZVHMx6RyHkelHJtPzufT+TWFrX8lg3Abxci8pQDzq1RUcPHCQMB54vKZIfYfapl+uRZzHRB0VpHD+RwNoqA=='
+    account_name = 'projectbodegadb'
+    account_key = 'oPxyq+14Ob7BGY2fkSKsEQPiObqqUPfS+s1zvKd4jUdLb1UZ+XzC5Lg4p2WVGgeUjDF5A2wNpPqO+AStDGmBJw=='
     azure_container ='static'
     expiration_secs = None
     

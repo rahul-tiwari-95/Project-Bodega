@@ -117,7 +117,7 @@ ASGI_APPLICATION = 'trill.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'testdb',
+        'NAME': 'projectbodegadb',
         'USER': 'postgres',
         'PASSWORD': '043074',
         'HOST': '127.0.0.1',
@@ -175,10 +175,12 @@ STATICFILES_STORAGE = 'backend.azure_blob.AzureStaticStorage'
 STATIC_LOCATION = "static"
 MEDIA_LOCATION = "media"
 
-AZURE_ACCOUNT_NAME = 'bdgdaostorage'
+AZURE_ACCOUNT_NAME = 'projectbodegadb'
 AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
 STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+
+
 
 
 

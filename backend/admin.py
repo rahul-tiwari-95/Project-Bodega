@@ -24,6 +24,7 @@ admin.site.register(Social)
 admin.site.register(Shop)
 admin.site.register(Product)
 admin.site.register(ProductMetaData)
+#admin.site.register(ProductOwnershipLedger)
 
 
 #Cart & Checkout Tables - No need to be filled 

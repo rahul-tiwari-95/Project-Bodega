@@ -181,7 +181,6 @@ def cartbymetauser(request, pk):
     return Response(serializer.data, status=200)
 
 
-
 #Fetch Shop data by metauserID
 @api_view(['POST'])
 def FetchShopByMetaUserID(request):
@@ -244,8 +243,16 @@ def productsByMetaUser(request):
 #Sample views testing the Stripe integration [TEST MODE]
 #Comment these views when you go to production mode with SWIFT as the Frontend.
 
+#     elif request.method == 'POST':
+#         serializer = ProductOwnershipLedgerSerializer(data=JSONParser().parse(request))
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse(serializer.data, status=201)
+#         return JsonResponse(serializer.errors, status=400)
 
 
+# @csrf_exempt
+# def product_ownershipLedger_detail(request, pk):
 
 
 
@@ -316,6 +323,10 @@ class SentinoItemClassificationDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SentinoItemClassification.objects.all()
     serializer_class = SentinoItemClassificationSerializer
 
+#@csrf_exempt
+class BLAScoreDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BLAScore.objects.all()
+    serializer_class = BLASerializer
 
 #Sentino Inventory Model Generic Views 
 #@csrf_exempt
@@ -339,7 +350,6 @@ class SentinoDescriptionList(generics.ListCreateAPIView):
 class SentinoDescriptionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SentinoSelfDescription.objects.all()
     serializer_class = SentinoDescriptionSerializer
-
 
 #Sentino Profile Generic Views
 #@csrf_exempt
@@ -411,6 +421,86 @@ class BodegaCognitiveInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BodegaCognitiveInventory.objects.all()
     serializer_class = BodegaCognitiveInventorySerializer
 
+#Sentino Profile Generic Views
+#@csrf_exempt
+class SentinoProfileList(generics.ListCreateAPIView):
+    queryset = SentinoProfile.objects.all()
+    serializer_class = SentinoProfileSerializer
+
+#@csrf_exempt
+class SentinoProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoProfile.objects.all()
+    serializer_class = SentinoProfileSerializer
+
+#Bodega Vision Generic Views
+#@csrf_exempt
+class BodegaVisionList(generics.ListCreateAPIView):
+    queryset = BodegaVision.objects.all()
+    serializer_class = BodegaVisionSerializer
+
+#@csrf_exempt
+class BodegaVisionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaVision.objects.all()
+    serializer_class = BodegaVisionSerializer
+
+
+#Bodega Face Generic Views
+#@csrf_exempt
+class BodegaFaceList(generics.ListCreateAPIView):
+    queryset = BodegaFace.objects.all()
+    serializer_class = BodegaFaceSerializer
+
+#@csrf_exempt
+class BodegaFaceDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaFace.objects.all()
+    serializer_class = BodegaFaceSerializer
+
+
+#Bodega Personalizer Generic Views
+#@csrf_exempt
+class BodegaPersonalizerList(generics.ListCreateAPIView):
+    queryset = BodegaPersonalizer.objects.all()
+    serializer_class = BodegaPersonalizerSerializer
+
+#@csrf_exempt
+class BodegaPersonalizerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaPersonalizer.objects.all()
+    serializer_class = BodegaPersonalizerSerializer
+
+
+#Bodega Cognitive Item Generic Views 
+#@csrf_exempt
+class BodegaCognitiveItemList(generics.ListCreateAPIView):
+    queryset = BodegaCognitiveItem.objects.all()
+    serializer_class = BodegaCongnitiveItemSerializer
+
+#@csrf_exempt
+class BodegaCognitiveItemDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitiveItem.objects.all()
+    serializer_class = BodegaCongnitiveItemSerializer
+    
+
+#Bodega Cognitive Inventory Generic Views
+#@csrf_exempt
+class BodegaCognitiveInventoryList(generics.ListCreateAPIView):
+    queryset = BodegaCognitiveInventory.objects.all()
+    serializer_class = BodegaCognitiveInventorySerializer
+
+#@csrf_exempt
+class BodegaCognitiveInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitiveInventory.objects.all()
+    serializer_class = BodegaCognitiveInventorySerializer
+
+#Bodega Cognitive Person Generic Views
+#@csrf_exempt
+class BodegaCognitivePersonList(generics.ListCreateAPIView):
+    queryset = BodegaCognitivePerson.objects.all()
+    serializer_class = BodegaCognitivePersonSerializer
+
+#@csrf_exempt
+class BodegaCognitivePersonDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitivePerson.objects.all()
+    serializer_class = BodegaCognitivePersonSerializer
 
 #Bodega Cognitive Person Generic Views
 #@csrf_exempt
@@ -459,6 +549,11 @@ class UserPaymentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserPayment.objects.all()
     serializer_class = UserPaymentSerializer
 
+#User Type Generic Views
+#@csrf_exempt
+class UserTypeList(generics.ListCreateAPIView):
+    queryset = UserType.objects.all()
+    serializer_class = UserTypeSerializer
 
 #User Type Generic Views
 #@csrf_exempt
@@ -483,6 +578,11 @@ class ChatRoomDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
 
+#Particpant Generic Views
+#@csrf_exempt
+class ParticipantList(generics.ListCreateAPIView):
+    queryset = Participant.objects.all()
+    serializer_class = ParticipantSerializer
 
 #Particpant Generic Views
 #@csrf_exempt
@@ -495,6 +595,16 @@ class ParticpiantDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Participant.objects.all()
     serializer_class = ParticipantSerializer
 
+#Message Generic Views 
+#@csrf_exempt
+class MessageList(generics.ListCreateAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+#@csrf_exempt
+class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
 
 #Message Generic Views 
 #@csrf_exempt
@@ -520,6 +630,11 @@ class ProductCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer 
 
+#Product Theme Generic Views
+#@csrf_exempt
+class BoostTagsList(generics.ListCreateAPIView):
+    queryset = BoostTags.objects.all()
+    serializer_class = BoostTagsSerializer
 
 #Product Theme Generic Views
 #@csrf_exempt
@@ -556,6 +671,11 @@ class SocialDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Social.objects.all()
     serializer_class = SocialSerializer
 
+#Shop Generic Views
+#@csrf_exempt
+class ShopList(generics.ListCreateAPIView):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
 
 #Shop Generic Views
 #@csrf_exempt
@@ -605,6 +725,11 @@ class MunchiesPageDetail(generics.RetrieveUpdateDestroyAPIView):
     from .serializers import MunchiesPageSerializer
     serializer_class = MunchiesPageSerializer
 
+#Shopping Session Generic Views 
+#@csrf_exempt
+class ShoppingSessionList(generics.ListCreateAPIView):
+    queryset = ShoppingSession.objects.all()
+    serializer_class = ShoppingSessionSerializer
 
 class MunchiesVideoList(generics.ListCreateAPIView):
     from .models import MunchiesVideo
@@ -710,6 +835,7 @@ class SysOpsAgentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SysOpsAgent.objects.all()
     serializer_class = SysOpsAgentSerializer
 
+#Stripe Integration Viewset
 
 #SysOps Agent Repo Generic View
 #@csrf_exempt
@@ -734,6 +860,10 @@ class SysOpsAgentProjectDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SysOpsProject.objects.all()
     serializer_class = SysOpsProjectSerializer
 
+#Retreive a StripeAccount and store that data in our Database
+@api_view(['POST'])
+def retreiveStripeAccount(request):
+    stripeAccount = stripe.Account.retrieve(request.data['stripeAccountID'])
 
 #SysOps Demand Node Generic Views 
 #@csrf_exempt
@@ -764,9 +894,6 @@ class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 stripe.api_key='sk_test_51L08MiHqfk1hk8aABrqHYR0aGbxNY3YkKdSmX8VRRSKEVUTmYnvfxert4KnNnAh1R2qSbyRpKiohlYpG8Nfk89vB00W13HuLdg'
 
-
-
-
 #Create a New Stripe Account Endpoint - For Digital Services
 @api_view(['POST'])
 def createStripeAccount(request):
@@ -775,7 +902,9 @@ def createStripeAccount(request):
                                             email=request.data['email'],
                                             )
     
+
     return Response(newStripeAccount, status=200)
+
     
 
 #Proceed with Stripe Account Authentication -- Outsourced to Stripe via in-app browser
@@ -832,6 +961,7 @@ class StripeAccountInfoDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 
+
 #Transfer funds to Bodega Merchants via stripeAccountID
 @api_view(['POST'])
 def payoutStripeAccount(request):
@@ -842,6 +972,7 @@ def payoutStripeAccount(request):
         transfer_group = request.data['orderID'],
     )
 
+
     stripeAccountTransfer.objects.create(
                                         stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['stripeAccountInfoID']),
                                         transactionID = transferFunds.id, 
@@ -851,7 +982,6 @@ def payoutStripeAccount(request):
     )
 
     return Response(data="Successfull. TransactionID: "+ transferFunds.id, status=200 )
-    #return Response(data=transferFunds, status=200)
 
 
 #Generic views for Stripe Account Transfer Model  Instance
@@ -919,7 +1049,7 @@ def createCharge(request):
     captureCharge = stripe.PaymentIntent.confirm(stripeCharge.id)
 
     try:
-        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = bodegaCustomer.objects.get(pk=request.data['bodegaCustomerID']), 
+        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']), 
                                                         amount=request.data['amount'], 
                                                         currency=request.data['currency'],
                                                         description=request.data['description'],
@@ -983,7 +1113,7 @@ def createStripeCustomer(request):
                                                 
     )
     try:
-        customerObject = bodegaCustomer.objects.create(
+        customerObject = customerPayment.objects.create(
                                                         metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
                                                         name = request.data['name'],
                                                         email = request.data['email'],
@@ -998,11 +1128,11 @@ def createStripeCustomer(request):
 
 #Views for bodegaCustomer Data 
 class bodegaCustomerList(generics.ListCreateAPIView):
-    queryset = bodegaCustomer.objects.all()
+    queryset = customerPayment.objects.all()
     serializer_class = bodegaCustomerSerializer
 
 class bodegaCustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = bodegaCustomer.objects.all()
+    queryset = customerPayment.objects.all()
     serializer_class = bodegaCustomerSerializer
 
 
@@ -1093,7 +1223,7 @@ def subscribe(request):
     except:
         return Response(data="Unable to Subscribe", status=404)
 
-
+        
 
 
 #Notification View Settings
@@ -1105,7 +1235,7 @@ class notificationsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Notifications.objects.all()
     serializer_class = notificationsSerializer
 
-
+    
 
 @api_view(['POST'])
 def FetchNotificationsByMetaUserID(request):

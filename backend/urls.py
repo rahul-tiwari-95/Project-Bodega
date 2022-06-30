@@ -234,6 +234,16 @@ urlpatterns = [
     path('bodega-api/singleMunchieVideo/', views.MunchiesVideoList.as_view()),
     path('bodega-api/multipleMunchieVideos/<int:pk>/', views.MunchiesVideoDetail.as_view()),
 
+    path('bodega-api/product/', views.ProductList.as_view()),
+    path('bodega-api/product/<int:pk>/', views.ProductDetail.as_view()),
+
+    path('bodega-api/munchiesFeed/', views.MunchiesPageList.as_view()), #Show all content from all Munchies Pages
+    path('bodega-api/singleMunchiePage/<int:pk>/', views.MunchiesPageDetail.as_view()), #Shows one single Munchies Page
+
+    path('bodega-api/singleMunchieVideo/', views.MunchiesVideoList.as_view()),
+    path('bodega-api/multipleMunchieVideos/<int:pk>/', views.MunchiesVideoDetail.as_view()),
+
+
     # collaboration Model Endpoint by collaborationID
     path('bodega-api/collaboration/', views.CollaborationList.as_view()),
     path('bodega-api/collaboration/<int:pk>/', views.CollaborationDetail.as_view()),
@@ -261,6 +271,15 @@ urlpatterns = [
     path('bodega-api/orderSuccess/', views.OrderSuccessList.as_view()),
     path('bodega-api/orderSuccess/<int:pk>/', views.OrderSuccessDetail.as_view()),
 
+    
+    # Order Success Endpoints
+    path('bodega-api/orderSuccess/', views.OrderSuccessList.as_view()),
+    path('bodega-api/orderSuccess/<int:pk>/', views.OrderSuccessDetail.as_view()),
+
+
+    # Order failure Endpoints
+    path('bodega-api/orderFailure/', views.OrderFailureList.as_view()),
+    path('bodega-api/orderFailure/<int:pk>/', views.OrderFailureDetail.as_view()),
 
     # Order failure Endpoints
     path('bodega-api/orderFailure/', views.OrderFailureList.as_view()),
@@ -280,6 +299,9 @@ urlpatterns = [
     path('bodega-api/sysops_agent_project/', views.SysOpsAgentProjectList.as_view()),
     path('bodega-api/sysops_agent_project/<int:pk>/',views.SysOpsAgentProjectDetail.as_view()),
 
+    # SysOps ProjectRepo Endpoints
+    path('bodega-api/sysops_agent_project/', views.SysOpsAgentProjectList.as_view()),
+    path('bodega-api/sysops_agent_project/<int:pk>/',views.SysOpsAgentProjectDetail.as_view()),
     # SysOps DemandNode Endpoints
     path('bodega-api/sysopsdemandnode/', views.SysOpsDemandNodeList.as_view()),
     path('bodega-api/sysopsdemandnode/<int:pk>/', views.SysOpsDemandNodeDetail.as_view()),
