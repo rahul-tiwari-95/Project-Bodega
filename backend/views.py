@@ -55,11 +55,6 @@ def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
 
-def metauserauth(request):
-    #this will be linked to the authorization view on any frontend 
-    #this will be the template for any auth needed across any of our platforms  
-    
-    return (request)
 
 
 #MetaUser Generic Views  
@@ -335,12 +330,12 @@ def sentino_item_classification_list(request):
     #GET, POST request for sentino_item_classification model
     if request.method == 'GET':
         sentino_item_classification = SentinoItemClassification.objects.all()
-        serializer = SentinoItemClassficationSerializer(sentino_item_classification, many=True)
+        serializer = SentinoItemClassificationSerializer(sentino_item_classification, many=True)
         return JsonResponse(serializer.data, safe=False)
     
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = SentinoItemClassficationSerializer(data=data)
+        serializer = SentinoItemClassificationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -357,11 +352,11 @@ def sentino_item_classification_detail(request, pk):
         return JsonResponse(status=404)
 
     if request.method == 'GET':
-        serializer = SentinoItemClassficationSerializer(sentino_item_classification)
+        serializer = SentinoItemClassificationSerializer(sentino_item_classification)
         return JsonResponse(serializer.data)
     
     elif request.method == 'PUT':
-        serializer = SentinoItemClassficationSerializer(sentino_item_classification, data=JSONParser().parse(request))
+        serializer = SentinoItemClassificationSerializer(sentino_item_classification, data=JSONParser().parse(request))
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
@@ -1627,10 +1622,7 @@ class SysOpsAgentProjectDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SysOpsProject.objects.all()
     serializer_class = SysOpsProjectSerializer
 
-#Retreive a StripeAccount and store that data in our Database
-@api_view(['POST'])
-def retreiveStripeAccount(request):
-    stripeAccount = stripe.Account.retrieve(request.data['stripeAccountID'])
+
 
 #SysOps Demand Node Generic Views 
 #@csrf_exempt
