@@ -1,7 +1,4 @@
 
-from dataclasses import fields
-from locale import currency
-from tempfile import TemporaryFile
 from rest_framework import status, generics, mixins, request, viewsets
 
 from rest_framework.decorators import api_view
@@ -14,7 +11,6 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 import datetime
 from django.utils import timezone
-from .forms import UserAddressFormSet
 import requests
 from rest_framework.request import Request
 from django.urls import reverse, reverse_lazy

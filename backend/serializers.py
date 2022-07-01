@@ -1,7 +1,5 @@
-from dataclasses import fields
-from pyexpat import model
-from attr import field
-from django.contrib.auth.models import User, Group
+
+
 
 from .models import *
 from rest_framework import serializers
