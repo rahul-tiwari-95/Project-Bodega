@@ -1,6 +1,7 @@
 
 from dataclasses import fields
 from locale import currency
+from tempfile import TemporaryFile
 from rest_framework import status, generics, mixins, request, viewsets
 
 from rest_framework.decorators import api_view
@@ -2004,3 +2005,15 @@ def FetchNotificationsByMetaUserID(request):
         return Response(serializer.data, status=200)
     except Notifications.DoesNotExist:
         return Response(data="No Notifications Found", status=404)
+
+
+
+#Fetch Products by BoostTagsID
+@api_view(['POST'])
+def FetchBoostTagsByProductID(request):
+    try:
+        instance = Product.objects.filter(boostTagsID=request.data['boostTagsID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response (serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="Product not found", status=404)

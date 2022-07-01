@@ -215,5 +215,7 @@ urlpatterns = [
     path('bodega-api/searchChatRoom/', views.searchChatRoomByName),
     #Show messages by chatRoomID
     path('bodega-api/messagesChatRoom/', views.messagesByChatRoomID),
+
+    path('bodega-api/productsBoostTags/', views.FetchBoostTagsByProductID),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
