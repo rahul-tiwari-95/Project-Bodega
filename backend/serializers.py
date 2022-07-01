@@ -113,140 +113,140 @@ class KillSwitchSerializer(serializers.ModelSerializer):
 class LevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Level
-        fields = ['id', 'metauserID','number']
+        fields = '__all__'
         
 #Solomon Serializer Class
 class SolomonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solomonv0
-        fields = ['id', 'psy_traits', 'engagement_traits', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #BLASerializer Class
 class BLASerializer(serializers.ModelSerializer):
     class Meta:
         model = BLAScore
-        fields = ['id', 'metauserID', 'levelID', 'ReviewCycleNo','current_score', 'predicted_score', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Sentino Item Proximity Class
 class SentinoItemProximitySerializer(serializers.ModelSerializer):
     class Meta:
         model = SentinoItemProximity
-        fields = ['id', 'content_metadata', 'content_metadata2','content_metadata3', 'syslog_metadata', 'self_statements','created_at', 'modified_at']
+        fields = '__all__'
 
 #Sentino Item Projection Class 
 class SentinoItemProjectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SentinoItemProjection
-        fields = ['id', 'content_metadata', 'content_metadata2', 'content_metadata3', 'syslog_metadata', 'self_statements','created_at', 'modified_at']
+        fields = '__all__'
     
         
 #Sentino Item Classification Class 
 class SentinoItemClassificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SentinoItemClassification
-        fields = ['id', 'content_metadata', 'content_metadata2', 'content_metadata3', 'syslog_metadata', 'self_statements','created_at', 'modified_at']
+        fields = '__all__'
 
 #Sentino Inventory Serializer Class
 class SentinoInventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SentinoInventory
-        fields = ['id', 'content_metadata', 'content_metadata2', 'content_metadata3', 'syslog_metadata', 'self_statements','created_at', 'modified_at']
+        fields = '__all__'
 
 
 #Sentino Description Serializer Class
 class SentinoDescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SentinoSelfDescription
-        fields = ['id', 'content_metadata', 'content_metadata2', 'content_metadata3', 'syslog_metadata', 'self_statements','created_at', 'modified_at']
+        fields = '__all__'
 
 #Sentino Profile Serializer Class
 class SentinoProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = SentinoProfile
-        fields = ['id', 'content_metadata', 'content_metadata2', 'content_metadata3', 'syslog_metadata', 'self_statements','created_at', 'modified_at']
+        fields = '__all__'
 
 #Bodega Vision Serializer Class
 class BodegaVisionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaVision
-        fields = ['id', 'metauserID','image_metadata','video_metadata','syslog_metadata','created_at', 'modified_at']
+        fields = '__all__'
 
 #Bodega Face  Serializer Class
 class BodegaFaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaFace
-        fields = ['id', 'metauserID', 'facial_metadata', 'syslog_metadata', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Bodega Personalizer Serializer Class
 class BodegaPersonalizerSerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaPersonalizer
-        fields = ['id', 'metauserID', 'content_metadata', 'syslog_metadata', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Bodega Cognitive Serializer Class
 class BodegaCongnitiveItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaCognitiveItem
-        fields = ['id', 'metauserID', 'proximityID','classificationID','projectionID', 'self_statements','content_metadata','syslog_metadata','created_at', 'modified_at']
+        fields = '__all__'
 
 #Bodega Cognitive Inventory Serializer Class
 class BodegaCognitiveInventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaCognitiveInventory
-        fields = ['id', 'metauserID','inventoryID','self_statements','content_metadata','syslog_metadata', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Bodega Cognitive Person Serializer Class
 class BodegaCognitivePersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaCognitivePerson
-        fields = ['id', 'metauserID', 'self_descriptionID', 'profileID', 'self_statements', 'content_metadata', 'syslog_metadata', 'created_at', 'modified_at']
+        fields = '__all__'
 #Bodega Dept Serializer Class
 class BodegaDeptSerializer(serializers.ModelSerializer):
     class Meta: 
         model = BodegaDept
-        fields = ['id', 'metauserID', 'departmentname','content_metadata','created_at', 'modified_at']
+        fields = '__all__'
 
 #User Address Serializer Class
 class UserAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAddress
-        fields = ['id', 'metauserID', 'address_line1','address_line2','address_state','city','postal_code','country', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #User Payment Serializer Class
 class UserPaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPayment
-        fields = ['id', 'metauserID', 'payment_type', 'stripeAccountID', 'total_money_out','total_money_in', 'user_payment_profile_status', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #User Type Serializer Class
 class UserTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserType
-        fields = ['id', 'metauserID', 'bodega_vision_ID','level_ID','solomon_person_ID','user_role','created_at', 'modified_at']
+        fields = '__all__'
 
 #Chat Room Serializer Class
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
-        fields = ['id', 'name', 'desc', 'rules', 'type_of_room','is_room_active','room_hashkey','created_on', 'modified_on']
+        fields = '__all__'
 
 #ParticpantSerializer Class
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
-        fields = ['id', 'metauserID', 'chat_room_ID']
+        fields = '__all__'
 
 #Message Serializer Class
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id', 'chat_room_ID', 'metauserID', 'message_body', 'upload_file', 'created_at', 'modified_at', 'hashkey']
+        fields = '__all__'
 
 #Product Category Serializer Class
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
-        fields = ['id', 'category_name', 'category_desc', 'category_image1', 'category_image2', 'category_image3', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Product Themes Serializer Class
 class BoostTagsSerializer(serializers.ModelSerializer):
@@ -258,19 +258,19 @@ class BoostTagsSerializer(serializers.ModelSerializer):
 class DiscountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Discount
-        fields = ['id','name', 'description','discount_percent', 'active_status','created_by','created_at', 'modified_at']
+        fields = '__all__'
 
 #Social Serializer Class
 class SocialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Social
-        fields = ['id', 'metauserID', 'following','followers','makeprofileprivate','saved_content','likes','dislikes','comments', 'products_clickedOn', 'bio', 'blocked_list', 'data_mining_status', 'account_active', 'delete_metauser', 'created_on', 'modified_on']
+        fields = '__all__'
 
 #Shop Serializer Class
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        fields = ['id', 'metauserID', 'all_products', 'all_user_data', 'name', 'description', 'logo', 'cover_image', 'address_line1', 'address_line2', 'city', 'state', 'postal_code', 'country','bodega_vision_tags', 'bodega_customer_tags', 'uniquesellingprop', 'data_mining_status', 'created_on', 'modified_on']
+        fields = '__all__'
         
 #Product MetaData Serializer Class
 class ProductMetaDataSerializer(serializers.ModelSerializer):
@@ -307,19 +307,19 @@ class CollaborationSerializer(serializers.ModelSerializer):
 class ShoppingSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingSession
-        fields = ['id', 'metauserID', 'total_amount', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Cart Item Serializer Class
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCartItem
-        fields = ['id', 'metauserID', 'product_ID', 'quantity', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #Order Details Serializer Class
 class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderDetail
-        fields = ['id', 'total_amount', 'payment_info','created_at', 'modified_at'] 
+        fields = '__all__'
 
 #Order Items Serializer Class
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -347,31 +347,31 @@ class OrderFailureSerializer(serializers.ModelSerializer):
 class SysOpsAgentSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysOpsAgent
-        fields = ['id', 'metauserID', 'levelID', 'departmentID', 'agent_hashkey', 'bio', 'reporting_officer', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #SysOps Agent Repo Serializer Class
 class SysOpsAgentRepoSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysOpsAgentRepo
-        fields = ['id', 'metauserID', 'sysops_agentID', 'project_hashkey', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #SysOps Product Serializer Class
 class SysOpsProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysOpsProject
-        fields = ['id', 'owner_metauserID', 'owner_agentID', 'levelID', 'divisionID','name', 'problem_statement', 'problem_impact_size', 'hypothesis', 'key_performance_indicators', 'status', 'ttc_hours','allocated_ttc_hours','tasks', 'team_hashkey_json','hashkey', 'genesis_project_hashkey', 'parent_project_hashkey', 'child_project_hashkey', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #SysOps Supply Node Serializer Class
 class SysOpsSupplyNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysOpsSupplyNode
-        fields = ['id', 'supply_metauserID','supply_shopID', 'bla_ScoreID', 'opsec_agent_hashkey', 'name', 'location', 'status', 'tokens_allocated', 'creator_hypothesis', 'sysops_agent_hypothesis', 'creator_identity_status', 'all_digital_url', 'influence_size','genre', 'category_vertical1', 'category_vertical2', 'product_traits', 'creator_traits', 'production_type', 'current_revenue', 'current_aov', 'predicted_revenue', 'creator_audience_traits', 'sysops_solution_hypothesis', 'additional_notes', 'created_at', 'modified_at']
+        fields = '__all__'
 
 #SysOps Demand Node Serializer Class
 class SysOpsDemandNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SysOpsDemandNode
-        fields = ['id', 'demand_metauserID', 'bla_ScoreID', 'opsec_agent_hashkey','name', 'location','status', 'tokens_allocated','creator_hypothesis','sysops_agent_hypothesis','creator_identity_status','all_digital_url','influence_size','genre','category_vertical', 'category_vertical2', 'product_traits', 'creator_traits', 'production_type', 'current_revenue','predicted_revenue', 'creator_audience_traits','sysops_solution_hypothesis','additional_notes','created_at','modified_at']
+        fields = '__all__'
 
 
 #Stripe Account Info Serializer Classes
