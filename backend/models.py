@@ -203,6 +203,18 @@ class customerPayment(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
 
+#Cash Register for Merchants
+#This table will be automatically filled as the charge is created on a product by a customer.
+#This ledger will show all earnings made via selling of products or via subscriptions
+class CashFlowLedger(models.Model):
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.PROTECT)
+    amount = models.FloatField(default=0.0)
+    description = models.CharField(max_length=300, default='PRODUCT NAME')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+
 
 class stripeCharges(models.Model):
     bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.PROTECT)
@@ -680,6 +692,52 @@ class Social(models.Model):
         # returns metauserID annd account_status
         return 'metauserID: %s -- Account On Status: %s' % (self.metauserID, self.account_active)
 
+class MetaUserSocial(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    followers = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    
+
+
+
+class bodegaSocial(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    followers = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    following = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    likes = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    comments = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    productsClickedOn = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    unfollows= ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    created_on = models.DateField(auto_now_add=True)
+    modified_on =models.DateTimeField(auto_now_add=True)
+
 
 # Commerce Model - key data weights on your commerce activity to be tracked for cluster analysis
 
@@ -728,18 +786,19 @@ class Product(models.Model):
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
     shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    productName = models.TextField(max_length=15, unique=True)
+    productName = models.TextField(max_length=140, unique=True)
     producDescription = models.CharField(max_length=300)
     sellingPrice = models.FloatField(default=0.0)
     discounted_price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0)
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
-    size_chart = models.FileField(upload_to='product/size_chart', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image1 = models.FileField(upload_to='product/product_image1', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image2 = models.FileField(upload_to='product/product_image2', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image3 = models.FileField( upload_to='product/product_image3', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image4 = models.FileField(upload_to='product/product_image4', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    isPhysicalProduct = models.BooleanField(default=False)
+    size_chart = models.FileField(upload_to='product/size_chart', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image1 = models.FileField(upload_to='product/product_image1', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image2 = models.FileField(upload_to='product/product_image2', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image3 = models.FileField( upload_to='product/product_image3', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image4 = models.FileField(upload_to='product/product_image4', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     productHashkey = models.TextField(default=product_hashkey_generator, unique=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
@@ -834,6 +893,35 @@ class Collaboration(models.Model):
     def __str__(self):
         # returns collab type & collab status
         return 'User ID: %s -- Shop ID: %s' % (self.metauserID, self.shop_ID)
+
+
+class yerrrCollaboration(models.Model):
+    collaboratorMetaUserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    ownerMetaUserID = models.IntegerField(default=0)
+    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    campaignName = models.CharField(max_length=255, default='Your Campaign Name')
+    campaignDescription = models.CharField(max_length=600, default='Why you want to collaborate on this product?')
+    media1 = models.FileField(upload_to='yerrr/media1', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption1 = models.CharField(max_length=255, default='Caption for Media 1')
+    media2 = models.FileField(upload_to='yerrr/media2', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption2 = models.CharField(max_length=255, default='Caption for Media 2')
+    media3 = models.FileField(upload_to='yerrr/media3', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption3 = models.CharField(max_length=255, default='Caption for Media 3')
+    collaborationType = models.TextField(choices=[ 
+        ('FIXED-ONE-TIME-PAYMENT', 'FIXED-ONE-TIME-PAYMENT'),
+        ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
+        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
+    ])
+    campaignRules = models.CharField(max_length=255, default='Product Owner can list rules for the campaign.')
+    collaboratorFixedPaymentAmount = models.IntegerField(default=0)
+    collaboratorCommissionPercentageAmount = models.IntegerField(default=0)
+    yerrrStatus = models.BooleanField(default=False)
+    ownerAcceptBid = models.BooleanField(default=False)
+    collaboratorAcceptBid = models.BooleanField(default=False)
+    #Either the owner or the collaborator goes False on the bid then yerrrStatus goes False as well.
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
 
 
 # Create temp table for Shopping Session - We will store this data and analyze behaviour.
@@ -1136,7 +1224,7 @@ class SysOpsDemandNode(models.Model):
 class Notifications(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     text = models.CharField(max_length=400)
-    image = models.FileField(upload_to='notifications/image_metadata', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    image = models.CharField(default=None, max_length=255)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 

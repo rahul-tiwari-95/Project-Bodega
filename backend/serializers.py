@@ -298,7 +298,7 @@ class MunchiesVideoSerializer(serializers.ModelSerializer):
 #Collaboration Serializer Class
 class CollaborationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Collaboration
+        model = yerrrCollaboration
         fields = '__all__'
 
 #Shopping Session Serializer Class  
@@ -405,6 +405,7 @@ class subscribersSerializer(serializers.ModelSerializer):
         fields ='__all__'
 
 
+
 #Serializer Class for Notifications Model Instance 
 #The Notification model will be instantiated all over the program to run it in sync 
 class notificationsSerializer(serializers.ModelSerializer):
@@ -418,6 +419,11 @@ class bodegaCustomerSerializer(serializers.ModelSerializer):
         model = customerPayment
         fields = '__all__'
 
+class cashFlowLedgerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CashFlowLedger
+        fields = '__all__'
+
 
 
 class SentinoItemClassificationSerializer(serializers.ModelSerializer):
@@ -428,4 +434,10 @@ class SentinoItemClassificationSerializer(serializers.ModelSerializer):
 class BodegaCognitiveItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = BodegaCognitiveItem
+        fields = '__all__'
+
+
+class bodegaSocialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bodegaSocial
         fields = '__all__'

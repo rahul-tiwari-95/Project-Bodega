@@ -18,14 +18,25 @@ urlpatterns = [
     #Retreive Stripe Account IDs
     path('bodegaCreators/fetchStripeAccount/', views.retreiveStripeAccount),
     #Retreive Stripe Account Info on Bodega 
-    path('bodegaCreators/stripeAccount/', views.StripeAccountInfoList.as_view()),
-    path('bodegaCreators/stripeAccount/<int:pk>/', views.StripeAccountInfoDetail.as_view()),
+    path('bodegaCreators/stripeAccountInfo/', views.StripeAccountInfoList.as_view()),
+    path('bodegaCreators/stripeAccountInfo/<int:pk>/', views.StripeAccountInfoDetail.as_view()),
+
+    #Fetch stripeAccountInfoID via MetaUserID 
+    path('bodegaCreators/fetchStripeAccountByMetaUserID/', views.fetchStripeAccountInfoByMetaUserID),
+
     #Create Fund Transfer to Eligible Stripe Account
     path('bodegaCreators/createPayoutTransfer/', views.payoutStripeAccount),
     path('bodegaCreators/stripeTransfer/', views.StripeAccountTransferList.as_view()),
     path('bodegaCreators/stripeTransfer/<int:pk>/', views.StripeAccountTransferDetail.as_view()),
+
+    #Yerrr / Collaboration API Endpoint
+    #Yerrr Payout by Commission % on Sales
+    path('bodegaCreators/yerrrCommission/', views.yerrrCommissionPayout),
+    path('bodegaCreators/yerrrFixed/', views.yerrrFixedPayout),
+    
+    path('bodegaCreators/createPayoutTransfer/', views.payoutStripeAccount),
     #Stripe Endpoint to list all transfers
-    path('bodegaCreators/allStripeTransfers/', views.allStripeTransfers),
+    path('bodegaCreators/allStripeTransfers/', views.allStripeTransfers), #STRIPE SPECIFIC
     #Stripe Endpoint for Refunding funds
     path('bodegaCreators/reverseFunds/', views.reverseFunds),
     #Stripe Endpoint for retrieving our Stripe Balance.
@@ -46,9 +57,28 @@ urlpatterns = [
 
     #For Customers to subscribe to Creator's subscription
     path('bodegaCreators/subscribe/', views.subscribe),
-    #All Stripe Creator SubscriptionsList
+
+    #UnSubscribe URL
+    path('bodegaCreators/unsubscribe/', views.unsubscribe),
+
+    #All Stripe Merchant SubscriptionsList
     path('bodegaCreators/allSubscriptions/', views.creatorSubscriptionList.as_view()),
     path('bodegaCreators/allSubscriptions/<int:pk>/', views.creatorSubscriptionDetail.as_view()),
+
+    #All Stripe Customer Subscriptions
+    path('bodegaCreators/customerSubscriptions/', views.subscribersList.as_view()),
+    path('bodegaCreators/customerSubscriptions/<int:pk>/', views.subscribersDetail.as_view()),
+
+    #URLs for Merchant / Creator Cash Flow Ledger Details 
+    path('bodegaCreators/cashFlow/', views.CashFlowLedgerList.as_view()),
+    path('bodegaCreators/cashFlow/<int:pk>/', views.CashFlowLedgerDetail.as_view()),
+
+    #Fetch CashFlow via stripeAccountInfoID
+    path('bodegaCreators/merchantCashFlow/', views.fetchCashFlowLedger),
+
+    #Fetch CashFlow via bodegaCustomerID
+    path('bodegaCreators/merchantCashFlowBodegaCustomer/', views.fetchCashFlowLedgerBodegaCustomer),
+
     # METAUSER API ENDPOINTS
     path('bodega-api/metauser/', views.MetaUserList.as_view()),
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
@@ -217,5 +247,14 @@ urlpatterns = [
     path('bodega-api/messagesChatRoom/', views.messagesByChatRoomID),
 
     path('bodega-api/productsBoostTags/', views.FetchBoostTagsByProductID),
+
+    path('bodega-api/adityaMetauser/', views.fetchMetaUserIDTest),
+
+
+
+
+    path('bodega-api/metauserSocial/', views.metaUserSocialList.as_view()),
+    path('bodega-api/metauserSocial/<int:pk>/', views.metaUserSocialDetail.as_view()),
+    path('bodega-api/socialMetaUser/', views.fetchSocialByMetaUserID),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)

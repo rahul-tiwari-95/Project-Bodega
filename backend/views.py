@@ -18,6 +18,7 @@ from django.views.generic import ListView, CreateView, DetailView, TemplateView
 from django.conf import settings
 import stripe
 import json
+import httpie
 
 
 
@@ -1656,10 +1657,61 @@ def createStripeAccount(request):
     newStripeAccount = stripe.Account.create(type="express", 
                                             country=request.data['country'], 
                                             email=request.data['email'],
-                                            )
+                                            business_profile = {
+                                                "name" :request.data['businessName'],
+                                                "product_description": request.data['businessDescription'],
+                                                "support_address":{
+                                                    "city": request.data['city'],
+                                                    "country": request.data['country'],
+                                                    "line1": request.data['addressLine1'],
+                                                    "line2": request.data['addressLine2'],
+                                                    "postal_code": request.data['postalCode'],
+                                                    "state": request.data['state']
+                                                },
+                                                "support_phone": request.data['support_phone'],
+                                                "support_url": request.data['support_url'],
+                                            })
+    
+    #Store the following data into StripeAccountInfo Table and Shop Table
+    try:
+        stripeAccountInfo.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    stripeAccountID = newStripeAccount.id,
+                                    businessType = request.data['businessType'],
+                                    businessName = request.data['businessName'],
+                                    businessDescription = request.data['businessDescription'],
+                                    businessCity = request.data['city'],
+                                    businessCountry = request.data['country'],
+                                    businessLine1 = request.data['addressLine1'],
+                                    businessLine2 = request.data['addressLine2'],
+                                    businessPostalCode = request.data['postalCode'],
+                                    businessEmail = request.data['email'],
+                                    businessPhone =request.data['support_phone'],
+                                    businessURL = request.data['support_url'],
+
+
+        )
+        Shop.objects.create(
+                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                        name = request.data['businessName'],
+                        description = request.data['businessDescription'],
+                        address_line1 = request.data['addressLine1'],
+                        address_line2 = request.data['addressLine2'],
+                        city = request.data['city'],
+                        state = request.data['state'],
+                        postal_code = request.data['postalCode'],
+                        country = request.data['country'],
+                        uniquesellingprop =request.data['uniquesellingprop'],
+                        data_mining_status = True                        
+        )
+
+        return Response(data="STRIPE ACCOUNT ID: "+newStripeAccount.id, status=200)
+    except:
+        return Response(data="TRY AGAIN IN 10 Seconds.", status=404)
+
     
 
-    return Response(newStripeAccount, status=200)
+    
 
     
 
@@ -1688,22 +1740,50 @@ def retreiveStripeAccount(request):
         #Check if the StripeAccount already exisst or not?
         try:
             existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
-            stripeAccountAuth = "Existing Austhorized Bodega Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
-            return Response(data=stripeAccountAuth, status=200)
-        except:
-            stripeAccountInfo.objects.create(
-            metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
-            stripeAccountID = stripeAccount.id, 
-            accountPaymentStatus = True,
-            accountTransfersStatus = True, 
+        except stripeAccountInfo.DoesNotExist:
+            return Response(data="WRONG or INVALID CREDENTIALS", status=404)
+        stripeAccountAuth = "Authorized Project-Bodega Member Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "Congratulations! Your Project-Bodega member account is ACTIVE. You're ready to take off!", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/istockphoto-472361905-612x612.jpg"
         )
-            stripeAccountAuth = "New Authorized Bodega Account ID: "+ stripeAccount.id + " | Payout Status: Active"
-            return Response(data=stripeAccountAuth, status=200)
+        return Response(data=stripeAccountAuth, status=200)
+    
+    elif stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") != 'active':
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "Project-Bodega Member Update: Your documents are still pending verification. Give it 3-5 business days", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/1995685.png"
+        )
+        return Response(data="Restricted Project-Bodega Member Account ID:  "+ existingStripeAccount.stripeAccountID + " | Payout Status: Pending Verification" , status=200)
+    else:
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "ERROR: You haven't submitted your Project-Bodega Member Application.", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/1995685.png"
+        )
+        return Response(data="Project-Bodega Merchant Account Not Found | Payout Status: INELIGIBLE", status=404)
+
+
 
         
+            
+        
 
-    else:
-        return Response(data='Project-Bodega Creator Status: INELIGIBLE FOR PAYOUTS', status=200)
+    # else:
+    #     return Response(data='Project-Bodega Creator Status: INELIGIBLE FOR PAYOUTS', status=200)
+
+
+#Fetching StripeAccountInfo Data via MetaUserID 
+@api_view(['POST'])
+def fetchStripeAccountInfoByMetaUserID(request):
+    try:
+        instance = stripeAccountInfo.objects.filter(metauserID=request.data['metauserID'])
+        serializer = stripeAccountInfoSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except stripeAccountInfo.DoesNotExist:
+        return Response(data="No StripeAccountInfo Found", status=404)
 
 
 #Generic Views for stripeAccountInfo model instance.
@@ -1721,7 +1801,8 @@ class StripeAccountInfoDetail(generics.RetrieveUpdateDestroyAPIView):
 #Transfer funds to Bodega Merchants via stripeAccountID
 @api_view(['POST'])
 def payoutStripeAccount(request):
-    transferFunds = stripe.Transfer.create(
+    try:
+        transferFunds = stripe.Transfer.create(
         amount=request.data['payoutAmount'], 
         currency=request.data['currency'], 
         destination=request.data['stripeAccountID'],
@@ -1729,15 +1810,154 @@ def payoutStripeAccount(request):
     )
 
 
-    stripeAccountTransfer.objects.create(
+        stripeAccountTransfer.objects.create(
                                         stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['stripeAccountInfoID']),
                                         transactionID = transferFunds.id, 
                                         payoutAmount = transferFunds.amount,
                                         payoutOrderInfo = transferFunds.transfer_group,
 
     )
+        Notifications.objects.create(
+                                metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                text = "CASH IN!: Funds Successfully transfered to your bank account.", 
+                                image = "https://projectbodegadb.blob.core.windows.net/media/2489756.png"
+    )
 
-    return Response(data="Successfull. TransactionID: "+ transferFunds.id, status=200 )
+        return Response(data="Payout Successfull. TransactionID: "+ transferFunds.id, status=200 )
+    except:
+        return Response(data="Payout UnSuccessfull. Try again later", status=404)
+
+
+
+#API Endpoint for Yerr Based Payments on Commmission % on sales.
+@api_view(['POST'])
+def yerrrCommissionPayout(request):
+    #No Need to capture the payment - its automatically sent when a customer buys the Yerrr Product
+    transferFundsOwner = stripe.Transfer.create(
+        amount=request.data['ownerPayoutAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['ownerStripeAccountID'],
+        transfer_group = request.data['productName'],
+    )
+    transferFundsCollaborator = stripe.Transfer.create(
+        amount=request.data['collaboratorPayoutAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['collaboratorStripeAccountID'],
+        transfer_group = request.data['productName'],
+    )
+    try:
+        #Owner Creation Algorithms
+        stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['ownerStripeAccountInfoID']),
+                                        transactionID = transferFundsOwner.id, 
+                                        payoutAmount = transferFundsOwner.amount,
+                                        payoutOrderInfo = transferFundsOwner.transfer_group,
+
+    )
+       #Collaborator Creation Algorithms
+        stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['collaboratorStripeAccountInfoID']),
+                                        transactionID = transferFundsCollaborator.id, 
+                                        payoutAmount = transferFundsCollaborator.amount,
+                                        payoutOrderInfo = transferFundsCollaborator.transfer_group,
+
+    )
+        
+        
+        # #Fetch MetaUserID via bodegaCustomerID
+        # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
+        # #Push Realtime Notifications
+        #Owner Notifications 
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['ownerMetauserID']),
+                                        text = "New Yerrr Sale for " + str(request.data['ownerPayoutAmount']), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/283-2836870_community-icon-transparent-background-png-download-transparent-transparent.png.jpeg"
+        )
+        #Collaborator Notifications
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['collaboratorMetauserID']),
+                                        text = "New Yerrr Sale for " + str(request.data['collaboratorPayoutAmount']), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/283-2836870_community-icon-transparent-background-png-download-transparent-transparent.png.jpeg"
+        )
+
+        #Owner Cash Ledger Function 
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['ownerStripeAccountInfoID']),
+                                                    amount = float(request.data['ownerPayoutAmount']),
+                                                    description = "Yerrr Payout Automatically Captured!"
+        )
+        #Collaborator Cash Ledger Function
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['collaboratorStripeAccountInfoID']),
+                                                    amount = float(request.data['collaboratorPayoutAmount']),
+                                                    description = "Yerrr Payout Automatically Captured!"
+        )
+        return Response(data="Yerrr Payout Successfull", status=200)
+
+    except:
+        return Response(data="Yerrr Payout Failed", status=404)
+
+
+        
+#API Endpoint for Yerrr Fixed Payment Functions
+@api_view(['POST'])
+def yerrrFixedPayout(request):
+    #We will charge the owner's credit card and send the money to the Collaborator
+
+    #Charge the Owner of the Yerrr Product 
+    stripeCharge = stripe.PaymentIntent.create(
+                                        amount=request.data['fixedAmount'], 
+                                        currency=request.data['currency'], 
+                                        #source='tok_visa,
+                                        payment_method_types=["card"],
+                                        description=request.data['productName'],
+                                        customer=request.data['ownerCustomerID'],
+                                        payment_method= request.data['ownerPaymentMethodID']
+    )
+    captureCharge = stripe.PaymentIntent.confirm(stripeCharge.id)
+    try:
+        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = customerPayment.objects.get(pk=request.data['ownerBodegaCustomerID']), 
+                                                        amount=request.data['fixedAmount'], 
+                                                        currency=request.data['currency'],
+                                                        description=request.data['productName'],
+                                                        stripeChargeID = stripeCharge.id, 
+                                                        paymentStatus=True, 
+                                                        capturedStatus=True, 
+                                                        stripeCustomerID = request.data['ownerCustomerID'],
+                                                        stripePaymentMethodID = request.data['ownerPaymentMethodID'])
+        #Send the earnings to Collaborator's ledger.
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['ownerBodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['collaboratorStripeAccountInfoID']),
+                                                    amount = float(request.data['fixedAmount']),
+                                                    description = "Yerrr Fixed Payout Automatically Captured"
+        )
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['collaboratorMetauserID']),
+                                        text = "New Yerrr Payout for " + str(request.data['fixedAmount']), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
+        )
+
+        #Now, transfer the captured funds to the Collaborator
+        transferFundsCollaborator = stripe.Transfer.create(
+        amount=request.data['fixedAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['collaboratorStripeAccountID'],
+        transfer_group = request.data['productName'],
+        )
+        stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['collaboratorStripeAccountInfoID']),
+                                        transactionID = transferFundsCollaborator.id, 
+                                        payoutAmount = transferFundsCollaborator.amount,
+                                        payoutOrderInfo = transferFundsCollaborator.transfer_group,
+
+        )
+        return Response(data="Yerrr Fixed Payout Successfull", status=200)
+    except:
+        return Response(data="Yerrr Fixed Payout Failure", status=404)
+
 
 
 #Generic views for Stripe Account Transfer Model  Instance
@@ -1814,11 +2034,29 @@ def createCharge(request):
                                                         capturedStatus=True, 
                                                         stripeCustomerID = request.data['customerID'],
                                                         stripePaymentMethodID = request.data['paymentMethodID'])
+        
+        #Send the earnings to Merchant's ledger.
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['stripeAccountInfoID']),
+                                                    amount = float(request.data['amount']),
+                                                    description = request.data['description']
+        )
+        
+        # #Fetch MetaUserID via bodegaCustomerID
+        # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
+        # #Push Realtime Notifications
+        amount = request.data['amount']
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                        text = "New Sale for " + str(request.data['amount']), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
+        )
                                                         
         serializer = stripeChargesSerializer(chargeObject)
         return Response (serializer.data, status=200)
     except:
-        return Response(data=serializer.errors, status=404)
+        return Response(data="ERROR CHARGING CUSTOMER", status=404)
 
 #Generic Views for stripeCHarges model instance.
 
@@ -1829,6 +2067,40 @@ class StripeChargesList(generics.ListCreateAPIView):
 class StripeChargesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = stripeCharges.objects.all()
     serializer_class = stripeChargesSerializer
+
+
+#Views for Merchant Cash Flow Ledger model instance
+class CashFlowLedgerList(generics.ListCreateAPIView):
+    queryset = CashFlowLedger.objects.all()
+    serializer_class = cashFlowLedgerSerializer
+
+
+class CashFlowLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CashFlowLedger.objects.all()
+    serializer_class = cashFlowLedgerSerializer
+
+
+#Fetch CashFlowLedger by stripeAccountInfoID 
+@api_view(['POST'])
+def fetchCashFlowLedger(request):
+    try: 
+        instance = CashFlowLedger.objects.filter(stripeAccountInfoID=request.data['stripeAccountInfoID'])
+        serializer = cashFlowLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except CashFlowLedger.DoesNotExist:
+        return Response(data="INVALID REQUEST", status=404)
+
+#Fetch CashFlowLedger by bodegaCustomerID 
+@api_view(['POST'])
+def fetchCashFlowLedgerBodegaCustomer(request):
+    try: 
+        instance = CashFlowLedger.objects.filter(bodegaCustomerID=request.data['bodegaCustomerID'])
+        serializer = cashFlowLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except CashFlowLedger.DoesNotExist:
+        return Response(data="INVALID REQUEST", status=404)
+
+
 
 
 
@@ -1875,6 +2147,11 @@ def createStripeCustomer(request):
                                                         email = request.data['email'],
                                                         customerID = customer.id,
                                                         paymentMethodID = paymentMethod.id
+        )
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "Your Card was successfully added. It's securely stored with Stripe Inc.",
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/609415.png"
         )
         serializer = bodegaCustomerSerializer(customerObject)
         return Response(serializer.data, status=200)
@@ -1923,6 +2200,11 @@ def createStripeSubscriptionProduct(request):
                                                                         chargingFrequency = request.data['chargingFrequency'],
                                                                         stripeProductID = stripeProduct.id, 
                                                                         stripePriceID = stripePrice.id
+        )
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                    text = "Woohoo!, Your Subscription Product was created successfully", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/3997719.png"
         )
         serializer = creatorSubscriptionSerializer(creatorSubscriptionObject)
         return Response(serializer.data, status=200)
@@ -1973,11 +2255,39 @@ def subscribe(request):
                                                         invoiceID = stripeSubscription.latest_invoice,
                                                         status = stripeSubscription.status
         )
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                    text = "Knock Knock!, You have a new Subscriber.", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/3997719.png"
+        )
         serializer = subscribersSerializer(subscribersObject)
         return Response(serializer.data, status=200)
     
     except:
         return Response(data="Unable to Subscribe", status=404)
+
+
+class subscribersList(generics.ListCreateAPIView):
+    queryset = Subscribers.objects.all()
+    serializer_class = subscribersSerializer
+
+
+class subscribersDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Subscribers.objects.all()
+    serializer_class = subscribersSerializer
+
+#Unsunscribe Functions --------------------------------
+@api_view(['POST'])
+def unsubscribe(request):
+    try:
+        stripe.Subscription.delete(
+            request.data['subscriptionID'], 
+        )
+        instance = Subscribers.objects.get(subscriptionID = request.data['subscriptionID'])
+        instance.delete()
+        return Response(data="Subscription Cancelled", status=200)
+    except:
+        return Response(data="SERVER ERROR. TRY AGAINST", status=404)
 
         
 
@@ -2013,3 +2323,34 @@ def FetchBoostTagsByProductID(request):
         return Response (serializer.data, status=200)
     except Product.DoesNotExist:
         return Response(data="Product not found", status=404)
+
+
+@api_view(['POST'])
+def fetchMetaUserIDTest(request):
+    try:
+        instance = MetaUser.objects.get(pk=request.data['metauserID'])
+        serializer = MetaUserSerializer(instance)
+        return Response (serializer.data, status=200)
+    except MetaUser.DoesNotExist:
+        return Response (data="ERROR", status=404)
+
+
+
+#MetaUserSocial Serializer
+class metaUserSocialList(generics.ListCreateAPIView):
+    queryset = bodegaSocial.objects.all()
+    serializer_class = bodegaSocialSerializer
+
+class metaUserSocialDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = bodegaSocial.objects.all()
+    serializer_class = bodegaSocialSerializer
+
+#Filter MetaUserSocial by metauserID
+@api_view(['POST'])
+def fetchSocialByMetaUserID(request):
+    try:
+        instance = bodegaSocial.objects.filter(metauserID=request.data['metauserID'])
+        serializer = bodegaSocialSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except bodegaSocial.DoesNotExist:
+        return Response(data="No MetaUserSocial Found", status=404)
