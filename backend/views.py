@@ -953,7 +953,7 @@ def FetchOrderItemsByMetaUserID(request):
 #Fetch Collaboration / Yerrr items by metauserID - User's all past collaborations
 @api_view(['POST'])
 def FetchCollaborationByMetaUserID(request):
-    instance = Collaboration.objects.filter(metauserID=request.data['metauserID'])
+    instance = yerrrCollaboration.objects.filter(metauserID=request.data['metauserID'])
     serializer = CollaborationSerializer(instance, many=True)
     return Response(serializer.data, status=200)
 
@@ -1510,12 +1510,12 @@ class MunchiesVideoDetail(generics.RetrieveUpdateDestroyAPIView):
 #Collaboration Generic Views
 #@csrf_exempt
 class CollaborationList(generics.ListCreateAPIView):
-    queryset = Collaboration.objects.all()
+    queryset = yerrrCollaboration.objects.all()
     serializer_class = CollaborationSerializer
 
 #@csrf_exempt
 class CollaborationDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Collaboration.objects.all()
+    queryset = yerrrCollaboration.objects.all()
     serializer_class = CollaborationSerializer
 
 
