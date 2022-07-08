@@ -1674,7 +1674,7 @@ def createStripeAccount(request):
     
     #Store the following data into StripeAccountInfo Table and Shop Table
     try:
-        stripeAccountInfo.objects.create(
+        instance=stripeAccountInfo.objects.create(
                                     metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
                                     stripeAccountID = newStripeAccount.id,
                                     businessType = request.data['businessType'],
@@ -1704,8 +1704,8 @@ def createStripeAccount(request):
                         uniquesellingprop =request.data['uniquesellingprop'],
                         data_mining_status = True                        
         )
-
-        return Response(data="STRIPE ACCOUNT ID: "+newStripeAccount.id, status=200)
+        serializer = stripeAccountInfoSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
     except:
         return Response(data="TRY AGAIN IN 10 Seconds.", status=404)
 
