@@ -1,4 +1,5 @@
 
+import asyncio
 from rest_framework import status, generics, mixins, request, viewsets
 
 from rest_framework.decorators import api_view
@@ -19,6 +20,7 @@ from django.conf import settings
 import stripe
 import json
 import httpie
+import shippo
 
 
 
@@ -1584,6 +1586,36 @@ class OrderFailureDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderFailureSerializer
 
 
+class OrderLedgerList(generics.ListCreateAPIView):
+    queryset = OrderLedger.objects.all()
+    serializer_class = OrderLedgerSerializer
+
+class OrderLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderLedger.objects.all()
+    serializer_class = OrderLedgerSerializer
+
+
+#Filtering Order Ledger by CustomerMetaUserID
+@api_view(['POST'])
+def filterOrderLedgerByMetauserID(request):
+    try:
+        instance = OrderLedger.objects.filter(customerMetauserID=request.data['customerMetauserID'])
+        serializer = OrderLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except OrderLedger.DoesNotExist:
+        return Response(data="OrderLedger Not Found", status=404)
+
+#Filtering Order Ledger by merchantStripeAccountInfoID
+@api_view(['POST'])
+def filterOrderLedgerByStripeaccountID(request):
+    try:
+        instance = OrderLedger.objects.filter(merchantStripeAccountInfoID=request.data['merchantStripeAccountInfoID'])
+        serializer = OrderLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except OrderLedger.DoesNotExist:
+        return Response(data="OrderLedger Not Found", status=404)
+
+
 #SysOps Agnet Generic Views
 #@csrf_exempt
 class SysOpsAgentList(generics.ListCreateAPIView):
@@ -1650,6 +1682,12 @@ class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
 #Stripe Integration Viewset
 
 stripe.api_key='sk_test_51L08MiHqfk1hk8aABrqHYR0aGbxNY3YkKdSmX8VRRSKEVUTmYnvfxert4KnNnAh1R2qSbyRpKiohlYpG8Nfk89vB00W13HuLdg'
+# shippoToken = "shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5"
+# shippo.api_key='shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5'
+# shippo.config.api_key="shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5"
+
+# shippo.api_key='shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5'
+shippo.config.api_key="shippo_test_1c8ea49d84399bc8084d6a8d0e498c940274884c"
 
 #Create a New Stripe Account Endpoint - For Digital Services
 @api_view(['POST'])
@@ -1703,6 +1741,16 @@ def createStripeAccount(request):
                         country = request.data['country'],
                         uniquesellingprop =request.data['uniquesellingprop'],
                         data_mining_status = True                        
+        )
+        UserAddress.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    address_line1 = request.data['addressLine1'],
+                                    address_line2 = request.data['addressLine2'],
+                                    address_state = request.data['state'],
+                                    city = request.data['city'],
+                                    postal_code = request.data['postalCode'],
+                                    country = request.data['country'],
+                                    
         )
         return Response(newStripeAccount, status=200)
     except:
@@ -2045,10 +2093,11 @@ def createCharge(request):
         # #Fetch MetaUserID via bodegaCustomerID
         # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
         # #Push Realtime Notifications
-        amount = request.data['amount']
+        amount = int(request.data['amount'])
+        amount = amount*100
         Notifications.objects.create(
                                         metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
-                                        text = "New Sale for " + str(request.data['amount']), 
+                                        text = "New Sale for $" + str(amount), 
                                         image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
         )
                                                         
@@ -2166,6 +2215,15 @@ class bodegaCustomerList(generics.ListCreateAPIView):
 class bodegaCustomerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = customerPayment.objects.all()
     serializer_class = bodegaCustomerSerializer
+
+class bodegaCustomerList(generics.ListCreateAPIView):
+    queryset = bodegaSupport.objects.all()
+    serializer_class = bodegaSupportSerializer
+
+class bodegaSupportDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = bodegaSupport.objects.all()
+    serializer_class = bodegaSupportSerializer
+
 
 
 
@@ -2353,3 +2411,89 @@ def fetchSocialByMetaUserID(request):
         return Response(serializer.data, status=200)
     except bodegaSocial.DoesNotExist:
         return Response(data="No MetaUserSocial Found", status=404)
+
+
+
+
+#Shippo API Integration
+#Fetch Senders and Receivers address
+#Show options available 
+#Charge merchant credit card for shipping label.
+#Generate label for merchant 
+
+@api_view(['POST'])
+def generateLabel(request):
+
+    #Prepping POST Payload
+    address_from = {
+        "name": request.data['merchantName'],
+        "street1": request.data['merchantAddressLine1'],
+        "street2": request.data['merchantAddressLine2'],
+        "city": request.data['merchantCity'],
+        "state": request.data['merchantState'],
+        "zip": request.data['merchantPostalCode'],
+        "country": request.data['merchantCountry']
+    }
+
+    address_to = {
+        "name": request.data['customerName'],
+        "street1": request.data['customerAddressLine1'],
+        "street2": request.data['customerAddressLine2'],
+        "city": request.data['customerCity'],
+        "state": request.data['customerState'],
+        "zip": request.data['customerPostalCode'],
+        "country": request.data['customerCountry']
+    }
+    parcel = {
+        "length":request.data['packageLength'],
+        "width":request.data['packageWidth'],
+        "height":request.data['packageHeight'],
+        "distance_unit": "in", 
+        "weight": request.data['packageWeight'],
+        "mass_unit": "lb"
+    }
+    shipment = shippo.Shipment.create(
+        address_from = address_from,
+        address_to = address_to,
+        parcels = [parcel],
+        asynchronous = False, 
+        provider = "USPS",
+
+    )
+    length = int(len(shipment.rates))
+
+    for x in range(length):
+        print(shipment.rates[x].provider)
+        if shipment.rates[x].attributes == ['FASTEST'] and request.data['labelAttributes'] == "FASTEST" and shipment.rates[x].provider == 'USPS':
+            rate = shipment.rates[x]
+            transaction = shippo.Transaction.create(
+            rate = rate.object_id,
+            label_file_type="PDF", 
+            asynchronous = False
+        )
+            return Response(data="Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url, status=200)
+
+        elif shipment.rates[x].attributes == ['CHEAPEST'] and request.data['labelAttributes'] == "CHEAPEST" and shipment.rates[x].provider == 'USPS':
+            rate = shipment.rates[x]
+            transaction = shippo.Transaction.create(
+            rate = rate.object_id,
+            label_file_type="PDF", 
+            asynchronous = False
+        )
+            return Response(data="Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url, status=200)
+        
+        elif shipment.rates[x].attributes == ['BESTVALUE'] and request.data['labelAttributes'] == "BESTVALUE" and shipment.rates[x].provider == 'USPS':
+            rate = shipment.rates[x]
+            transaction = shippo.Transaction.create(
+            rate = rate.object_id,
+            label_file_type="PDF", 
+            asynchronous = False
+        )
+            return Response(data="Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url, status=200)
+        # else:
+        #     return Response(data="No Label found with your configuration. Please try again.", status=200)
+    
+    return Response(data="No Shipping Label found with your configuration. Please try again.", status=200)
+    
+
+

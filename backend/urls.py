@@ -207,6 +207,15 @@ urlpatterns = [
     # Order failure Endpoints
     path('bodega-api/orderFailure/', views.OrderFailureList.as_view()),
     path('bodega-api/orderFailure/<int:pk>/', views.OrderFailureDetail.as_view()),
+
+    #Order Ledger Endpoint
+    path('bodega-api/orderLedger/', views.OrderLedgerList.as_view()),
+    path('bodega-api/orderLedger/<int:pk>/', views.OrderLedgerDetail.as_view()),
+
+    #Filtering Order Ledger by metauserID
+    path('bodega-api/orderLedgerMetaUser/', views.filterOrderLedgerByMetauserID),
+    path('bodega-api/orderLedgerStripeAccount/', views.filterOrderLedgerByStripeaccountID),
+
     # SysOpsAgent Endpoints
     path('bodega-api/sysops_agent/', views.SysOpsAgentList.as_view()),
     path('bodega-api/sysops_agent/<int:pk>/', views.SysOpsAgentDetail.as_view()),
@@ -256,5 +265,12 @@ urlpatterns = [
     path('bodega-api/metauserSocial/', views.metaUserSocialList.as_view()),
     path('bodega-api/metauserSocial/<int:pk>/', views.metaUserSocialDetail.as_view()),
     path('bodega-api/socialMetaUser/', views.fetchSocialByMetaUserID),
+
+    #Generate Label URL 
+    path('bodega-api/generateLabel/', views.generateLabel),
+
+    #bodega Customer Support endpoint
+    path('bodega-api/bodegaCustomer/', views.bodegaCustomerList.as_view()),
+    path('bodega-api/bodegaCustomer/<int:pk>/', views.bodegaCustomerDetail.as_view()),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)

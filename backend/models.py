@@ -794,6 +794,7 @@ class Product(models.Model):
     sellingPrice = models.FloatField(default=0.0)
     discounted_price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0)
+    productVariants = models.TextField(default="Large")
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
     isPhysicalProduct = models.BooleanField(default=False)
@@ -1029,6 +1030,28 @@ class OrderFailure(models.Model):
     def __str__(self):
         return 'Stripe Charge ID: %s -- Order ID: %s' % (self.stripeChargeID, self.order_ID)
 
+
+#OrderLedger Table for all Orders
+
+class OrderLedger(models.Model):
+    customerMetauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    merchantStripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    userAddress = models.ForeignKey(UserAddress, on_delete=models.PROTECT)
+    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    orderStatus = models.TextField(choices=[
+        ('PENDING', 'PENDING'),
+        ('CANCELLED', 'CANCELLED'),
+        ('FULFILLED', 'FULFILLED'),
+        ('REFUNDED', 'REFUNDED')
+    ])
+    paymentCaptured = models.BooleanField(default=False)
+    orderAmount = models.FloatField(default=0.0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+ 
+
 # Create models for Vendor payouts if needed
 # maybe Shop_Payout Table
 class ShopPayout(models.Model):
@@ -1235,4 +1258,11 @@ class Notifications(models.Model):
     def __str__(self):
         return 'Notification Text: %s ' % (self.text)
 
-        
+
+class bodegaSupport(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    category = models.TextField(max_length=255, default="ORDER STATUS")
+    message = models.CharField(max_length=500, default="PROBLEM STATEMENT")
+    ticketActive = models.BooleanField(default=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)

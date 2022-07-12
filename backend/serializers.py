@@ -338,6 +338,11 @@ class OrderFailureSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrderLedgerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderLedger
+        fields = '__all__'
+
 
 #Shop Payout Serializer Class -- Not completed
 
@@ -440,4 +445,9 @@ class BodegaCognitiveItemSerializer(serializers.ModelSerializer):
 class bodegaSocialSerializer(serializers.ModelSerializer):
     class Meta:
         model = bodegaSocial
+        fields = '__all__'
+
+class bodegaSupportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bodegaSupport
         fields = '__all__'
