@@ -451,3 +451,42 @@ class bodegaSupportSerializer(serializers.ModelSerializer):
     class Meta:
         model = bodegaSupport
         fields = '__all__'
+
+
+class contentPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = contentPage
+        fields = '__all__'
+
+class collectionPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = collectionPage
+        fields = '__all__'
+
+class textPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = textPage
+        fields = '__all__'
+
+
+class navigationBarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = navigationBar
+        fields = '__all__'
+
+class footerBarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = footerBar
+        fields = '__all__'
+
+
+class websiteSiteMapConfigSerializer(serializers.ModelSerializer): 
+    class Meta:
+        model = websiteSiteMapConfig
+        fields = '__all__'
+
+
+class collectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = '__all__'

@@ -606,9 +606,10 @@ class ProductCategory(models.Model):
         ('DIGITAL-ART', 'DIGITAL-ART'),
         ('MUSIC-FILE', 'MUSIC-FILE'),
         ('COLLECTIBLES', 'COLLECTIBLES'),
+        ('DIGITAL-COLLECTIBLES', 'DIGITAL-COLLECTIBLES'),
         ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
-        ('DIGITAL-ACCESSORIES', 'DIGITAL-ACCESSORIES'),
-        ('POTRAIT-VIDEO-FILE', 'POTRAIT-VIDEO-FILE'),
+        ('ENTERTAINMENT', 'ENTERTAINMENT'),
+        ('EDUCATIONAL', 'EDUCATIONAL'),
     ])
     category_desc = models.TextField(default='Describe your creation.')
     created_at = models.DateField(auto_now_add=True)  # when was it created
@@ -779,16 +780,53 @@ class Shop(models.Model):
         return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
 
 
-#Creator Merchant Model
+#Creating Product Inventory Table which includes Product Variant option 
+
+class ProductInventory(models.Model):
+    quantity = models.IntegerField(default=0)
+    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
+
+def get_sentinel_productInventory():
+    return ProductInventory.objects.get_or_create(quantity=0, productVariant='OS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_productInventory_id():
+    return get_sentinel_productInventory().id
+
+
+class Collection(models.Model):
+    name = models.CharField(max_length=255, default='default collection')
+    description = models.CharField(max_length=400, default='default collection description')
+    coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'CollectionID: %s ' % (self.id)
+
+
+def get_sentinel_collection():
+    return Collection.objects.get_or_create(name='deleted')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_collection_id():
+    return get_sentinel_collection().id
 
 
 
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    product_categoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
+    collectionID = models.ForeignKey(Collection, on_delete=models.SET(get_sentinel_collection), default=get_sentinel_collection_id)
+    productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
+    productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
-    discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
-    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
     productName = models.TextField(max_length=140, unique=True)
     producDescription = models.CharField(max_length=300)
     sellingPrice = models.FloatField(default=0.0)
@@ -798,11 +836,11 @@ class Product(models.Model):
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
     isPhysicalProduct = models.BooleanField(default=False)
-    size_chart = models.FileField(upload_to='product/size_chart', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    product_image1 = models.FileField(upload_to='product/product_image1', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    product_image2 = models.FileField(upload_to='product/product_image2', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    product_image3 = models.FileField( upload_to='product/product_image3', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    product_image4 = models.FileField(upload_to='product/product_image4', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    size_chart = models.FileField(upload_to='product/size_chart', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image1 = models.FileField(upload_to='product/product_image1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image2 = models.FileField(upload_to='product/product_image2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image3 = models.FileField( upload_to='product/product_image3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image4 = models.FileField(upload_to='product/product_image4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     productHashkey = models.TextField(default=product_hashkey_generator, unique=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
@@ -835,32 +873,6 @@ class ProductMetaData(models.Model):
 
         return 'Product Meta Data '
 
-
-class MunchiesPage(models.Model):
-    munchiesPageName = models.CharField(max_length=255)
-    munchiesCoverImage = models.FileField(upload_to = 'munchies/coverImage')
-    munchiesPageViews = models.IntegerField(default=0)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Munchies Page Name: %s -- Total Views: %s' %(self.munchiesPageName, self.munchiesPageViews)
-
-
-
-#Creating Munchies Tabel
-class MunchiesVideo(models.Model):
-    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.PROTECT)
-    munchiesVideo = models.FileField(upload_to='munchies/videos')
-    munchiesCaption = models.CharField(max_length=200)
-    munchiesVideoTags = models.CharField(max_length=200)
-    munchiesDislikes = models.IntegerField(default=0)
-    munchiesVideoViews = models.IntegerField(default=0)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Munchies Video: %s -- Total Views: %s' %(self.munchiesVideo, self.munchiesVideoViews)
 
 
 
@@ -1266,3 +1278,168 @@ class bodegaSupport(models.Model):
     ticketActive = models.BooleanField(default=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
+
+
+
+
+#Models for Merchant Website Configuration
+
+#contentPage -- HomePage for Merchant Website
+class contentPage(models.Model):
+    media1 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media5 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media6 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption1 = models.CharField(max_length=255, default='null')
+    caption2 = models.CharField(max_length=255, default='null')
+    caption3 = models.CharField(max_length=255, default='null')
+    caption4 = models.CharField(max_length=255, default='null')
+    caption5 = models.CharField(max_length=255, default='null')
+    caption6 = models.CharField(max_length=255, default='null')
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    buttonText5 = models.CharField(max_length=255, default='null')
+    buttonText6 = models.CharField(max_length=255, default='null')
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    headingText = models.CharField(max_length=300, default='null')
+    subheadingText = models.CharField(max_length=300, default='null')
+    libraryCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/libraryCoverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    isPrivate = models.BooleanField(default=False)
+    isSubscriptionPage = models.BooleanField(default=False)
+    swiftTemplateID = models.IntegerField(default=0)
+    fontStyle = models.TextField(default='null')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+def get_sentinel_contentPage():
+    return contentPage.objects.get_or_create(caption1='deleted')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_contentPage_id():
+    return get_sentinel_collection().id
+
+#collectionPage which will be displaying products filtered by collectionID
+class collectionPage(models.Model):
+    collectionID = models.ForeignKey(Collection, on_delete=models.SET(get_sentinel_collection), default=get_sentinel_collection_id)
+    collectionCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionPage/coverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionImage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    fontStyle = models.TextField(default='null')
+    isPrivate = models.BooleanField(default=False)
+    isSubscriptionPage = models.BooleanField(default=False)
+    swiftTemplateID = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+class textPage(models.Model):
+    media1 = models.FileField(upload_to='bodegaMerchant/webshop/textPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/webshop/textPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    body = models.TextField(default='null')
+    headingText = models.TextField(default='null')
+    subheadingText = models.TextField(default='null')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+
+#Creating navigationBar and FooterBar database models
+class navigationBar(models.Model):
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    buttonText5 = models.CharField(max_length=255, default='null')
+    buttonText6 = models.CharField(max_length=255, default='null')
+    buttonText7 = models.CharField(max_length=255, default='null')
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    collectionButtonID5 = models.IntegerField(default=0)
+    collectionButtonID6 = models.IntegerField(default=0)
+    collectionButtonID7 = models.IntegerField(default=0)
+    brandLogo = models.FileField(upload_to='bodegaMerchant/webshop/navigationBar/brandLogo', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    bannerText = models.TextField(default='null')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+def get_sentinel_navBar():
+    return navigationBar.objects.get_or_create(bannerText='DEFAULT_DB_ENTRY')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_navBar_id():
+    return get_sentinel_navBar().id
+
+class footerBar(models.Model):
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    buttonText5 = models.CharField(max_length=255, default='null')
+    buttonText6 = models.CharField(max_length=255, default='null')
+    buttonText7 = models.CharField(max_length=255, default='null')
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    collectionButtonID5 = models.IntegerField(default=0)
+    collectionButtonID6 = models.IntegerField(default=0)
+    collectionButtonID7 = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+def get_sentinel_footerBar():
+    return footerBar.objects.get_or_create(buttonText1='DEFAULT_DB_ENTRY')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_footerBar_id():
+    return get_sentinel_footerBar().id
+
+class websiteSiteMapConfig(models.Model):
+    isGenesisBlock = models.BooleanField(default=False)
+    contentPageID = models.ForeignKey(contentPage, on_delete=models.SET(get_sentinel_contentPage), default=get_sentinel_contentPage_id)
+    navigationBarID = models.ForeignKey(navigationBar, on_delete=models.SET(get_sentinel_navBar), default=get_sentinel_navBar_id)
+    footerBarID = models.ForeignKey(footerBar, on_delete=models.SET(get_sentinel_footerBar), default=get_sentinel_footerBar_id)
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    collectionButtonID5 = models.IntegerField(default=0)
+    collectionButtonID6 = models.IntegerField(default=0)
+
+
+#MuchiesVideo and MunchiesPage will become a video-only website page which creators can use to upload videos content
+#Lets not release this now - we can release this later if there is demand.
+class MunchiesPage(models.Model):
+    munchiesPageName = models.CharField(max_length=255)
+    munchiesCoverImage = models.FileField(upload_to = 'munchies/coverImage')
+    munchiesPageViews = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Munchies Page Name: %s -- Total Views: %s' %(self.munchiesPageName, self.munchiesPageViews)
+
+
+
+#Creating Munchies Tabel
+class MunchiesVideo(models.Model):
+    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.PROTECT)
+    munchiesVideo = models.FileField(upload_to='munchies/videos')
+    munchiesCaption = models.CharField(max_length=200)
+    munchiesVideoTags = models.CharField(max_length=200)
+    munchiesDislikes = models.IntegerField(default=0)
+    munchiesVideoViews = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Munchies Video: %s -- Total Views: %s' %(self.munchiesVideo, self.munchiesVideoViews)

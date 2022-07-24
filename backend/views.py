@@ -2497,3 +2497,109 @@ def generateLabel(request):
     
 
 
+
+#Website Builder APIs
+#General APIs
+
+#contentPage View
+class contentPageList(generics.ListCreateAPIView):
+    queryset = contentPage.objects.all()
+    serializer_class = contentPageSerializer
+
+class contentPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = contentPage.objects.all()
+    serializer_class = contentPageSerializer
+
+#collectionPage View
+class collectionPageList(generics.ListCreateAPIView):
+    queryset = collectionPage.objects.all()
+    serializer_class = collectionPageSerializer
+
+class collectionPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = collectionPage.objects.all()
+    serializer_class = collectionPageSerializer
+
+
+#textPage View
+class textPageList(generics.ListCreateAPIView):
+    queryset = textPage.objects.all()
+    serializer_class = textPageSerializer
+
+class textPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = textPage.objects.all()
+    serializer_class = textPageSerializer
+
+
+#navigationBar View
+class navigationBarList(generics.ListCreateAPIView):
+    queryset = navigationBar.objects.all()
+    serializer_class = navigationBarSerializer
+
+class navigationBarDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = navigationBar.objects.all()
+    serializer_class = navigationBarSerializer
+
+#footerBar View class
+class footerBarList(generics.ListCreateAPIView):
+    queryset = footerBar.objects.all()
+    serializer_class = footerBarSerializer
+
+class footerBarDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = footerBar.objects.all()
+    serializer_class = footerBarSerializer
+
+
+#websiteSiteMapConfig View
+class websiteSiteMapConfigList(generics.ListCreateAPIView):
+    queryset = websiteSiteMapConfig.objects.all()
+    serializer_class = websiteSiteMapConfigSerializer
+
+class websiteSiteMapConfigDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = websiteSiteMapConfig.objects.all()
+    serializer_class = websiteSiteMapConfigSerializer
+
+
+class collectionList(generics.ListCreateAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = collectionSerializer
+
+class collectionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = collectionSerializer
+
+
+
+
+#Adding filtering APIs for Frontend API
+
+#Filtering collectionPage by collectionID
+@api_view(['POST'])
+def filterCollectionPageByCollectionID(request):
+    try:
+        instance = collectionPage.objects.filter(collectionID=request.data['collectionID'])
+        serializer = collectionPageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="CollectionID INVALID", status=400)
+
+
+#Filtering websiteSiteMapConfig by OwnerMetauserIDs
+@api_view(['POST'])
+def websiteSiteMapConfigByMetaUserID(request):
+    try:
+        instance = websiteSiteMapConfig.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = websiteSiteMapConfigSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="MetaUserID Invalid")
+
+
+
+@api_view(['POST'])
+def filterProductCategory(request):
+    try:
+        instance = Product.objects.filter(productCategoryID=request.data['productCategoryID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ProductCategory ID Invalid")

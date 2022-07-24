@@ -272,5 +272,44 @@ urlpatterns = [
     #bodega Customer Support endpoint
     path('bodega-api/bodegaCustomer/', views.bodegaCustomerList.as_view()),
     path('bodega-api/bodegaCustomer/<int:pk>/', views.bodegaCustomerDetail.as_view()),
+
+
+    #Website Builder APIs
+
+    #ContentPage Endpoint
+    path('bodegaCreators/contentPage/', views.contentPageList.as_view()),
+    path('bodegaCreators/contentPage/<int:pk>/', views.contentPageDetail.as_view()),
+
+    #CollectionPage Endpoint
+    path('bodegaCreators/collectionPage/', views.collectionPageList.as_view()),
+    path('bodegaCreators/collectionPage/<int:pk>/', views.collectionPageDetail.as_view()),
+
+    #Text Page Endpoint
+    path('bodegaCreators/textPage/', views.textPageList.as_view()),
+    path('bodegaCreators/textPage/<int:pk>/', views.textPageDetail.as_view()),
+
+    #navigationBar Endpoint
+    path('bodegaCreators/navBar/', views.navigationBarList.as_view()),
+    path('bodegaCreators/navBar/<int:pk>/', views.navigationBarDetail.as_view()),
+
+    #Footerbar Endpoint
+    path('bodegaCreators/footerBar/', views.footerBarList.as_view()),
+    path('bodegaCreators/footerBar/<int:pk>/', views.footerBarDetail.as_view()),
+
+    #websiteMapConfig Endpoint
+    path('bodegaCreators/siteMap/', views.websiteSiteMapConfigList.as_view()),
+    path('bodegaCreators/siteMap/<int:pk>/', views.websiteSiteMapConfigDetail.as_view()),
+
+    #Filtering CollectionPage by collectionID
+    path('bodegaCreators/filterCollectionPage/', views.filterCollectionPageByCollectionID),
+
+    #Filtering websiteMapConfig by metauserIDs
+    path('bodegaCreators/filterSiteMap/', views.websiteSiteMapConfigByMetaUserID),
+
+    path('bodegaCreators/filterProductCategory/', views.filterProductCategory),
+
+    #Collection APIs
+    path('bodegaCreators/collections/', views.collectionList.as_view()),
+    path('bodegaCreators/collections/<int:pk>/', views.collectionDetail.as_view()),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
