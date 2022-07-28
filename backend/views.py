@@ -2278,6 +2278,15 @@ class creatorSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = creatorSubscription.objects.all()
     serializer_class = creatorSubscriptionSerializer
 
+#Filter merchant subscriptions by metauserID
+@api_view(['POST'])
+def filterCreatorSubscriptionsByMetaUser(request):
+    try:
+        instance = creatorSubscription.objects.filter(metauserID = request.data['metauserID'])
+        serializer = creatorSubscriptionSerializer(instance, many=True) 
+        return Response(serializer.data, status=200)
+    except creatorSubscription.DoesNotExist:
+        return Response(data="INVALID MetaUserID", status=404)
 
 
 #2/2 - second part of subscription design process
@@ -2332,6 +2341,18 @@ class subscribersList(generics.ListCreateAPIView):
 class subscribersDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Subscribers.objects.all()
     serializer_class = subscribersSerializer
+
+
+#filtering customer subscriptions by metauserID
+@api_view(['POST'])
+def filterCustomerSubscriptionsByMetaUser(request):
+    try:
+        instance = Subscribers.objects.filter(metauserID=request.data['metauserID'])
+        serializer = subscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Subscribers.DoesNotExist:
+        return Response(data="INVALID MetaUserID", status=404)
+
 
 #Unsunscribe Functions --------------------------------
 @api_view(['POST'])

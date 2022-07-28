@@ -65,9 +65,14 @@ urlpatterns = [
     path('bodegaCreators/allSubscriptions/', views.creatorSubscriptionList.as_view()),
     path('bodegaCreators/allSubscriptions/<int:pk>/', views.creatorSubscriptionDetail.as_view()),
 
+    path('bodegaCreators/filterMerchantSubscriptions/', views.filterCreatorSubscriptionsByMetaUser),
+
     #All Stripe Customer Subscriptions
     path('bodegaCreators/customerSubscriptions/', views.subscribersList.as_view()),
     path('bodegaCreators/customerSubscriptions/<int:pk>/', views.subscribersDetail.as_view()),
+
+    #Filter customer subscriptions by metauserID
+    path('bodegaCreators/filterCustomerSubscriptions/', views.filterCustomerSubscriptionsByMetaUser),
 
     #URLs for Merchant / Creator Cash Flow Ledger Details 
     path('bodegaCreators/cashFlow/', views.CashFlowLedgerList.as_view()),
