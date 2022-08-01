@@ -2624,3 +2624,15 @@ def filterProductCategory(request):
         return Response(serializer.data, status=200)
     except:
         return Response(data="ProductCategory ID Invalid")
+
+
+#Filter Products by productCollectionID
+
+@api_view(['POST'])
+def filterProductsByCollectionID(request):
+    try:
+        instance = Product.objects.filter(collectionID=request.data['collectionID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="Invalid CollectionID", status=404)

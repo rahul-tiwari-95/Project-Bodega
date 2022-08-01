@@ -312,6 +312,7 @@ urlpatterns = [
     path('bodegaCreators/filterSiteMap/', views.websiteSiteMapConfigByMetaUserID),
 
     path('bodegaCreators/filterProductCategory/', views.filterProductCategory),
+    path('bodegaCreators/filterProductCollection/', views.filterProductsByCollectionID),
 
     #Collection APIs
     path('bodegaCreators/collections/', views.collectionList.as_view()),
