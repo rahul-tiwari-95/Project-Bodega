@@ -114,7 +114,12 @@ class MetaUserTags(models.Model):
     def __str__(self):
         return "MetaUser Tags for metauser: %s" % (self.metauserID)
 
-
+class MetaUserAccountStatus(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    isPaidSubscriber = models.BooleanField(default=False)
+    isAccountLocked = models.BooleanField(default=False)
+    referralCode = models.TextField(unique=True)
+    activatePaywall = models.BooleanField(default=False)
 
 
 

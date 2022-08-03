@@ -1030,6 +1030,17 @@ class MetaUserTagsDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MetaUserTagsSerializer
 
 
+#Filtering MetaUser Tags by metauserID
+@api_view(['POST'])
+def filterTagsByMetaUserID(request):
+    try:
+        instance = MetaUserTags.objects.filter(metauserID=request.data['metauserID'])
+        serializer = MetaUserTagsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except MetaUser.DoesNotExist:
+        return Response(data="No MetaUser Found", status=404)
+
+
 #Level Generics Views 
 #@csrf_exempt
 class LevelList(generics.ListCreateAPIView):
@@ -2636,3 +2647,13 @@ def filterProductsByCollectionID(request):
         return Response(serializer.data, status=200)
     except Product.DoesNotExist:
         return Response(data="Invalid CollectionID", status=404)
+
+
+class MetaUserAccountStatusList(generics.ListCreateAPIView):
+    queryset = MetaUserAccountStatus.objects.all()
+    serializer_class = MetaUserAccountStatusSerializer
+
+class MetaUserAccountStatusDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MetaUserAccountStatus.objects.all()
+    serializer_class = MetaUserAccountStatusSerializer
+

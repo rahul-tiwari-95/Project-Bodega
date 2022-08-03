@@ -490,3 +490,8 @@ class collectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = '__all__'
+
+class MetaUserAccountStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetaUserAccountStatus
+        fields = '__all__'

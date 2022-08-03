@@ -244,6 +244,9 @@ urlpatterns = [
     #Show MetaUserTags 
     path('bodega-api/metauserTags/', views.MetaUserTagsList.as_view()),
     path('bodega-api/metauserTags/<int:pk>/', views.MetaUserTagsDetail.as_view()),
+
+    path('bodega-api/filterMetaUserTags/', views.filterTagsByMetaUserID),
+    
     #Search MetaUser by MetaUserName 
     path('bodega-api/searchMetaUser/', views.searchMetaUserByName),
     #Fetch All Past Orders of the Metauser.
@@ -317,5 +320,9 @@ urlpatterns = [
     #Collection APIs
     path('bodegaCreators/collections/', views.collectionList.as_view()),
     path('bodegaCreators/collections/<int:pk>/', views.collectionDetail.as_view()),
+
+
+    path('bodega-api/metauserAccountStatus/', views.MetaUserAccountStatusList.as_view()),
+    path('bodega-api/metauserAccountStatus/<int:pk>/', views.MetaUserAccountStatusDetail.as_view()),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
