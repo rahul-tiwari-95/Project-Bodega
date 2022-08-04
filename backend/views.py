@@ -2657,3 +2657,13 @@ class MetaUserAccountStatusDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = MetaUserAccountStatus.objects.all()
     serializer_class = MetaUserAccountStatusSerializer
 
+#Filter websiteSiteMapConfig by metauserID
+
+@api_view(['POST'])
+def filterSiteMapByContentPageID(request):
+    try:
+        instance = websiteSiteMapConfig.objects.filter(contentPageID=request.data['contentPageID'])
+        serializer = websiteSiteMapConfigSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except websiteSiteMapConfig.DoesNotExist:
+        return Response(data="Not Found", status=404)

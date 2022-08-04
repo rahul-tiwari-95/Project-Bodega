@@ -313,6 +313,7 @@ urlpatterns = [
 
     #Filtering websiteMapConfig by metauserIDs
     path('bodegaCreators/filterSiteMap/', views.websiteSiteMapConfigByMetaUserID),
+    path('bodegaCreators/filterSiteMapByContentPageID/', views.filterSiteMapByContentPageID),
 
     path('bodegaCreators/filterProductCategory/', views.filterProductCategory),
     path('bodegaCreators/filterProductCollection/', views.filterProductsByCollectionID),
