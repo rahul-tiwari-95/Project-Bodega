@@ -282,6 +282,11 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
+class ProductInventorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductInventory
+        fields = '__all__'
+
 #Munchies Page Serializer Classes
 class MunchiesPageSerializer(serializers.ModelSerializer):
     class Meta:

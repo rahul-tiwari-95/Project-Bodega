@@ -164,6 +164,10 @@ urlpatterns = [
     # Product Category Model Endpoint by messageID
     path('bodega-api/product_category/', views.ProductCategoryList.as_view()),
     path('bodega-api/product_category/<int:pk>/', views.ProductCategoryDetail.as_view()),
+
+    path('bodega-api/product_inventory/', views.ProductInventoryList.as_view()),
+    path('bodega-api/product_inventory/<int:pk>/', views.ProductInventoryDetail.as_view()),
+
     # Boost Tags Model Endpoint by ProductID
     path('bodega-api/boostTags/', views.BoostTagsList.as_view()),
     path('bodega-api/boostTags/<int:pk>/', views.BoostTagsDetail.as_view()),
@@ -325,5 +329,9 @@ urlpatterns = [
 
     path('bodega-api/metauserAccountStatus/', views.MetaUserAccountStatusList.as_view()),
     path('bodega-api/metauserAccountStatus/<int:pk>/', views.MetaUserAccountStatusDetail.as_view()),
+
+
+    path('bodega-api/yerrrByCollaborator/', views.filterYerrrByCollaborator),
+    path('bodega-api/yerrrByOwner/', views.filterYerrrByOwner),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)

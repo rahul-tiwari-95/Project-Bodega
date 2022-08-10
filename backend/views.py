@@ -1485,6 +1485,17 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+
+
+class ProductInventoryList(generics.ListCreateAPIView):
+    queryset = ProductInventory.objects.all()
+    serializer_class = ProductInventorySerializer
+
+#@csrf_exempt
+class ProductInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductInventory.objects.all()
+    serializer_class = ProductInventorySerializer
+
 #MunchiesPage Generics Views
 class MunchiesPageList(generics.ListCreateAPIView):
     from .models import MunchiesPage
@@ -2667,3 +2678,26 @@ def filterSiteMapByContentPageID(request):
         return Response(serializer.data, status=200)
     except websiteSiteMapConfig.DoesNotExist:
         return Response(data="Not Found", status=404)
+
+
+
+#Filtering Yerrr by collaboratorMetauserID
+@api_view(['POST'])
+def filterYerrrByCollaborator(request):
+    try:
+        instance = yerrrCollaboration.objects.filter(collaboratorMetaUserID=request.data['collaboratorMetaUserID'])
+        serializer = CollaborationSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except yerrrCollaboration.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#Filtering Yerrr by ownerMetaUserID
+@api_view(['POST'])
+def filterYerrrByOwner(request):
+    try:
+        instance = yerrrCollaboration.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = CollaborationSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except yerrrCollaboration.DoesNotExist:
+        return Response(data="Not Found", status=404)
+

@@ -95,6 +95,13 @@ class MetaUser(models.Model):
         # returns username & modified_at
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
+def get_sentinel_MetaUser():
+    return MetaUser.objects.get_or_create(meta_username='bugsbunny', passcode='password1234', discord_username='spacejam')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_MetaUser_id():
+    return get_sentinel_MetaUser().id
+
 # Creating MetaUser Tags for Profile 
 class MetaUserTags(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
@@ -547,25 +554,12 @@ class ChatRoom(models.Model):
     name = models.TextField(unique=True)
     desc = models.TextField(default='Why was this room created?')
     tags = models.TextField(default='#ROOM')
-    type_of_room = models.TextField(choices=[
-        # only people with meta_key can join the secure_room
-        ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),
-        # anyone can join the secure room
-        ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),
-        # leads ro the deletion of the room
-        ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')
-    ])
+    type_of_room = models.TextField(default='Empty')
     isRoomPrivate = models.BooleanField(default=True)
     room_hashkey = models.TextField(
         default=chatroom_hashkey_generator, unique=True)
     modified_on =models.DateTimeField(auto_now_add=True)
     created_on = models.DateField(auto_now_add=True)
-
-    def __str__(self):
-        # returns room name and room status
-
-        return 'ROOM-NAME: %s -- ROOM-STATUS: %s' % (self.name, self.is_room_active)
-
 
 # Who all with particpate in which rooms? - See secuirty can be fucking easy
 class Participant(models.Model):
@@ -588,8 +582,7 @@ class Message(models.Model):
     chat_room_ID = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     message_body = models.TextField()
-    upload_file = models.FileField(
-        upload_to='user_meta_key/message/files', default=None)
+    upload_file = models.FileField(upload_to='user_meta_key/message/files', default=None)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
     hashkey = models.TextField(default=message_hashkey_generator, unique=True)
