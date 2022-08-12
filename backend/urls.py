@@ -329,9 +329,12 @@ urlpatterns = [
 
     path('bodega-api/metauserAccountStatus/', views.MetaUserAccountStatusList.as_view()),
     path('bodega-api/metauserAccountStatus/<int:pk>/', views.MetaUserAccountStatusDetail.as_view()),
-
+    path('bodega-api/filtermetauserAccountStatus/', views.filterMetaUserAccountStatusByMetaUserID),
 
     path('bodega-api/yerrrByCollaborator/', views.filterYerrrByCollaborator),
     path('bodega-api/yerrrByOwner/', views.filterYerrrByOwner),
+
+    path('bodegaCreators/filterContentPageByMetaUserID/', views.filterContentPageByMetaUserID),
+
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)

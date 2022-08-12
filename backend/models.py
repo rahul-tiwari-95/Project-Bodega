@@ -127,6 +127,8 @@ class MetaUserAccountStatus(models.Model):
     isAccountLocked = models.BooleanField(default=False)
     referralCode = models.TextField(unique=True)
     activatePaywall = models.BooleanField(default=False)
+    notificationStatus = models.BooleanField(default=False)
+    notificationMessage = models.TextField(default='Welcome to Project-Bodega')
 
 
 
@@ -609,14 +611,8 @@ class ProductCategory(models.Model):
         ('ENTERTAINMENT', 'ENTERTAINMENT'),
         ('EDUCATIONAL', 'EDUCATIONAL'),
     ])
-    category_desc = models.TextField(default='Describe your creation.')
     created_at = models.DateField(auto_now_add=True)  # when was it created
     modified_at =models.DateTimeField(auto_now_add=True)  # when was it last modfied
-    category_image1 = models.FileField(
-        upload_to='category/category_image1')  # set default to Bodega's image
-    category_image2 = models.FileField(upload_to='category/category_image2')
-    category_image3 = models.FileField(upload_to='category/category_image3')
-
     def __str__(self):
         # returns Product Category
 
@@ -1284,6 +1280,7 @@ class bodegaSupport(models.Model):
 
 #contentPage -- HomePage for Merchant Website
 class contentPage(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
     media1 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media2 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media3 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')

@@ -1,6 +1,7 @@
 
 
 
+from attr import fields
 from .models import *
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -500,3 +501,9 @@ class MetaUserAccountStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaUserAccountStatus
         fields = '__all__'
+
+
+class ProductCategoryFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = ['id']

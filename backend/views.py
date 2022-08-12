@@ -2701,3 +2701,22 @@ def filterYerrrByOwner(request):
     except yerrrCollaboration.DoesNotExist:
         return Response(data="Not Found", status=404)
 
+#Filtering contentPage by ownerMetaUserID
+@api_view(['POST'])
+def filterContentPageByMetaUserID(request):
+    try:
+        instance = contentPage.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = contentPageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
+
+#Filtering MetaUserAccountStatus by metauserID
+@api_view(['POST'])
+def filterMetaUserAccountStatusByMetaUserID(request):
+    try:
+        instance = MetaUserAccountStatus.objects.filter(metauserID=request.data['metauserID'])
+        serializer = MetaUserAccountStatusSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
