@@ -150,14 +150,20 @@ urlpatterns = [
     path('bodega-api/metauser_type/', views.UserTypeList.as_view()),
     path('bodega-api/metauser_type/<int:pk>/', views.UserTypeDetail.as_view()),
     # Chat Room Endpoint by Chat Room ID
-    path('bodega-api/metauser_chat_room/', views.ChatRoomList.as_view()),
-    path('bodega-api/metauser_chat_room/<int:pk>/', views.ChatRoomDetail.as_view()),
+    path('bodega-api/metauser_chat_room/', views.BodegaServerList.as_view()),
+    path('bodega-api/metauser_chat_room/<int:pk>/', views.BodegaServerDetail.as_view()),
     
     # Particpant Model  Endpoint by Chat Room ID
     path('bodega-api/participant/', views.ParticipantList.as_view()),
     path('bodega-api/participant/<int:pk>/', views.ParticpiantDetail.as_view()),
-    path('bodega-api/chatRoomsByMetauserID/', views.FetchParticipantByMetaUserID),
-    path('bodega-api/chatRoomAuth/<int:pk>/', views.AuthenticateParticipantByRoomHashkey),
+    path('bodega-api/BodegaServersByMetauserID/', views.FetchParticipantByMetaUserID),
+    path('bodega-api/BodegaServerAuth/<int:pk>/', views.AuthenticateParticipantByRoomHashkey),
+
+    #Filtering BodegaServer by metauserIDs
+    path('bodega-api/filterBodegaServerByMetaUserID/<int:pk>/', views.filterBodegaServerByMetaUserID),
+    #Filtering messages by BodegaServer ID
+    path('bodega-api/filterMessagesReverseLookup/<int:pk>/', views.filterMessagesReverseLookup),
+
     # Message Model Endpoint by messageID
     path('bodega-api/message/', views.MessageList.as_view()),
     path('bodega-api/message/<int:pk>/', views.MessageDetail.as_view()),
@@ -263,9 +269,9 @@ urlpatterns = [
     #Show all notifications by MetaUserID
     path('bodega-api/metauserNotifications/', views.FetchNotificationsByMetaUserID),
     #Search Chat Room by name
-    path('bodega-api/searchChatRoom/', views.searchChatRoomByName),
-    #Show messages by chatRoomID
-    path('bodega-api/messagesChatRoom/', views.messagesByChatRoomID),
+    path('bodega-api/searchBodegaServer/', views.searchBodegaServerByName),
+    #Show messages by BodegaServerID
+    path('bodega-api/messagesBodegaServer/', views.messagesByBodegaServerID),
 
     path('bodega-api/productsBoostTags/', views.FetchBoostTagsByProductID),
 
@@ -335,6 +341,22 @@ urlpatterns = [
     path('bodega-api/yerrrByOwner/', views.filterYerrrByOwner),
 
     path('bodegaCreators/filterContentPageByMetaUserID/', views.filterContentPageByMetaUserID),
+
+    #Newsletter Endpoints
+    path('bodegaCreators/newsletter/', views.NewsletterList.as_view()),
+    path('bodegaCreators/newsletter/<int:pk>/', views.NewsletterDetail.as_view()),
+
+    path('bodegaCreators/filterNewsletterMetaUserID/', views.filterNewsLetterByMetaUserID),
+    path('bodegaCreators/filterNewsletterSubscriberByNewsletterID/', views.filterNewsletterSubscriberByNewsletterID),
+    path('bodegaCreators/filterNewsletterSubscriberByMetaUserID/', views.filterNewsletterSubscriberByMetaUserID),
+
+    #Filtering Collection By MetaUserID
+    path('bodegaCreators/filterCollectionByMetaUserID/', views.filterCollectionByMetaUserID),
+
+    #Filtering UserAddress by metauserID
+    path('bodegaCreators/filterUserAddressByMetaUserID/', views.filterUserAddressByMetaUserID),
+
+
 
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)

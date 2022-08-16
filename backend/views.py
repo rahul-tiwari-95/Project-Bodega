@@ -866,23 +866,23 @@ def address_detail(request, pk):
 
 
 
-#For Searching ChatRoom by names
+#For Searching BodegaServer by names
 @api_view(['POST'])
-def searchChatRoomByName(request):
+def searchBodegaServerByName(request):
     try:
-        instance = ChatRoom.objects.filter(name=request.data['name'])
-        serializer = ChatRoomSerializer(instance, many=True)
+        instance = BodegaServer.objects.filter(name=request.data['name'])
+        serializer = BodegaServerSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     
-    except ChatRoom.DoesNotExist:
-        return Response(data="No ChatRoom Found.", status=404)
+    except BodegaServer.DoesNotExist:
+        return Response(data="No BodegaServer Found.", status=404)
 
 
-#Filtering Messages by ChatRoom IDs
+#Filtering Messages by BodegaServer IDs
 @api_view(['POST'])
-def messagesByChatRoomID(request):
+def messagesByBodegaServerID(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['chatRoomID'])
+        instance = Message.objects.filter(chat_room_ID=request.data['BodegaServerID'])
         serializer = MessageSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     except Message.DoesNotExist:
@@ -959,7 +959,7 @@ def FetchCollaborationByMetaUserID(request):
     serializer = CollaborationSerializer(instance, many=True)
     return Response(serializer.data, status=200)
 
-#Fetch all ChatRooms by MetaUser ID
+#Fetch all BodegaServers by MetaUser ID
 @api_view(['POST'])
 def FetchParticipantByMetaUserID(request):
     instance = Participant.objects.filter(metauserID=request.data.get)
@@ -969,8 +969,8 @@ def FetchParticipantByMetaUserID(request):
 #Authenticate New Participant by Room Hashkey
 @api_view(['POST'])
 def AuthenticateParticipantByRoomHashkey(request, pk):
-    instance = ChatRoom.objects.filter(pk=pk)
-    serializer = ChatRoomSerializer(instance, many=True)
+    instance = BodegaServer.objects.filter(pk=pk)
+    serializer = BodegaServerSerializer(instance, many=True)
     
     if instance.room_hashkey == request.data.get('room_hashkey'):
         print("Authentication Successful")
@@ -1342,14 +1342,14 @@ class UserTypeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 #Chat Room Generic Views
 #@csrf_exempt
-class ChatRoomList(generics.ListCreateAPIView):
-    queryset = ChatRoom.objects.all()
-    serializer_class = ChatRoomSerializer
+class BodegaServerList(generics.ListCreateAPIView):
+    queryset = BodegaServer.objects.all()
+    serializer_class = BodegaServerSerializer
 
 #@csrf_exempt
-class ChatRoomDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ChatRoom.objects.all()
-    serializer_class = ChatRoomSerializer
+class BodegaServerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaServer.objects.all()
+    serializer_class = BodegaServerSerializer
 
 #Particpant Generic Views
 #@csrf_exempt
@@ -2720,3 +2720,103 @@ def filterMetaUserAccountStatusByMetaUserID(request):
         return Response(serializer.data, status=200)
     except:
         return Response(data="Not Found", status=404)
+
+
+
+#Filtering Collections by metauserIDs
+@api_view(['POST'])
+def filterCollectionByMetaUserID(request):
+    try:
+        instance = Collection.objects.filter(metauserID=request.data['metauserID'])
+        serializer = collectionSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Collection.DoesNotExist:
+        return Response(data="INVALID Collection ID",status=404)
+
+
+
+#Filtering UserAddress by metauserIDs
+@api_view(['POST'])
+def filterUserAddressByMetaUserID(request):
+    try:
+        instance = UserAddress.objects.filter(metauserID=request.data['metauserID'])
+        serializer = UserAddressSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except UserAddress.DoesNotExist:
+        return Response(data="Not Found",status=404)
+
+
+
+
+#Filtering BodegaServer by metauserIDs
+@api_view(['POST'])
+def filterBodegaServerByMetaUserID(request):
+    try:
+        instance = BodegaServer.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = BodegaServerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServer.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#Filtering Messages in reverse order by BodegaServerID
+@api_view(['POST'])
+def filterMessagesReverseLookup(request):
+    try:
+        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('created_at').reverse().values('id', 'message_body')
+        serializer = MessageSerializer(instance, many=True)
+        return Response (serializer.data, status=200)
+    except:
+        return Response(data="INVALID CHAT ROOM ID", status=404)
+
+
+
+#Filtering Newsletter by owner metauserID
+@api_view(['POST'])
+def filterNewsLetterByMetaUserID(request):
+    try:
+        instance = Newsletter.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = NewsletterSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Newsletter.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+
+#Filtering NewsletterSubscribers by newsletterID 
+@api_view(['POST'])
+def filterNewsletterSubscriberByNewsletterID(request):
+    try:
+        instance = NewsletterSubscribers.objects.filter(newsletterID =request.data['newsletterID'])
+        serializer = NewsletterSubscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except NewsletterSubscribers.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Filtering NewsletterSubscribers by metauserIDs
+@api_view(['POST'])
+def filterNewsletterSubscriberByMetaUserID(request):
+    try:
+        instance = NewsletterSubscribers.objects.filter(metauserID=request.data['metauserID'])
+        serializer = NewsletterSubscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except NewsletterSubscribers.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+class NewsletterList(generics.ListCreateAPIView):
+    queryset = Newsletter.objects.all()
+    serializer_class = NewsletterSerializer
+
+class NewsletterDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Newsletter.objects.all()
+    serializer_class = NewsletterSerializer
+
+
+class NewsletterSubscribersList(generics.ListCreateAPIView):
+    queryset = NewsletterSubscribers.objects.all()
+    serializer_class = NewsletterSubscribersSerializer
+
+class NewsletterSubscribersDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = NewsletterSubscribers.objects.all()
+    serializer_class = NewsletterSubscribersSerializer

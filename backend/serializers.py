@@ -224,9 +224,9 @@ class UserTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 #Chat Room Serializer Class
-class ChatRoomSerializer(serializers.ModelSerializer):
+class BodegaServerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChatRoom
+        model = BodegaServer
         fields = '__all__'
 
 #ParticpantSerializer Class
@@ -507,3 +507,13 @@ class ProductCategoryFilterSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = ['id']
+
+class NewsletterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Newsletter
+        fields = '__all__'
+
+class NewsletterSubscribersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterSubscribers
+        fields = '__all__'

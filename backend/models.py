@@ -96,7 +96,7 @@ class MetaUser(models.Model):
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
 def get_sentinel_MetaUser():
-    return MetaUser.objects.get_or_create(meta_username='bugsbunny', passcode='password1234', discord_username='spacejam')[0]
+    return MetaUser.objects.get_or_create(meta_username='rahultiwari', passcode='mk@043074', discord_username='raven')[0]
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_MetaUser_id():
@@ -553,13 +553,23 @@ class UserType(models.Model):
 
 class ChatRoom(models.Model):
     # Chat_Room ID will be created automatically by PostGre
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
     name = models.TextField(unique=True)
     desc = models.TextField(default='Why was this room created?')
     tags = models.TextField(default='#ROOM')
     type_of_room = models.TextField(default='Empty')
     isRoomPrivate = models.BooleanField(default=True)
-    room_hashkey = models.TextField(
-        default=chatroom_hashkey_generator, unique=True)
+    modified_on =models.DateTimeField(auto_now_add=True)
+    created_on = models.DateField(auto_now_add=True)
+
+
+class BodegaServer(models.Model):
+    # Chat_Room ID will be created automatically by PostGre
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    name = models.TextField(unique=True)
+    desc = models.TextField(default='Why was this room created?')
+    tags = models.TextField(default='#ROOM')
+    isRoomPrivate = models.BooleanField(default=True)
     modified_on =models.DateTimeField(auto_now_add=True)
     created_on = models.DateField(auto_now_add=True)
 
@@ -581,17 +591,56 @@ class Participant(models.Model):
 # what a message will look like or what traits will it have
 class Message(models.Model):
     # message_ID will be automatically be generated
-    chat_room_ID = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    chat_room_ID = models.ForeignKey(BodegaServer, on_delete=models.CASCADE)
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    username = models.TextField(blank=True)
     message_body = models.TextField()
-    upload_file = models.FileField(upload_to='user_meta_key/message/files', default=None)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
-    hashkey = models.TextField(default=message_hashkey_generator, unique=True)
 
     def __str__(self):
         # returns chat_room_ID
         return 'Chat Room ID: %s ' % (self.chat_room_ID)
+
+class Newsletter(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    headingText = models.TextField(blank=True)
+    subheadingText = models.TextField(blank=True)
+    paragraphText = models.TextField(blank=True)
+    media1 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    NewsletterCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/newsletter/NewsletterCoverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    isPrivate = models.BooleanField(default=False)
+    isSubscriptionPage = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+def get_sentinel_Newsletter():
+    return Newsletter.objects.get_or_create(headingText='newsletter')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_Newsletter_id():
+    return get_sentinel_Newsletter().id
+
+
+
+class NewsletterSubscribers(models.Model):
+    newsletterID = models.ForeignKey(Newsletter, on_delete=models.SET(get_sentinel_Newsletter), default=get_sentinel_Newsletter_id)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
 
 # Product Category Definition - How are the products/assets categorized / segmented?
@@ -794,6 +843,7 @@ def get_sentinel_productInventory_id():
 
 
 class Collection(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
     name = models.CharField(max_length=255, default='default collection')
     description = models.CharField(max_length=400, default='default collection description')
     coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
