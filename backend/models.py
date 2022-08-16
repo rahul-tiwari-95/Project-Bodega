@@ -843,7 +843,7 @@ def get_sentinel_productInventory_id():
 
 
 class Collection(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     name = models.CharField(max_length=255, default='default collection')
     description = models.CharField(max_length=400, default='default collection description')
     coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
