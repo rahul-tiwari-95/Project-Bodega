@@ -2603,11 +2603,11 @@ class websiteSiteMapConfigDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class collectionList(generics.ListCreateAPIView):
-    queryset = Collection.objects.all()
+    queryset = ProductCollection.objects.all()
     serializer_class = collectionSerializer
 
 class collectionDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Collection.objects.all()
+    queryset = ProductCollection.objects.all()
     serializer_class = collectionSerializer
 
 
@@ -2727,10 +2727,10 @@ def filterMetaUserAccountStatusByMetaUserID(request):
 @api_view(['POST'])
 def filterCollectionByMetaUserID(request):
     try:
-        instance = Collection.objects.filter(metauserID=request.data['metauserID'])
+        instance = ProductCollection.objects.filter(metauserID=request.data['metauserID'])
         serializer = collectionSerializer(instance, many=True)
         return Response(serializer.data, status=200)
-    except Collection.DoesNotExist:
+    except ProductCollection.DoesNotExist:
         return Response(data="INVALID Collection ID",status=404)
 
 

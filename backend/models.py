@@ -854,18 +854,36 @@ class Collection(models.Model):
         return 'CollectionID: %s ' % (self.id)
 
 
-def get_sentinel_collection():
-    return Collection.objects.get_or_create(name='deleted')[0]
-    #Create entry if it doesn't exist else just load a placeholder
 
-def get_sentinel_collection_id():
-    return get_sentinel_collection().id
+class ProductCollection(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    name = models.CharField(max_length=255, default='default collection')
+    description = models.CharField(max_length=400, default='default collection description')
+    coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'CollectionID: %s ' % (self.id)
+
+
+
+# def get_sentinel_collection():
+#     return Collection.objects.get_or_create(name='deleted')[0]
+#     #Create entry if it doesn't exist else just load a placeholder
+
+# def get_sentinel_collection_id():
+#     return get_sentinel_collection().id
+
+
+
+
 
 
 
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    collectionID = models.ForeignKey(Collection, on_delete=models.SET(get_sentinel_collection), default=get_sentinel_collection_id)
+    collectionID = models.ForeignKey(ProductCollection, on_delete=models.PROTECT)
     productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
     productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
@@ -1366,11 +1384,11 @@ def get_sentinel_contentPage():
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_contentPage_id():
-    return get_sentinel_collection().id
+    return get_sentinel_contentPage().id
 
 #collectionPage which will be displaying products filtered by collectionID
 class collectionPage(models.Model):
-    collectionID = models.ForeignKey(Collection, on_delete=models.SET(get_sentinel_collection), default=get_sentinel_collection_id)
+    collectionID = models.ForeignKey(Collection, on_delete=models.PROTECT)
     collectionCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionPage/coverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionImage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     backgroundColor = models.TextField(default='TRANSPARENT')

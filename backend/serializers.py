@@ -494,7 +494,7 @@ class websiteSiteMapConfigSerializer(serializers.ModelSerializer):
 
 class collectionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Collection
+        model = ProductCollection
         fields = '__all__'
 
 class MetaUserAccountStatusSerializer(serializers.ModelSerializer):
