@@ -19,7 +19,7 @@ from backend.azure_blob import AzureMediaStorage, AzureStaticStorage
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.bdgdao.azurewebsites.net'
+    'https://*./bodegaproduction.azurewebsites.net'
 ]
 # hello
 
@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'https://bdgdao.azurewebsites.net'
+    'https://bodegaproduction.azurewebsites.net'
 ]
 
 
@@ -82,7 +83,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware'
 ]

@@ -1388,7 +1388,7 @@ def get_sentinel_contentPage_id():
 
 #collectionPage which will be displaying products filtered by collectionID
 class collectionPage(models.Model):
-    collectionID = models.ForeignKey(Collection, on_delete=models.PROTECT)
+    collectionID = models.ForeignKey(ProductCollection, on_delete=models.PROTECT)
     collectionCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionPage/coverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionImage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     backgroundColor = models.TextField(default='TRANSPARENT')
