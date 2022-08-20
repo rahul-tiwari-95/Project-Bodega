@@ -1802,15 +1802,24 @@ def authenticateStripeAccount(request):
 @api_view(['POST'])
 def retreiveStripeAccount(request):
     stripeAccount = stripe.Account.retrieve(request.data['stripeAccountID'])
+    
 
-
-    if stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") == 'active':
+    try:
+        existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
+             
+    except stripeAccountInfo.DoesNotExist:
+        return Response(data="WRONG or INVALID CREDENTIALS", status=404)
+        
+    if  stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID']) and stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers")   == 'active':
 
         #Check if the StripeAccount already exisst or not?
-        try:
-            existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
-        except stripeAccountInfo.DoesNotExist:
-            return Response(data="WRONG or INVALID CREDENTIALS", status=404)
+        # try:
+        #      existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
+             
+        # except stripeAccountInfo.DoesNotExist:
+        #     return Response(data="WRONG or INVALID CREDENTIALS", status=404)
+
+        
         stripeAccountAuth = "Authorized Project-Bodega Member Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
         Notifications.objects.create(
                                     metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
@@ -1819,7 +1828,7 @@ def retreiveStripeAccount(request):
         )
         return Response(data=stripeAccountAuth, status=200)
     
-    elif stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") != 'active':
+    elif stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") == 'inactive':
         Notifications.objects.create(
                                     metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
                                     text = "Project-Bodega Member Update: Your documents are still pending verification. Give it 3-5 business days", 
@@ -1833,6 +1842,7 @@ def retreiveStripeAccount(request):
                                     image = "https://projectbodegadb.blob.core.windows.net/media/1995685.png"
         )
         return Response(data="Project-Bodega Merchant Account Not Found | Payout Status: INELIGIBLE", status=404)
+    
 
 
 
