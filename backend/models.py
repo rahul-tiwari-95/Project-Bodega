@@ -686,10 +686,9 @@ class BoostTags(models.Model):
 class Discount(models.Model):
     name = models.TextField()
     description = models.TextField()
-    discount_percent = models.FloatField(default=0.0)
+    discount_percent = models.IntegerField(default=0)
     active_status = models.BooleanField(default=False)
-    created_by = models.ForeignKey(
-        MetaUser, on_delete=models.CASCADE)  # which user created this
+    created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE, default=get_sentinel_MetaUser_id)  # which user created this
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -697,7 +696,12 @@ class Discount(models.Model):
         # returns Discount code and Discount %
 
         return 'Code: %s' % (self.name)
+def get_sentinel_discount():
+    return Discount.objects.get_or_create(name='No Discount', description='No Discount / Promo available', discount_percent=0, active_status=True)[0]
+    #Create entry if it doesn't exist else just load a placeholder
 
+def get_sentinel_discount_id():
+    return get_sentinel_discount().id
 
 # creating base template for Bodega coins
 # in the beginning, bodega coins will be simply points you get on purchase
@@ -823,23 +827,7 @@ class Shop(models.Model):
         return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
 
 
-#Creating Product Inventory Table which includes Product Variant option 
 
-class ProductInventory(models.Model):
-    quantity = models.IntegerField(default=0)
-    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
-    created_at = models.DateField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
-
-def get_sentinel_productInventory():
-    return ProductInventory.objects.get_or_create(quantity=0, productVariant='OS')[0]
-    #Create entry if it doesn't exist else just load a placeholder
-
-def get_sentinel_productInventory_id():
-    return get_sentinel_productInventory().id
 
 
 class Collection(models.Model):
@@ -884,7 +872,6 @@ class ProductCollection(models.Model):
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     collectionID = models.ForeignKey(ProductCollection, on_delete=models.PROTECT)
-    productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
     productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
@@ -892,9 +879,6 @@ class Product(models.Model):
     productName = models.TextField(max_length=140, unique=True)
     producDescription = models.CharField(max_length=300)
     sellingPrice = models.FloatField(default=0.0)
-    discounted_price = models.FloatField(default=0.0)
-    quantity = models.IntegerField(default=0)
-    productVariants = models.TextField(default="Large")
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
     isPhysicalProduct = models.BooleanField(default=False)
@@ -911,6 +895,14 @@ class Product(models.Model):
         # returns Product Name & Product Meta Key
 
         return 'Product Name: %s -- Meta-Key: %s' % (self.productName, self.productHashkey)
+
+def get_sentinel_product():
+    return Product.objects.get_or_create(productName='New Beginnings')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_product_id():
+    return get_sentinel_product().id
+
 
 
 # Creating ProductMetaData model - how does a product look like? what are the traits?
@@ -936,7 +928,24 @@ class ProductMetaData(models.Model):
         return 'Product Meta Data '
 
 
+#Creating Product Inventory Table which includes Product Variant option 
 
+class ProductInventory(models.Model):
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    quantity = models.IntegerField(default=0)
+    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
+
+def get_sentinel_productInventory():
+    return ProductInventory.objects.get_or_create(quantity=0, productVariant='OS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_productInventory_id():
+    return get_sentinel_productInventory().id
 
 
 
@@ -1112,6 +1121,8 @@ class OrderLedger(models.Model):
     merchantStripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
     userAddress = models.ForeignKey(UserAddress, on_delete=models.PROTECT)
     productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    generateTrackingLabel = models.BooleanField(default=False)
+    customTrackingLabel = models.TextField(blank=True, null=True)
     orderStatus = models.TextField(choices=[
         ('PENDING', 'PENDING'),
         ('CANCELLED', 'CANCELLED'),

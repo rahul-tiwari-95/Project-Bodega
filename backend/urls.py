@@ -160,9 +160,9 @@ urlpatterns = [
     path('bodega-api/BodegaServerAuth/<int:pk>/', views.AuthenticateParticipantByRoomHashkey),
 
     #Filtering BodegaServer by metauserIDs
-    path('bodega-api/filterBodegaServerByMetaUserID/<int:pk>/', views.filterBodegaServerByMetaUserID),
+    path('bodega-api/filterBodegaServerByMetaUserID/', views.filterBodegaServerByMetaUserID),
     #Filtering messages by BodegaServer ID
-    path('bodega-api/filterMessagesReverseLookup/<int:pk>/', views.filterMessagesReverseLookup),
+    path('bodega-api/filterMessagesReverseLookup/', views.filterMessagesReverseLookup),
 
     # Message Model Endpoint by messageID
     path('bodega-api/message/', views.MessageList.as_view()),
@@ -346,6 +346,10 @@ urlpatterns = [
     path('bodegaCreators/newsletter/', views.NewsletterList.as_view()),
     path('bodegaCreators/newsletter/<int:pk>/', views.NewsletterDetail.as_view()),
 
+    #Newsletter Subscriber Endpoints
+    path('bodegaCreators/newsletterSubscriber/', views.NewsletterSubscribersList.as_view()),
+    path('bodegaCreators/newsletterSubscriber/<int:pk>/', views.NewsletterSubscribersDetail.as_view()),
+
     path('bodegaCreators/filterNewsletterMetaUserID/', views.filterNewsLetterByMetaUserID),
     path('bodegaCreators/filterNewsletterSubscriberByNewsletterID/', views.filterNewsletterSubscriberByNewsletterID),
     path('bodegaCreators/filterNewsletterSubscriberByMetaUserID/', views.filterNewsletterSubscriberByMetaUserID),
@@ -356,6 +360,8 @@ urlpatterns = [
     #Filtering UserAddress by metauserID
     path('bodegaCreators/filterUserAddressByMetaUserID/', views.filterUserAddressByMetaUserID),
 
+    #Filtering Product Inventory by productID
+    path('bodega-api/filterProductInventoryByProductID/', views.filterProductInventoryByProductID),
 
 
 ]

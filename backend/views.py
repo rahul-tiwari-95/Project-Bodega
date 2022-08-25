@@ -1496,6 +1496,16 @@ class ProductInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductInventory.objects.all()
     serializer_class = ProductInventorySerializer
 
+#Filter ProductInventory by ProductID
+@api_view(['POST'])
+def filterProductInventoryByProductID(request):
+    try:
+        instance = ProductInventory.objects.filter(productID=request.data['productID'])
+        serializer = ProductInventorySerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except ProductInventory.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
 #MunchiesPage Generics Views
 class MunchiesPageList(generics.ListCreateAPIView):
     from .models import MunchiesPage
@@ -2524,7 +2534,8 @@ def generateLabel(request):
             label_file_type="PDF", 
             asynchronous = False
         )
-            return Response(data="Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url, status=200)
+            labelResponse = json.loads("Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url)
+            return Response(data=labelResponse, status=200)
 
         elif shipment.rates[x].attributes == ['CHEAPEST'] and request.data['labelAttributes'] == "CHEAPEST" and shipment.rates[x].provider == 'USPS':
             rate = shipment.rates[x]
@@ -2772,7 +2783,7 @@ def filterBodegaServerByMetaUserID(request):
 @api_view(['POST'])
 def filterMessagesReverseLookup(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('created_at').reverse().values('id', 'message_body')
+        instance = Message.objects.filter(chat_room_ID=request.data['bodegaServerID']).order_by('created_at').reverse().values('id', 'message_body')
         serializer = MessageSerializer(instance, many=True)
         return Response (serializer.data, status=200)
     except:

@@ -30,7 +30,7 @@ CSRF_TRUSTED_ORIGINS = [
 SECRET_KEY = 'django-insecure-g5mid7ca(k)m94_hw$zdl*!y$ol&86py-c@@h=+nz+q*@ag=pj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     STRIPE_PUBLISHABLE_KEY = 'test_publishable_key'
@@ -66,7 +66,7 @@ INSTALLED_APPS = [
 ]
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 100
 }
 
 SERVER_EMAIL = [
@@ -124,7 +124,7 @@ ASGI_APPLICATION = 'trill.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'projectbodegadb',
+        'NAME': 'bodegalocaldb',
         'USER': 'postgres',
         'PASSWORD': '043074',
         'HOST': '127.0.0.1',
