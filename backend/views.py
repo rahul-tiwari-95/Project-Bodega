@@ -1800,8 +1800,8 @@ def createStripeAccount(request):
 def authenticateStripeAccount(request):
     stripeAuthLink = stripe.AccountLink.create(
                                             account=request.data['stripeAccountID'],
-                                            refresh_url="https://example.com/reauth",
-                                            return_url="https://example.com/return",
+                                            refresh_url="com.projectbodega://stripe_validation_callback",
+                                            return_url="com.projectbodega://stripe_validation_callback",
                                             type="account_onboarding")
 
     return Response(stripeAuthLink.url, status=200)
@@ -2258,7 +2258,7 @@ class bodegaCustomerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = customerPayment.objects.all()
     serializer_class = bodegaCustomerSerializer
 
-class bodegaCustomerList(generics.ListCreateAPIView):
+class bodegaSupportList(generics.ListCreateAPIView):
     queryset = bodegaSupport.objects.all()
     serializer_class = bodegaSupportSerializer
 

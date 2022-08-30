@@ -1130,6 +1130,8 @@ class OrderLedger(models.Model):
         ('REFUNDED', 'REFUNDED')
     ])
     paymentCaptured = models.BooleanField(default=False)
+    customerReceived = models.BooleanField(default=False)
+    merchantDelivered = models.BooleanField(default=False)
     orderAmount = models.FloatField(default=0.0)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
