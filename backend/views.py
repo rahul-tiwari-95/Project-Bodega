@@ -1800,8 +1800,8 @@ def createStripeAccount(request):
 def authenticateStripeAccount(request):
     stripeAuthLink = stripe.AccountLink.create(
                                             account=request.data['stripeAccountID'],
-                                            refresh_url="com.projectbodega://stripe_validation_callback",
-                                            return_url="com.projectbodega://stripe_validation_callback",
+                                            refresh_url="https://bodegaproduction.azurewebsites.net",
+                                            return_url="https://bodegaproduction.azurewebsites.net",
                                             type="account_onboarding")
 
     return Response(stripeAuthLink.url, status=200)
