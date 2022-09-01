@@ -375,7 +375,8 @@ urlpatterns = [
 
 
     #Filter creator Subscriptions by priceID
-    path('bodegaCreators/filterSubsByPriceID/', views.filterCreatorSubscriptionByPriceID),
+    path('bodegaCreators/filterCreatorSubsByPriceID/', views.filterCreatorSubscriptionByPriceID),
+    path('bodegaCreators/filterSubsByPriceID/', views.filterSubscribersByShopID),
 
 
 ]

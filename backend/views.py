@@ -2907,3 +2907,13 @@ def filterCreatorSubscriptionByPriceID(request):
         return Response(serializer.data, status=200)
     except:
         return Response(data="Not Found", status=404)
+
+#Filter Subscribers by ShopID
+@api_view(['POST'])
+def filterSubscribersByShopID(request):
+    try:
+        instance = Subscribers.objects.filter(priceID = request.data['priceID'])
+        serializer = subscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)

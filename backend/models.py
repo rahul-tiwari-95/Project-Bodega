@@ -297,6 +297,7 @@ class creatorSubscription(models.Model):
 
 class Subscribers(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    shopID = models.ForeignKey(Shop, on_delete=models.PROTECT, null=True)
     customerID = models.CharField(max_length=400)
     priceID = models.CharField(max_length=400)
     subscriptionID = models.CharField(max_length=400)
