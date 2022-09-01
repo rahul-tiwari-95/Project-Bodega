@@ -241,6 +241,12 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = '__all__'
 
+#Reverse Message Serializer Class
+class ReverseMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'message_body', 'modified_at']
+
 #Product Category Serializer Class
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:

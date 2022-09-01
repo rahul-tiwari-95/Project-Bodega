@@ -2771,11 +2771,12 @@ def filterBodegaServerByMetaUserID(request):
 @api_view(['POST'])
 def filterMessagesReverseLookup(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('created_at').reverse().values('id', 'message_body')
-        serializer = MessageSerializer(instance, many=True)
+        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at')
+        serializer = ReverseMessageSerializer(instance, many=True)
+        print(serializer)
         return Response (serializer.data, status=200)
     except:
-        return Response(data="INVALID CHAT ROOM ID", status=404)
+        return Response(data="INVALID CHAT ROOM ", status=404)
 
 #Filter Messages by metauserID 
 @api_view(['POST'])
