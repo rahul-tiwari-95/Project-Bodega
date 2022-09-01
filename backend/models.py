@@ -162,6 +162,38 @@ class BLAScore(models.Model):
     def __str__(self):
         return 'BLA Score: %s -- MetaUserID: %s ' % (self.current_score, self.metauserID)
 
+class Shop(models.Model):
+    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
+    all_products = JSONField(null=True, blank=True)
+    all_user_data = JSONField(null=True,blank=True)  # list of metauser IDs for your reference. no other data is shown here
+    name = models.TextField()
+    description = models.TextField()
+    logo = models.FileField(upload_to='shop-details/profile_picture')
+    cover_image = models.FileField(
+        upload_to='shop-details/profile_cover_image', default='EMPTY')
+    # Ask user if their Shop address is same as their own address for fucks sake.
+    address_line1 = models.TextField()
+    address_line2 = models.TextField()
+    address_state = models.TextField()
+    city = models.TextField()
+    state = models.TextField(default='NY')
+    postal_code = models.TextField()
+    country = models.TextField(max_length=2)  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
+    bodega_vision_tags = JSONField(null=True,
+                                   blank=True)  # loaded data from Azure Vision API - All tags stored here - Solomon_vision
+    bodega_customer_tags = JSONField(
+        null=True, blank=True)  # load tags on customers
+    uniquesellingprop = models.TextField(
+        default='Why your meta-shop is special than others?')
+    data_mining_status = models.BooleanField(default=False)
+    created_on = models.DateField(auto_now_add=True)
+    modified_on =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # returns Shop nane and metauserID
+        return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
+
+
 
 
 #STRIPE INTEGRATION CLASSES
@@ -252,6 +284,7 @@ class stripeCharges(models.Model):
 
 class creatorSubscription(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    shopID = models.ForeignKey(Shop, on_delete=models.PROTECT, null=True)
     subscriptionName = models.CharField(max_length=300)
     subscriptionDescription = models.CharField(max_length=500)
     amount = models.IntegerField(default=0)
@@ -791,41 +824,6 @@ class bodegaSocial(models.Model):
 
 
 # Commerce Model - key data weights on your commerce activity to be tracked for cluster analysis
-
-class Shop(models.Model):
-    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
-    all_products = JSONField(null=True, blank=True)
-    all_user_data = JSONField(null=True,blank=True)  # list of metauser IDs for your reference. no other data is shown here
-    name = models.TextField()
-    description = models.TextField()
-    logo = models.FileField(upload_to='shop-details/profile_picture')
-    cover_image = models.FileField(
-        upload_to='shop-details/profile_cover_image', default='EMPTY')
-    # Ask user if their Shop address is same as their own address for fucks sake.
-    address_line1 = models.TextField()
-    address_line2 = models.TextField()
-    address_state = models.TextField()
-    city = models.TextField()
-    state = models.TextField(default='NY')
-    postal_code = models.TextField()
-    country = models.TextField(choices=[
-        ('INDIA', 'IN'),
-        ('USA', 'US'),
-    ])  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
-    bodega_vision_tags = JSONField(null=True,
-                                   blank=True)  # loaded data from Azure Vision API - All tags stored here - Solomon_vision
-    bodega_customer_tags = JSONField(
-        null=True, blank=True)  # load tags on customers
-    uniquesellingprop = models.TextField(
-        default='Why your meta-shop is special than others?')
-    data_mining_status = models.BooleanField(default=False)
-    created_on = models.DateField(auto_now_add=True)
-    modified_on =models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        # returns Shop nane and metauserID
-        return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
-
 
 
 
