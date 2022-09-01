@@ -98,18 +98,6 @@ def metauserauth(request, pk):
         print("Authentication failed")
         return Response(data='Authentication Failed',status=404)
 
-#For searching metauser by their metausername 
-@api_view(['POST'])
-def searchMetaUserByName(request):
-    try :
-        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
-        serializer = MetaUserSerializer(instance)
-        return Response(serializer.data, status=200)
-
-
-    except MetaUser.DoesNotExist:
-        return Response(status=404, data= request.data['meta_username']+ ' MetaUser not found.')
-
 
 
 @csrf_exempt
@@ -2783,12 +2771,21 @@ def filterBodegaServerByMetaUserID(request):
 @api_view(['POST'])
 def filterMessagesReverseLookup(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['bodegaServerID']).order_by('created_at').reverse().values('id', 'message_body')
+        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('created_at').reverse().values('id', 'message_body')
         serializer = MessageSerializer(instance, many=True)
         return Response (serializer.data, status=200)
     except:
         return Response(data="INVALID CHAT ROOM ID", status=404)
 
+#Filter Messages by metauserID 
+@api_view(['POST'])
+def filterMessageByMetaUser(request):
+    try:
+        instance = Message.objects.filter(metauserID=request.data['metauserID'])
+        serializer = MessageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Message.DoesNotExist:
+        return Response(data="Not Found", status=404)
 
 
 #Filtering Newsletter by owner metauserID
@@ -2841,3 +2838,72 @@ class NewsletterSubscribersList(generics.ListCreateAPIView):
 class NewsletterSubscribersDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = NewsletterSubscribers.objects.all()
     serializer_class = NewsletterSubscribersSerializer
+
+
+#Search Functions for Bodega 
+
+#Product Search Functions
+@api_view(['POST'])
+def searchProductName(request):
+    try:
+        instance = Product.objects.filter(productName = request.data['productName'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#For searching metauser by their metausername 
+@api_view(['POST'])
+def searchMetaUserByName(request):
+    try :
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        serializer = MetaUserSerializer(instance)
+        return Response(serializer.data, status=200)
+
+    except MetaUser.DoesNotExist:
+        return Response(status=404, data= "Not Found")
+
+
+#Search MetaUserName via Public Hashkey
+@api_view(['POST'])
+def searchMetaUserByPublicHashkey(request):
+    try:
+        instance = MetaUser.objects.filter(public_hashkey=request.data['public_hashkey'])
+        serializer = MetaUserSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except MetaUser.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Search BoostTags by tags name
+@api_view(['POST'])
+def searchBoostTagsByName(request):
+    try:
+        instance = BoostTags.objects.filter(tags=request.data['tags'])
+        serializer = BoostTagsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BoostTags.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Search BodegaServer by name
+@api_view(['POST'])
+def searchBodegaServerByName(request):
+    try:
+        instance = BodegaServer.objects.filter(name=request.data['BodegaServerName'])
+        serializer = BodegaServerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServer.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+
+#Filter creatorSubscription by priceID
+@api_view(['POST'])
+def filterCreatorSubscriptionByPriceID(request):
+    try:
+        instance = creatorSubscription.objects.filter(stripePriceID=request.data['stripePriceID'])
+        serializer = creatorSubscriptionSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)

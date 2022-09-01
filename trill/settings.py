@@ -30,7 +30,7 @@ CSRF_TRUSTED_ORIGINS = [
 SECRET_KEY = 'django-insecure-g5mid7ca(k)m94_hw$zdl*!y$ol&86py-c@@h=+nz+q*@ag=pj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
     STRIPE_PUBLISHABLE_KEY = 'test_publishable_key'

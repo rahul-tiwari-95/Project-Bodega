@@ -602,7 +602,7 @@ class BodegaServer(models.Model):
     name = models.TextField(unique=True)
     desc = models.TextField(default='Why was this room created?')
     tags = models.TextField(default='#ROOM')
-    isRoomPrivate = models.BooleanField(default=True)
+    isRoomPrivate = models.BooleanField(default=False)
     modified_on =models.DateTimeField(auto_now_add=True)
     created_on = models.DateField(auto_now_add=True)
 

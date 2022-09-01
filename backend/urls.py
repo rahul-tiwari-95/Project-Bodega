@@ -364,5 +364,19 @@ urlpatterns = [
     path('bodega-api/filterProductInventoryByProductID/', views.filterProductInventoryByProductID),
 
 
+    #Search Endpoints
+    path('bodega-api/productSearch/', views.searchProductName),
+    path('bodega-api/metauserHashkeySearch/', views.searchMetaUserByPublicHashkey),
+    path('bodega-api/boostTagsSearch/', views.searchBoostTagsByName),
+    path('bodega-api/bodegaServerSearch/', views.searchBodegaServerByName),
+
+    #filter messages by metauserIDs
+    path('bodega-api/filterMessageByMetaUserID/', views.filterMessageByMetaUser),
+
+
+    #Filter creator Subscriptions by priceID
+    path('bodegaCreators/filterSubsByPriceID/', views.filterCreatorSubscriptionByPriceID),
+
+
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
