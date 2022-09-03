@@ -2918,3 +2918,14 @@ def filterSubscribersByShopID(request):
         return Response(serializer.data, status=200)
     except:
         return Response(data="Not Found", status=404)
+
+
+#Filter OrderItems by OrderID
+@api_view(['POST'])
+def filterOrderItemsByOrderID(request):
+    try:
+        instance = OrderItem.objects.filter(order_ID=request.data['order_ID'])
+        serializer = OrderItemSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)

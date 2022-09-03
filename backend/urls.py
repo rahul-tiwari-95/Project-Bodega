@@ -378,6 +378,9 @@ urlpatterns = [
     path('bodegaCreators/filterCreatorSubsByPriceID/', views.filterCreatorSubscriptionByPriceID),
     path('bodegaCreators/filterSubsByPriceID/', views.filterSubscribersByShopID),
 
+    #Filter OrderDetail by Order_ID
+    path('bodega-api/filterOrderDetail/', views.filterOrderItemsByOrderID),
+
 
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
