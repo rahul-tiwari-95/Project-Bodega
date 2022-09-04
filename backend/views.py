@@ -2929,3 +2929,14 @@ def filterOrderItemsByOrderID(request):
         return Response(serializer.data, status=200)
     except:
         return Response(data="Not Found", status=404)
+
+
+#Filtering Customer Payments by metauserID
+@api_view(['POST'])
+def filterCustomerPaymentByMetaUserID(request):
+    try:
+        instance = customerPayment.objects.filter(metauserID=request.data['metauserID'])
+        serializer = bodegaCustomerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except customerPayment.DoesNotExist:
+        return Response(data="Not Found", status=200)

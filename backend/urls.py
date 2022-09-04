@@ -381,6 +381,9 @@ urlpatterns = [
     #Filter OrderDetail by Order_ID
     path('bodega-api/filterOrderDetail/', views.filterOrderItemsByOrderID),
 
+    #Filter customer payment by metauserIDs
+    path('bodegaCreators/filterCustomerPayment/', views.filterCustomerPaymentByMetaUserID),
+
 
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
