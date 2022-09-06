@@ -105,8 +105,8 @@ def get_sentinel_MetaUser_id():
 # Creating MetaUser Tags for Profile 
 class MetaUserTags(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    metauserStatus = models.CharField(default="ACTIVE GUEST CREATOR", max_length=255)
-    trophiesAllocated = models.TextField(default="BABYSTEPS REVOLUTIONARY")
+    metauserStatus = models.CharField(default="ACTIVE CREATOR", max_length=255)
+    trophiesAllocated = models.TextField(default="BODEGA100 REVOLUTIONARY")
     projectBodegaLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
     metauserProfileLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
     coverBodegaImage = models.ImageField(default="https://projectbodegadb.blob.core.windows.net/media/coverImage.gif")
@@ -126,9 +126,13 @@ class MetaUserAccountStatus(models.Model):
     isPaidSubscriber = models.BooleanField(default=False)
     isAccountLocked = models.BooleanField(default=False)
     referralCode = models.TextField(unique=True)
+    referralCount = models.IntegerField(default=0)
+    referralStatus = models.BooleanField(default=False)
     activatePaywall = models.BooleanField(default=False)
     notificationStatus = models.BooleanField(default=False)
     notificationMessage = models.TextField(default='Welcome to Project-Bodega')
+    created_at = models.DateField(auto_now_add=True, null=True)
+    modified_at =models.DateTimeField(auto_now_add=True, null=True)
 
 
 
@@ -606,6 +610,12 @@ class BodegaServer(models.Model):
     isRoomPrivate = models.BooleanField(default=False)
     modified_on =models.DateTimeField(auto_now_add=True)
     created_on = models.DateField(auto_now_add=True)
+
+
+#BodegaServer Participant Model
+class BodegaServerParticipant(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    bodegaServerID = models.ForeignKey(BodegaServer, on_delete=models.CASCADE)
 
 # Who all with particpate in which rooms? - See secuirty can be fucking easy
 class Participant(models.Model):

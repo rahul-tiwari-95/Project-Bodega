@@ -947,12 +947,26 @@ def FetchCollaborationByMetaUserID(request):
     serializer = CollaborationSerializer(instance, many=True)
     return Response(serializer.data, status=200)
 
-#Fetch all BodegaServers by MetaUser ID
+#Fetch all BodegaServers Participant by MetaUser ID
 @api_view(['POST'])
 def FetchParticipantByMetaUserID(request):
-    instance = Participant.objects.filter(metauserID=request.data.get)
-    serializer = ParticipantSerializer(instance, many=True)
-    return Response(serializer.data, status=200)
+    try:
+        instance = BodegaServerParticipant.objects.filter(metauserID=request.data['metauserID'])
+        serializer = ParticipantSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServerParticipant.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Fetch all BodegaServers Participant by chat_room_ID
+@api_view(['POST'])
+def FetchParticipantByChatRoomID(request):
+    try:
+        instance = BodegaServerParticipant.objects.filter(bodegaServerID=request.data['bodegaServerID'])
+        serializer = ParticipantSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServerParticipant.DoesNotExist:
+        return Response(data="Not Found", status=404)
 
 #Authenticate New Participant by Room Hashkey
 @api_view(['POST'])
@@ -1342,18 +1356,12 @@ class BodegaServerDetail(generics.RetrieveUpdateDestroyAPIView):
 #Particpant Generic Views
 #@csrf_exempt
 class ParticipantList(generics.ListCreateAPIView):
-    queryset = Participant.objects.all()
-    serializer_class = ParticipantSerializer
-
-#Particpant Generic Views
-#@csrf_exempt
-class ParticipantList(generics.ListCreateAPIView):
-    queryset = Participant.objects.all()
+    queryset = BodegaServerParticipant.objects.all()
     serializer_class = ParticipantSerializer
 
 #@csrf_exempt
 class ParticpiantDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Participant.objects.all()
+    queryset = BodegaServerParticipant.objects.all()
     serializer_class = ParticipantSerializer
 
 #Message Generic Views 
@@ -2414,7 +2422,7 @@ class notificationsDetail(generics.RetrieveUpdateDestroyAPIView):
 @api_view(['POST'])
 def FetchNotificationsByMetaUserID(request):
     try: 
-        instance = Notifications.objects.filter(metauserID=request.data['metauserID'])
+        instance = Notifications.objects.filter(metauserID=request.data['metauserID']).order_by('modified_at').reverse()
         serializer = notificationsSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     except Notifications.DoesNotExist:

@@ -157,6 +157,7 @@ urlpatterns = [
     path('bodega-api/participant/', views.ParticipantList.as_view()),
     path('bodega-api/participant/<int:pk>/', views.ParticpiantDetail.as_view()),
     path('bodega-api/BodegaServersByMetauserID/', views.FetchParticipantByMetaUserID),
+    path('bodega-api/BodegaServersByChatRoomID/', views.FetchParticipantByChatRoomID),
     path('bodega-api/BodegaServerAuth/<int:pk>/', views.AuthenticateParticipantByRoomHashkey),
 
     #Filtering BodegaServer by metauserIDs

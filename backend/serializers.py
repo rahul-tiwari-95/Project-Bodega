@@ -232,7 +232,7 @@ class BodegaServerSerializer(serializers.ModelSerializer):
 #ParticpantSerializer Class
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Participant
+        model = BodegaServerParticipant
         fields = '__all__'
 
 #Message Serializer Class
