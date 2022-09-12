@@ -21,7 +21,7 @@ import stripe
 import json
 import httpie
 import shippo
-
+from trill.genesiskey import *
 
 
 
@@ -1709,13 +1709,13 @@ class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 #Stripe Integration Viewset
 
-stripe.api_key='sk_test_51L08MiHqfk1hk8aABrqHYR0aGbxNY3YkKdSmX8VRRSKEVUTmYnvfxert4KnNnAh1R2qSbyRpKiohlYpG8Nfk89vB00W13HuLdg'
+stripe.api_key= STRIPE_PUBLISHABLE_KEY
 # shippoToken = "shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5"
 # shippo.api_key='shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5'
 # shippo.config.api_key="shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5"
 
 # shippo.api_key='shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5'
-shippo.config.api_key="shippo_test_1c8ea49d84399bc8084d6a8d0e498c940274884c"
+shippo.config.api_key=SHIPPO_TEST_KEY
 
 #Create a New Stripe Account Endpoint - For Digital Services
 @api_view(['POST'])
@@ -2779,9 +2779,8 @@ def filterBodegaServerByMetaUserID(request):
 @api_view(['POST'])
 def filterMessagesReverseLookup(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at')
+        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username')
         serializer = ReverseMessageSerializer(instance, many=True)
-        print(serializer)
         return Response (serializer.data, status=200)
     except:
         return Response(data="INVALID CHAT ROOM ", status=404)

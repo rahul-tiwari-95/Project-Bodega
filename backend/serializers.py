@@ -245,7 +245,7 @@ class MessageSerializer(serializers.ModelSerializer):
 class ReverseMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id', 'message_body', 'modified_at']
+        fields = ['id', 'message_body', 'modified_at', 'username']
 
 #Product Category Serializer Class
 class ProductCategorySerializer(serializers.ModelSerializer):

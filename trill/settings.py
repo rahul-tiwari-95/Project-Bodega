@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 from backend.azure_blob import AzureMediaStorage, AzureStaticStorage
+#from genesiskey import *
+from .genesiskey import *
 
 
 
@@ -21,25 +23,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_TRUSTED_ORIGINS = [
     'https://*./bodegaproduction.azurewebsites.net'
 ]
-# hello
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g5mid7ca(k)m94_hw$zdl*!y$ol&86py-c@@h=+nz+q*@ag=pj'
-
-# SECURITY WARNING: don't run with debug turned on in production!
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
+SECRET_KEY = SECRET_KEY
 DEBUG = True
+SUDO_DEPLOY=SUDO_DEPLOY
 
-if DEBUG:
-    STRIPE_PUBLISHABLE_KEY = 'test_publishable_key'
-    STRIPE_SECRET_KEY = 'test_secret_key'
+if DEBUG is False and SUDO_DEPLOY is True:
+    STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
+
+    SUDO25 = STRIPE_RAHUL_KEY
+elif DEBUG is True and SUDO_DEPLOY is False:
+    STRIPE_PUBLISHABLE_KEY=STRIPE_TEST_KEY
+
+elif DEBUG is True and SUDO_DEPLOY is True:
+    STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
+
+
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'https://bdgdao.azurewebsites.net'
     'https://bodegaproduction.azurewebsites.net'
 ]
 
@@ -54,9 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'corsheaders',
-
     'storages',
     'rest_framework',
     'stripe'
