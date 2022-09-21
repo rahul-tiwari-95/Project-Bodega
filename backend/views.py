@@ -1827,11 +1827,7 @@ def retreiveStripeAccount(request):
 
         
         stripeAccountAuth = "Authorized Project-Bodega Member Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
-        Notifications.objects.create(
-                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
-                                    text = "Congratulations! Your Project-Bodega member account is ACTIVE. You're ready to take off!", 
-                                    image = "https://projectbodegadb.blob.core.windows.net/media/istockphoto-472361905-612x612.jpg"
-        )
+        metauser=request.data['metauserID']
         return Response(data=stripeAccountAuth, status=200)
     
     elif stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") == 'inactive':
@@ -2947,3 +2943,91 @@ def filterCustomerPaymentByMetaUserID(request):
         return Response(serializer.data, status=200)
     except customerPayment.DoesNotExist:
         return Response(data="Not Found", status=200)
+
+
+
+
+#Bodega CreditCardLedger 
+class BodegaCreditCardLedgerList(generics.ListCreateAPIView):
+    queryset = BodegaCreditCardLedger.objects.all()
+    serializer_class = BodegaCreditCardLedgerSerializer
+
+class BodegaCreditCardLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCreditCardLedger.objects.all()
+    serializer_class = BodegaCreditCardLedgerSerializer
+
+
+#Filter BodegaCreditCardLedger by MetaUserID
+@api_view(['POST'])
+def filterCreditCardLedgerByMetaUserID(request):
+    try:
+        instance = BodegaCreditCardLedger.objects.filter(metauserID=request.data['metauserID'])
+        serializer = BodegaCreditCardLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR",status=404)
+
+
+
+
+#BodegaSubscriberLedger 
+class BodegaSubscriberLedgerList(generics.ListCreateAPIView):
+    queryset = BodegaSubscriberLedger.objects.all()
+    serializer_class = BodegaSubscriberLedgerSerializer
+
+class BodegaSubscriberLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaSubscriberLedger.objects.all()
+    serializer_class = BodegaSubscriberLedgerSerializer
+
+#Filter BodegaSubscriberLedger by metauserIDs
+@api_view(['POST'])
+def filterSubscriberLedgerByMetaUserID(request):
+    try:
+        instance = BodegaSubscriberLedger.objects.filter(metauserID=request.data['metauserID'])
+        serializer = BodegaSubscriberLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR", status=404)
+
+
+
+#BodegaPublicURL
+class BodegaPublicURLList(generics.ListCreateAPIView):
+    queryset = BodegaPublicURL.objects.all()
+    serializer_class = BodegaPublicURLSerializer
+
+class BodegaPublicURLDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaPublicURL.objects.all()
+    serializer_class = BodegaPublicURLSerializer
+
+#Filter BodegaPublicURL by metauserIDs
+@api_view(['POST'])
+def filterBodegaPublicURLByMetaUserID(request):
+    try:
+        instance = BodegaPublicURL.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = BodegaPublicURLSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR", status=404)
+
+
+
+#Memories
+
+class MemoriesList(generics.ListCreateAPIView):
+    queryset = Memories.objects.all()
+    serializer_class = MemoriesSerializer
+
+class MemoriesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Memories.objects.all()
+    serializer_class = MemoriesSerializer
+
+#Filter Memories by MetaUserID
+@api_view(['POST'])
+def filterMemoriesByMetaUserID(request):
+    try:
+        instance = Memories.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = MemoriesSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR", status=404)

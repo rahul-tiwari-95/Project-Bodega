@@ -523,3 +523,29 @@ class NewsletterSubscribersSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewsletterSubscribers
         fields = '__all__'
+
+
+#BodegaCreditCardLedger
+class BodegaCreditCardLedgerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodegaCreditCardLedger
+        fields = '__all__'
+
+
+class BodegaSubscriberLedgerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodegaSubscriberLedger
+        fields = '__all__'
+
+
+class BodegaPublicURLSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodegaPublicURL
+        fields = '__all__'
+
+
+class MemoriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Memories
+        fields = '__all__'
+

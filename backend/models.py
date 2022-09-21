@@ -314,6 +314,30 @@ class Subscribers(models.Model):
 
 
 
+# #Table for BodegaCreditCardLedger 
+class BodegaCreditCardLedger(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    amount = models.IntegerField(default=0)
+    currency = models.TextField(blank=False)
+    description = models.TextField(blank=True)
+    customerID = models.TextField(blank=False)
+    paymentMethodID = models.TextField(blank=False)
+    bodegaCustomerID = models.IntegerField(blank=False)
+    stripeAccountInfoID = models.IntegerField(blank=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+#Table for BodegaSubscriberLedger 
+class BodegaSubscriberLedger(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    customerID = models.TextField(blank=False)
+    stripePriceID = models.TextField(blank=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+
 
 
 # Models for Sentino APIs - These tables act as a backup and allows us to measure all different personality profiles of the customer/user
@@ -1364,6 +1388,63 @@ class bodegaSupport(models.Model):
     modified_at =models.DateTimeField(auto_now_add=True)
 
 
+#Models for bdgdao public link URLs
+class BodegaPublicURL(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    metausername = models.TextField(blank=True)
+    bioCaption = models.TextField(blank=True)
+    subscriptionButton = models.BooleanField(default=False)
+    yerrrButton = models.BooleanField(default=False)
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    profileImage =  models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/profileImage/media', blank=True)
+    coverMedia = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media1 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media5 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media6 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media7 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media8 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media9 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media10 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media11 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media12= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media13= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media14= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media15= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption1 = models.URLField( blank=True)
+    caption2 = models.URLField( blank=True)
+    caption3 = models.URLField( blank=True)
+    caption4 = models.URLField( blank=True)
+    caption5 = models.URLField( blank=True)
+    caption6 = models.URLField( blank=True)
+    caption7 = models.URLField( blank=True)
+    caption8 = models.URLField( blank=True)
+    caption9 = models.URLField( blank=True)
+    caption10 = models.URLField( blank=True)
+    caption11 = models.URLField( blank=True)
+    caption12 = models.URLField( blank=True)
+    caption13 = models.URLField( blank=True)
+    caption14 = models.URLField( blank=True)
+    caption15 = models.URLField( blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+class Memories(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    memoriesMedia = models.FileField(upload_to='bodegaMerchant/memories/media', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    memoriesCaption = models.TextField(blank=True)
+    expirationCondition = models.TextField(choices=[
+        ('5MINS', '5MINS'),
+        ('30MINS', '30MINS'),
+        ('24HOURS', '24HOURS'),
+        ('NEVER', 'NEVER')])
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+    
 
 
 #Models for Merchant Website Configuration

@@ -5,7 +5,7 @@ from .views import *
 #import stripeServer.views as stripeViews
 urlpatterns = [
     # Landing Page URLs
-    path('', views.home_page),
+    path('oldhome/', views.home_page),
     path('not-auth/', views.filter_spam),
     path('home/', views.landing_page),
     path('home/aboutbodega/', views.about_us),
@@ -385,6 +385,26 @@ urlpatterns = [
     #Filter customer payment by metauserIDs
     path('bodegaCreators/filterCustomerPayment/', views.filterCustomerPaymentByMetaUserID),
 
+    #BodegaCreditCardLedger URLs
+    path('bodegaCreditCardLedger/', views.BodegaCreditCardLedgerList.as_view()),
+    path('bodegaCreditCardLedger/<int:pk>/', views.BodegaCreditCardLedgerDetail.as_view()),
+    path('filterCreditCardLedger/', views.filterCreditCardLedgerByMetaUserID),
 
+
+    #BodegaSubscriberLedger URLs
+    path('bodegaSubscriberLedger/', views.BodegaSubscriberLedgerList.as_view()),
+    path('bodegaSubscriberLedger/<int:pk>/', views.BodegaSubscriberLedgerDetail.as_view()),
+    path('filterSubscriberLedger/', views.filterSubscriberLedgerByMetaUserID),
+
+
+    #BodegaPublicURL 
+    path('bodegaPublicURL/', views.BodegaPublicURLList.as_view()),
+    path('bodegaPublicURL/<int:pk>/', views.BodegaPublicURLDetail.as_view()),
+    path('filterPublicURL/', views.filterBodegaPublicURLByMetaUserID),
+
+    #Memories
+    path('bodegaMemories/', views.MemoriesList.as_view()),
+    path('bodegaMemories/<int:pk>/', views.MemoriesDetail.as_view()),
+    path('filterMemories/', views.filterMemoriesByMetaUserID),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
