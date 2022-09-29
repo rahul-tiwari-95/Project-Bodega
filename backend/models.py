@@ -906,7 +906,6 @@ class ProductCollection(models.Model):
 
 class ProductInventory(models.Model):
     quantity = models.IntegerField(default=0)
-    price = models.IntegerField(default=0)
     productVariant = models.TextField(default='OS') #OS stands for One Sized Product
     created_at = models.DateField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
