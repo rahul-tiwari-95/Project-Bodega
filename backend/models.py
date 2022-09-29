@@ -87,7 +87,7 @@ class MetaUser(models.Model):
     passcode = models.TextField(unique=True)
     private_hashkey = models.TextField(default=private_metauser_hashkey_generator, unique=True)
     public_hashkey = models.TextField( default=public_metauser_hashkey_generator, unique=True)
-    discord_username = models.TextField()
+    discord_username = models.TextField(blank=True)
     created_at = models.DateField(auto_now_add=True)  
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -96,7 +96,7 @@ class MetaUser(models.Model):
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
 def get_sentinel_MetaUser():
-    return MetaUser.objects.get_or_create(meta_username='rahultiwari', passcode='mk@043074', discord_username='raven')[0]
+    return MetaUser.objects.get_or_create(meta_username='sudo25', passcode='mk@043074', discord_username='raven')[0]
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_MetaUser_id():
@@ -105,7 +105,7 @@ def get_sentinel_MetaUser_id():
 # Creating MetaUser Tags for Profile 
 class MetaUserTags(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    metauserStatus = models.CharField(default="ACTIVE CREATOR", max_length=255)
+    metauserStatus = models.CharField(default="ACTIVE CREATOR BODEGA1k", max_length=255)
     trophiesAllocated = models.TextField(default="BODEGA100 REVOLUTIONARY")
     projectBodegaLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
     metauserProfileLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
@@ -124,6 +124,9 @@ class MetaUserTags(models.Model):
 class MetaUserAccountStatus(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
     isPaidSubscriber = models.BooleanField(default=False)
+    rookieSubscriber = models.BooleanField(default=False)
+    creatorSubscriber = models.BooleanField(default=False)
+    influencerSubscriber = models.BooleanField(default=False)
     isAccountLocked = models.BooleanField(default=False)
     referralCode = models.TextField(unique=True)
     referralCount = models.IntegerField(default=0)
@@ -143,7 +146,7 @@ class MetaUserAccountStatus(models.Model):
 # everyone starts at 3.0
 class Level(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    number = models.FloatField(default=3.0)
+    number = models.FloatField(default=5.0)
 
     def __str__(self):
         # returns level number and userID
@@ -663,6 +666,7 @@ class Message(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     username = models.TextField(blank=True)
     message_body = models.TextField()
+    messageMedia = models.FileField(upload_to='bodegaMessaging/message/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -739,8 +743,8 @@ class ProductCategory(models.Model):
 #BoostTags Model Instance
 class BoostTags(models.Model):
     
-    tags = models.CharField(max_length=11) #Name of BoostTags
-    created_by = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    tags = models.CharField(max_length=11, unique=True) #Name of BoostTags
+    created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE) 
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -780,8 +784,7 @@ class Bodegacoins(models.Model):
 # Social Model - Key data weights on your social activity to be tracked for cluster-analysis - everything can be deleted
 
 class Social(models.Model):
-    metauserID = models.ForeignKey(MetaUser,
-                                   on_delete=models.CASCADE)  # we cant have metauserIDs deleted - its either ways not connected to their physical copies but STILL
+    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # we cant have metauserIDs deleted - its either ways not connected to their physical copies but STILL
     # bodegacoins_ID = models.ForeignKey(Bodegacoins, on_delete=models.CASCADE)
     # lists of MetametauserIDs of all people we follow
     following = JSONField(null=True, blank=True)
@@ -899,6 +902,26 @@ class ProductCollection(models.Model):
 
 
 
+#Creating Product Inventory Table which includes Product Variant option 
+
+class ProductInventory(models.Model):
+    quantity = models.IntegerField(default=0)
+    price = models.IntegerField(default=0)
+    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
+
+def get_sentinel_productInventory():
+    return ProductInventory.objects.get_or_create(quantity=1, productVariant='OS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_productInventory_id():
+    return get_sentinel_productInventory().id
+
+
 
 
 
@@ -909,6 +932,7 @@ class Product(models.Model):
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
     shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
     productName = models.TextField(max_length=140, unique=True)
     producDescription = models.CharField(max_length=300)
     sellingPrice = models.FloatField(default=0.0)
@@ -959,26 +983,6 @@ class ProductMetaData(models.Model):
         # returns Product Name & Product Meta Key
 
         return 'Product Meta Data '
-
-
-#Creating Product Inventory Table which includes Product Variant option 
-
-class ProductInventory(models.Model):
-    productID = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    quantity = models.IntegerField(default=0)
-    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
-    created_at = models.DateField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
-
-def get_sentinel_productInventory():
-    return ProductInventory.objects.get_or_create(quantity=0, productVariant='OS')[0]
-    #Create entry if it doesn't exist else just load a placeholder
-
-def get_sentinel_productInventory_id():
-    return get_sentinel_productInventory().id
 
 
 
@@ -1405,15 +1409,30 @@ class BodegaPublicURL(models.Model):
     media4 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media5 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media6 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media7 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media8 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media9 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media10 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media11 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media12= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media13= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media14= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
-    media15= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media7 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media7', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media8 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media8', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media9 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media9', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media10 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media10', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media11 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media11', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media12= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media12', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media13= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media13', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media14= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media14', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media15= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media15', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    altText1 = models.TextField(blank=True)
+    altText2 = models.TextField(blank=True)
+    altText3 = models.TextField(blank=True)
+    altText4 = models.TextField(blank=True)
+    altText5 = models.TextField(blank=True)
+    altText6 = models.TextField(blank=True)
+    altText7 = models.TextField(blank=True)
+    altText8 = models.TextField(blank=True)
+    altText9 = models.TextField(blank=True)
+    altText10 = models.TextField(blank=True)
+    altText11 = models.TextField(blank=True)
+    altText12 = models.TextField(blank=True)
+    altText13 = models.TextField(blank=True)
+    altText14 = models.TextField(blank=True)
+    altText15 = models.TextField(blank=True)
     caption1 = models.URLField( blank=True)
     caption2 = models.URLField( blank=True)
     caption3 = models.URLField( blank=True)
@@ -1609,3 +1628,31 @@ class MunchiesVideo(models.Model):
 
     def __str__(self):
         return 'Munchies Video: %s -- Total Views: %s' %(self.munchiesVideo, self.munchiesVideoViews)
+
+
+#Marketing Tables
+
+
+class BodegaAnnouncementBanner(models.Model):
+    media1 = models.FileField(upload_to='BodegaAnnouncementBanner/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='BodegaAnnouncementBanner/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='BodegaAnnouncementBanner/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='BodegaAnnouncementBanner/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media5 = models.FileField(upload_to='BodegaAnnouncementBanner/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media6 = models.FileField(upload_to='BodegaAnnouncementBanner/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media7 = models.FileField(upload_to='BodegaAnnouncementBanner/media7', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media8 = models.FileField(upload_to='BodegaAnnouncementBanner/media8', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media9 = models.FileField(upload_to='BodegaAnnouncementBanner/media9', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media10 = models.FileField(upload_to='BodegaAnnouncementBanner/media10', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    swiftURL1 = models.TextField(blank=True)
+    swiftURL2 = models.TextField(blank=True)
+    swiftURL3 = models.TextField(blank=True)
+    swiftURL4 = models.TextField(blank=True)
+    swiftURL5 = models.TextField(blank=True)
+    swiftURL6 = models.TextField(blank=True)
+    swiftURL7 = models.TextField(blank=True)
+    swiftURL8 = models.TextField(blank=True)
+    swiftURL9 = models.TextField(blank=True)
+    swiftURL10 = models.TextField(blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)

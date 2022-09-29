@@ -1492,14 +1492,14 @@ class ProductInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductInventory.objects.all()
     serializer_class = ProductInventorySerializer
 
-#Filter ProductInventory by ProductID
+#Filter Products by ProductInventorID
 @api_view(['POST'])
 def filterProductInventoryByProductID(request):
     try:
-        instance = ProductInventory.objects.filter(productID=request.data['productID'])
-        serializer = ProductInventorySerializer(instance, many=True)
+        instance = Product.objects.filter(productInventoryID=request.data['productInventoryID'])
+        serializer = ProductSerializer(instance, many=True)
         return Response(serializer.data, status=200)
-    except ProductInventory.DoesNotExist:
+    except Product.DoesNotExist:
         return Response(data="Not Found", status=404)
 
 #MunchiesPage Generics Views
@@ -1949,15 +1949,17 @@ def yerrrCommissionPayout(request):
         # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
         # #Push Realtime Notifications
         #Owner Notifications 
+        ownerPayoutAmount = int(request.data['ownerPayoutAmount'])/100
+        collaboratorPayoutAmount = int(request.data['collaboratorPayoutAmount'])/100
         Notifications.objects.create(
                                         metauserID = MetaUser.objects.get(pk=request.data['ownerMetauserID']),
-                                        text = "New Yerrr Sale for " + str(request.data['ownerPayoutAmount']), 
+                                        text = "New Yerrr Sale for " + str(ownerPayoutAmount), 
                                         image = "https://projectbodegadb.blob.core.windows.net/media/283-2836870_community-icon-transparent-background-png-download-transparent-transparent.png.jpeg"
         )
         #Collaborator Notifications
         Notifications.objects.create(
                                         metauserID = MetaUser.objects.get(pk=request.data['collaboratorMetauserID']),
-                                        text = "New Yerrr Sale for " + str(request.data['collaboratorPayoutAmount']), 
+                                        text = "New Yerrr Sale for " + str(collaboratorPayoutAmount), 
                                         image = "https://projectbodegadb.blob.core.windows.net/media/283-2836870_community-icon-transparent-background-png-download-transparent-transparent.png.jpeg"
         )
 
@@ -2015,9 +2017,10 @@ def yerrrFixedPayout(request):
                                                     amount = float(request.data['fixedAmount']),
                                                     description = "Yerrr Fixed Payout Automatically Captured"
         )
+        fixedAmount = int(request.data['fixedAmount'])/100
         Notifications.objects.create(
                                         metauserID = MetaUser.objects.get(pk=request.data['collaboratorMetauserID']),
-                                        text = "New Yerrr Payout for " + str(request.data['fixedAmount']), 
+                                        text = "New Yerrr Payout for " + str(fixedAmount), 
                                         image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
         )
 
@@ -2127,11 +2130,10 @@ def createCharge(request):
         # #Fetch MetaUserID via bodegaCustomerID
         # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
         # #Push Realtime Notifications
-        amount = int(request.data['amount'])
-        amount = amount*100
+        amount = (int(request.data['amount'])/100)
         Notifications.objects.create(
                                         metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
-                                        text = "New Sale for $" + str(amount), 
+                                        text = "New Purchase for $" + str(amount), 
                                         image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
         )
                                                         
@@ -2775,7 +2777,7 @@ def filterBodegaServerByMetaUserID(request):
 @api_view(['POST'])
 def filterMessagesReverseLookup(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username')
+        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username', 'messageMedia')
         serializer = ReverseMessageSerializer(instance, many=True)
         return Response (serializer.data, status=200)
     except:
@@ -3031,3 +3033,15 @@ def filterMemoriesByMetaUserID(request):
         return Response(serializer.data, status=200)
     except:
         return Response(data="ERROR", status=404)
+
+
+
+#Fetch all ProductHashkey data from metauserID 
+@api_view(['POST'])
+def productHashkeyByMetaUser(request):
+    try:
+        instance = Product.objects.filter(metauserID=request.data['metauserID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="ERROR",status=404)

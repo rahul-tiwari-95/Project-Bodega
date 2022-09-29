@@ -247,6 +247,12 @@ class ReverseMessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'message_body', 'modified_at', 'username']
 
+#Product Hashkey Ledger - MetaUser Unique Personal Assets Ledger
+class ProductHashkeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['productName', 'product_image1', 'productHashkey', 'created_at']
+
 #Product Category Serializer Class
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:

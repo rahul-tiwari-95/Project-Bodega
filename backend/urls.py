@@ -406,5 +406,7 @@ urlpatterns = [
     path('bodegaMemories/', views.MemoriesList.as_view()),
     path('bodegaMemories/<int:pk>/', views.MemoriesDetail.as_view()),
     path('filterMemories/', views.filterMemoriesByMetaUserID),
+
+    path('MUPA/', views.productHashkeyByMetaUser),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
