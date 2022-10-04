@@ -408,5 +408,10 @@ urlpatterns = [
     path('filterMemories/', views.filterMemoriesByMetaUserID),
 
     path('MUPA/', views.productHashkeyByMetaUser),
+
+    path('bodegaCreators/bodegaFollowers', views.BodegaFollowersList.as_view()),
+    path('bodegaCreators/bodegaFollowers/<int:pk>/', views.BodegaFollowersDetail.as_view()),
+
+    path('bodegaCreators/filterBodegaFollowersByMetaUserID', views.filterBodegaFollowersByOwnerMetaUserID),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)

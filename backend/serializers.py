@@ -245,7 +245,7 @@ class MessageSerializer(serializers.ModelSerializer):
 class ReverseMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id', 'message_body', 'modified_at', 'username']
+        fields = ['id', 'message_body', 'modified_at', 'username', 'messageMedia']
 
 #Product Hashkey Ledger - MetaUser Unique Personal Assets Ledger
 class ProductHashkeySerializer(serializers.ModelSerializer):
@@ -553,5 +553,11 @@ class BodegaPublicURLSerializer(serializers.ModelSerializer):
 class MemoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Memories
+        fields = '__all__'
+
+
+class BodegaFollowersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodegaFollowers
         fields = '__all__'
 

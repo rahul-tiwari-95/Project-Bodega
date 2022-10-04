@@ -96,7 +96,7 @@ class MetaUser(models.Model):
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
 def get_sentinel_MetaUser():
-    return MetaUser.objects.get_or_create(meta_username='sudo25', passcode='mk@043074', discord_username='raven')[0]
+    return MetaUser.objects.get_or_create(meta_username='Maeve', passcode='rahul@bernard', discord_username='maeve22')[0]
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_MetaUser_id():
@@ -105,7 +105,7 @@ def get_sentinel_MetaUser_id():
 # Creating MetaUser Tags for Profile 
 class MetaUserTags(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    metauserStatus = models.CharField(default="ACTIVE CREATOR BODEGA1k", max_length=255)
+    metauserStatus = models.CharField(default="ACTIVE BODEGA1k", max_length=255)
     trophiesAllocated = models.TextField(default="BODEGA100 REVOLUTIONARY")
     projectBodegaLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
     metauserProfileLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
@@ -115,7 +115,7 @@ class MetaUserTags(models.Model):
     subscribersNumber = models.IntegerField(default=0)
     followersNumber = models.IntegerField(default=0)
     subscriptionActive = models.BooleanField(default=False)
-    accessLevelClearance = models.FloatField(default=3.5)
+    accessLevelClearance = models.FloatField(default=5.0)
     isProfilePrivate = models.BooleanField(default=False)
 
     def __str__(self):
@@ -740,6 +740,14 @@ class ProductCategory(models.Model):
         return 'Product Category Name: %s ' % (self.category_name)
 
 
+def get_sentinel_ProductCategory():
+    return ProductCategory.objects.get_or_create(category_name='SHIRTS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_ProductCategory_id():
+    return get_sentinel_ProductCategory().id
+
+
 #BoostTags Model Instance
 class BoostTags(models.Model):
     
@@ -752,6 +760,13 @@ class BoostTags(models.Model):
         # returns collection name
 
         return 'BoostTags Name: %s' % (self.tags)
+
+def get_sentinel_boostTags():
+    return BoostTags.objects.get_or_create(tags='CREATOR')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_boostTags_id():
+    return get_sentinel_discount().id
 
 
 # Product Discount definition - How much discount?
@@ -890,7 +905,12 @@ class ProductCollection(models.Model):
     def __str__(self):
         return 'CollectionID: %s ' % (self.id)
 
+def get_sentinel_productCollection():
+    return ProductCollection.objects.get_or_create(name='Maeve Collection')[0]
+    #Create entry if it doesn't exist else just load a placeholder
 
+def get_sentinel_productCollection_id():
+    return get_sentinel_product().id
 
 # def get_sentinel_collection():
 #     return Collection.objects.get_or_create(name='deleted')[0]
@@ -900,25 +920,6 @@ class ProductCollection(models.Model):
 #     return get_sentinel_collection().id
 
 
-
-
-#Creating Product Inventory Table which includes Product Variant option 
-
-class ProductInventory(models.Model):
-    quantity = models.IntegerField(default=0)
-    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
-    created_at = models.DateField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
-
-def get_sentinel_productInventory():
-    return ProductInventory.objects.get_or_create(quantity=1, productVariant='OS')[0]
-    #Create entry if it doesn't exist else just load a placeholder
-
-def get_sentinel_productInventory_id():
-    return get_sentinel_productInventory().id
 
 
 
@@ -931,7 +932,7 @@ class Product(models.Model):
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
     shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
+    #productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
     productName = models.TextField(max_length=140, unique=True)
     producDescription = models.CharField(max_length=300)
     sellingPrice = models.FloatField(default=0.0)
@@ -953,11 +954,31 @@ class Product(models.Model):
         return 'Product Name: %s -- Meta-Key: %s' % (self.productName, self.productHashkey)
 
 def get_sentinel_product():
-    return Product.objects.get_or_create(productName='New Beginnings')[0]
+    return Product.objects.get_or_create(productName='BlitzDjango')[0]
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_product_id():
     return get_sentinel_product().id
+
+#Creating Product Inventory Table which includes Product Variant option 
+
+class ProductInventory(models.Model):
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    quantity = models.IntegerField(default=0)
+    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
+
+def get_sentinel_productInventory():
+    return ProductInventory.objects.get_or_create(quantity=1, productVariant='OS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_productInventory_id():
+    return get_sentinel_productInventory().id
+
 
 
 
@@ -1169,6 +1190,8 @@ class OrderLedger(models.Model):
     customerReceived = models.BooleanField(default=False)
     merchantDelivered = models.BooleanField(default=False)
     orderAmount = models.FloatField(default=0.0)
+    productVariant = models.TextField(blank=True)
+    quantity = models.IntegerField(default=0)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -1653,5 +1676,17 @@ class BodegaAnnouncementBanner(models.Model):
     swiftURL8 = models.TextField(blank=True)
     swiftURL9 = models.TextField(blank=True)
     swiftURL10 = models.TextField(blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+
+
+
+#FOLLOW BUTTON
+class BodegaFollowers(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    followerMetaUserID = models.IntegerField(blank=True)
+    followerMetaUserName = models.TextField(blank=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)

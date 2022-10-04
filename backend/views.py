@@ -1644,6 +1644,18 @@ def filterOrderLedgerByStripeaccountID(request):
         return Response(data="OrderLedger Not Found", status=404)
 
 
+#Filtering Orders on the basis of ProductID - Number of times the product was sold.
+@api_view(['POST'])
+def filterOrderLedgerByProductID(request):
+    try:
+        instance = OrderLedger.objects.filter(productID=request.data['productID'])
+        serializer = OrderLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except OrderLedger.DoesNotExist:
+        return Response(status=404)
+
+
+
 #SysOps Agnet Generic Views
 #@csrf_exempt
 class SysOpsAgentList(generics.ListCreateAPIView):
@@ -1796,8 +1808,8 @@ def createStripeAccount(request):
 def authenticateStripeAccount(request):
     stripeAuthLink = stripe.AccountLink.create(
                                             account=request.data['stripeAccountID'],
-                                            refresh_url="https://bodegaproduction.azurewebsites.net",
-                                            return_url="https://bodegaproduction.azurewebsites.net",
+                                            refresh_url="https://bodegaproduction.azurewebsites.net/home/",
+                                            return_url="https://bodegaproduction.azurewebsites.net/home/",
                                             type="account_onboarding")
 
     return Response(stripeAuthLink.url, status=200)
@@ -3045,3 +3057,25 @@ def productHashkeyByMetaUser(request):
         return Response(serializer.data, status=200)
     except Product.DoesNotExist:
         return Response(data="ERROR",status=404)
+
+
+
+class BodegaFollowersList(generics.ListCreateAPIView):
+    queryset = BodegaFollowers.objects.all()
+    serializer_class = BodegaFollowersSerializer
+
+class BodegaFollowersDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaFollowers.objects.all()
+    serializer_class = BodegaFollowersSerializer
+
+
+#Filter Bodega Followers by ownerMetaUserID
+@api_view(['POST'])
+def filterBodegaFollowersByOwnerMetaUserID(request):
+    try:
+        instance = BodegaFollowers.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = BodegaFollowersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaFollowers.DoesNotExist:
+        return Response(status=404)
+        
