@@ -98,6 +98,18 @@ def metauserauth(request, pk):
         print("Authentication failed")
         return Response(data='Authentication Failed',status=404)
 
+#Edit MetaUserName
+@api_view(['POST'])
+def editMetaUserName(request):
+    try:
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        instance.meta_username = request.data['new_meta_username']
+        instance.save()
+        serializer = MetaUserNameSerializer(instance)
+        return Response(serializer.data,status=200)
+    except MetaUser.DoesNotExist:
+        return Response(status=404)
+
 
 
 @csrf_exempt
@@ -1496,10 +1508,10 @@ class ProductInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
 @api_view(['POST'])
 def filterProductInventoryByProductID(request):
     try:
-        instance = Product.objects.filter(productInventoryID=request.data['productInventoryID'])
-        serializer = ProductSerializer(instance, many=True)
+        instance = ProductInventory.objects.filter(productID=request.data['productID'])
+        serializer = ProductInventorySerializer(instance, many=True)
         return Response(serializer.data, status=200)
-    except Product.DoesNotExist:
+    except ProductInventory.DoesNotExist:
         return Response(data="Not Found", status=404)
 
 #MunchiesPage Generics Views
@@ -2254,6 +2266,21 @@ def createStripeCustomer(request):
     except:
         return Response(data="Payment Method Failed", status=404)
 
+
+#Delete Customer's Payment Methods
+@api_view(['POST'])
+def deleteStripeCustomer(request):
+    try:
+        deleteCustomer = stripe.Customer.delete(request.data['customerID'])
+        if deleteCustomer.deleted == "true": 
+            instance = customerPayment.objects.get(metauserID=request.data['metauserID'])
+            verificationInstance = customerPayment.objects.get(customerID=request.data['customerID'])
+            if verificationInstance.id == instance.id:
+                instance.delete()
+                return Response(data="Payment Method Deleted", status=200)
+        
+    except:
+        return Response(data="Unable to Delete Customer Payment Details.Try Again", status=404)
 
 #Views for bodegaCustomer Data 
 class bodegaCustomerList(generics.ListCreateAPIView):
@@ -3024,6 +3051,16 @@ def filterBodegaPublicURLByMetaUserID(request):
     except:
         return Response(data="ERROR", status=404)
 
+
+#FIlter BodegaPublicURL by metausername 
+@api_view(['POST'])
+def filterBodegaPublicURLByMetaUserName(request):
+    try:
+        instance = BodegaPublicURL.objects.filter(metausername=request.data['metausername'])
+        serializer = BodegaPublicURLSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="METAUSER NOT FOUND", status=404)
 
 
 #Memories

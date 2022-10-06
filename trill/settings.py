@@ -21,25 +21,26 @@ from .genesiskey import *
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_TRUSTED_ORIGINS = [
-    'https://*./bodegaproduction.azurewebsites.net'
+    'https://*./bodegaproduction.azurewebsites.net',
+    'https://*.mybdga.com'
 ]
 
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
-SECURE_SSL_REDIRECT = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
 SECRET_KEY = SECRET_KEY
 DEBUG = True
 SUDO_DEPLOY=SUDO_DEPLOY
 
-if DEBUG is False and SUDO_DEPLOY is True:
-    STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
+# if DEBUG is False and SUDO_DEPLOY is True:
+#     STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
 
-    SUDO25 = STRIPE_RAHUL_KEY
-elif DEBUG is True and SUDO_DEPLOY is False:
-    STRIPE_PUBLISHABLE_KEY=STRIPE_TEST_KEY
+#     SUDO25 = STRIPE_RAHUL_KEY
+# elif DEBUG is True and SUDO_DEPLOY is False:
+#     STRIPE_PUBLISHABLE_KEY=STRIPE_TEST_KEY
 
-elif DEBUG is True and SUDO_DEPLOY is True:
-    STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
+# elif DEBUG is True and SUDO_DEPLOY is True:
+#     STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
 
 
 
@@ -47,6 +48,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'https://bodegaproduction.azurewebsites.net'
+    'https://mybdga.com'
 ]
 
 

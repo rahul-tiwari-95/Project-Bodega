@@ -561,3 +561,7 @@ class BodegaFollowersSerializer(serializers.ModelSerializer):
         model = BodegaFollowers
         fields = '__all__'
 
+class MetaUserNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetaUser
+        fields = ['meta_username']

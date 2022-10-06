@@ -17,15 +17,9 @@ admin.site.register(ChatRoom)
 admin.site.register(Participant)
 admin.site.register(Message)
 
-#Products Assets
-admin.site.register(ProductCategory)
-admin.site.register(BoostTags)
-admin.site.register(Discount)
-admin.site.register(Collaboration)
-admin.site.register(Social)
-admin.site.register(Shop)
+
 admin.site.register(Product)
-admin.site.register(ProductMetaData)
+
 #admin.site.register(ProductOwnershipLedger)
 
 

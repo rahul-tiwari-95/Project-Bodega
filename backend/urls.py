@@ -48,6 +48,7 @@ urlpatterns = [
     path('bodegaCreators/allCharges/<int:pk>/', views.StripeChargesDetail.as_view()),
      #Create Stripe Customer Objects
      path('bodegaCreators/createCustomer/', views.createStripeCustomer),
+     path('bodegaCreators/deleteCustomer/', views.deleteStripeCustomer),
 
      path('bodegaCreators/allCustomers/', views.bodegaCustomerList.as_view()),
      path('bodegaCreators/allCustomers/<int:pk>/', views.bodegaCustomerDetail.as_view()),
@@ -90,6 +91,7 @@ urlpatterns = [
 
      #METAUSER API ENDPOINTS via passcode=pk
      path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
+     path('bodega-api/editMetaUserName/', views.editMetaUserName),
 
 
 
@@ -401,6 +403,7 @@ urlpatterns = [
     path('bodegaPublicURL/', views.BodegaPublicURLList.as_view()),
     path('bodegaPublicURL/<int:pk>/', views.BodegaPublicURLDetail.as_view()),
     path('filterPublicURL/', views.filterBodegaPublicURLByMetaUserID),
+    path('searchBPL/metausername/', views.filterBodegaPublicURLByMetaUserName),
 
     #Memories
     path('bodegaMemories/', views.MemoriesList.as_view()),
