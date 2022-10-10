@@ -8,6 +8,7 @@ urlpatterns = [
     path('oldhome/', views.home_page),
     path('not-auth/', views.filter_spam),
     path('home/', views.landing_page),
+    path('privacyPolicy/', views.privacyPolicy),
     path('home/aboutbodega/', views.about_us),
     path('home/contact-us/', views.contact_us),
     #Stripe Integration Endpoints

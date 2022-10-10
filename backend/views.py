@@ -54,6 +54,9 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
+def privacyPolicy(request):
+    return render(request, 'backend/privacyPolicy.html')
+
 
 
 
@@ -2271,16 +2274,13 @@ def createStripeCustomer(request):
 @api_view(['POST'])
 def deleteStripeCustomer(request):
     try:
-        deleteCustomer = stripe.Customer.delete(request.data['customerID'])
-        if deleteCustomer.deleted == "true": 
-            instance = customerPayment.objects.get(metauserID=request.data['metauserID'])
-            verificationInstance = customerPayment.objects.get(customerID=request.data['customerID'])
-            if verificationInstance.id == instance.id:
-                instance.delete()
-                return Response(data="Payment Method Deleted", status=200)
+        deleteCustomer = stripe.Customer.delete(request.data['metauserID'])
+        instance = customerPayment.objects.get(metauserID=request.data['customerID'])
+        instance.delete()
+        return Response(data="Payment Method Deleted", status=200)
         
     except:
-        return Response(data="Unable to Delete Customer Payment Details.Try Again", status=404)
+        return Response(data="Unable to Delete Customer Payment Details.Try Again", status=200)
 
 #Views for bodegaCustomer Data 
 class bodegaCustomerList(generics.ListCreateAPIView):
