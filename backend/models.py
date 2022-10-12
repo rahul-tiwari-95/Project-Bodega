@@ -202,7 +202,7 @@ class Shop(models.Model):
 
 
 def get_sentinel_Shop():
-    return Shop.objects.get_or_create(metauserID=get_sentinel_MetaUser_id, name="FREE_DEFAULT_SHOP", description="DEFAULT SHOP DB ENTRY FOR FREE CUSTOMERS")[0]
+    return Shop.objects.get_or_create(name="FREE_DEFAULT_SHOP", description="DEFAULT SHOP DB ENTRY FOR FREE CUSTOMERS")[0]
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_Shop_id():
@@ -939,7 +939,7 @@ class Product(models.Model):
     productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
-    shopID = models.ForeignKey(Shop, on_delete=models.SET(get_sentinel_Shop), default=get_sentinel_Shop_id)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
     #productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
     productName = models.TextField(max_length=140, unique=True)
     producDescription = models.TextField(blank=True)
