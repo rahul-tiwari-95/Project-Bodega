@@ -96,7 +96,7 @@ class MetaUser(models.Model):
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
 def get_sentinel_MetaUser():
-    return MetaUser.objects.get_or_create(meta_username='Maeve', passcode='rahul@bernard', discord_username='maeve22')[0]
+    return MetaUser.objects.get_or_create(meta_username='rahultiwari', passcode='rahul@userone', discord_username='maeve22')[0]
     #Create entry if it doesn't exist else just load a placeholder
 
 def get_sentinel_MetaUser_id():
@@ -199,6 +199,14 @@ class Shop(models.Model):
     def __str__(self):
         # returns Shop nane and metauserID
         return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
+
+
+def get_sentinel_Shop():
+    return Shop.objects.get_or_create(metauserID=get_sentinel_MetaUser_id, name="FREE_DEFAULT_SHOP", description="DEFAULT SHOP DB ENTRY FOR FREE CUSTOMERS")[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_Shop_id():
+    return get_sentinel_Shop().id
 
 
 
@@ -730,7 +738,7 @@ class ProductCategory(models.Model):
         ('DIGITAL-COLLECTIBLES', 'DIGITAL-COLLECTIBLES'),
         ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
         ('ENTERTAINMENT', 'ENTERTAINMENT'),
-        ('EDUCATIONAL', 'EDUCATIONAL'),
+        ('CREATORS', 'CREATORS'),
     ])
     created_at = models.DateField(auto_now_add=True)  # when was it created
     modified_at =models.DateTimeField(auto_now_add=True)  # when was it last modfied
@@ -931,10 +939,10 @@ class Product(models.Model):
     productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
-    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.SET(get_sentinel_Shop), default=get_sentinel_Shop_id)
     #productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
     productName = models.TextField(max_length=140, unique=True)
-    producDescription = models.CharField(max_length=300)
+    producDescription = models.TextField(blank=True)
     sellingPrice = models.FloatField(default=0.0)
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
