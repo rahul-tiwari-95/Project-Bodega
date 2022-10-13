@@ -104,7 +104,7 @@ def get_sentinel_MetaUser_id():
 
 # Creating MetaUser Tags for Profile 
 class MetaUserTags(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     metauserStatus = models.CharField(default="ACTIVE BODEGA1k", max_length=255)
     trophiesAllocated = models.TextField(default="BODEGA100 REVOLUTIONARY")
     projectBodegaLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
@@ -122,7 +122,7 @@ class MetaUserTags(models.Model):
         return "MetaUser Tags for metauser: %s" % (self.metauserID)
 
 class MetaUserAccountStatus(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     isPaidSubscriber = models.BooleanField(default=False)
     rookieSubscriber = models.BooleanField(default=False)
     creatorSubscriber = models.BooleanField(default=False)
@@ -145,7 +145,7 @@ class MetaUserAccountStatus(models.Model):
 # 5.0 scale
 # everyone starts at 3.0
 class Level(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     number = models.FloatField(default=5.0)
 
     def __str__(self):
@@ -157,8 +157,8 @@ class Level(models.Model):
 class BLAScore(models.Model):
     # Solomon Model to be created later on for now  - pass
     # Possible Values: 3.0, 2.5,(Level 3+) 1.0,(Level 1) 0.0 (Level 0)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    levelID = models.ForeignKey(Level, on_delete=models.CASCADE)
     ReviewCycleNo = models.FloatField(default=1.0)
     current_score = models.FloatField(default=3.0)
     predicted_score = models.FloatField(
@@ -185,7 +185,7 @@ class Shop(models.Model):
     city = models.TextField()
     state = models.TextField(default='NY')
     postal_code = models.TextField()
-    country = models.TextField(max_length=2)  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
+    country = models.TextField(max_length=6)  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
     bodega_vision_tags = JSONField(null=True,
                                    blank=True)  # loaded data from Azure Vision API - All tags stored here - Solomon_vision
     bodega_customer_tags = JSONField(
@@ -213,7 +213,7 @@ def get_sentinel_Shop_id():
 
 #STRIPE INTEGRATION CLASSES
 class stripeAccountInfo(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     stripeAccountID = models.CharField(unique=True, max_length=400)
     businessType = models.CharField(max_length=300, default='Digital Services')
     businessName = models.CharField(blank=True, max_length=255)
@@ -237,7 +237,7 @@ class stripeAccountInfo(models.Model):
 
 #Instance is created whenever a new transfer Stripe API is triggered.
 class stripeAccountTransfer(models.Model):
-    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.CASCADE)
     transactionID = models.CharField(max_length=500)
     payoutAmount = models.FloatField(default=0.0)
     payoutOrderInfo = models.CharField(max_length=255)
@@ -258,7 +258,7 @@ class stripeAccountBalance(models.Model):
 
 
 class customerPayment(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     name = models.CharField(default='John Doe', max_length=255)
     email = models.CharField(default="johndoe@email.com", max_length=255)
     customerID = models.CharField(max_length=500)
@@ -271,8 +271,8 @@ class customerPayment(models.Model):
 #This table will be automatically filled as the charge is created on a product by a customer.
 #This ledger will show all earnings made via selling of products or via subscriptions
 class CashFlowLedger(models.Model):
-    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
-    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.PROTECT)
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.CASCADE)
+    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.CASCADE)
     amount = models.FloatField(default=0.0)
     description = models.CharField(max_length=300, default='PRODUCT NAME')
     created_at = models.DateField(auto_now_add=True)
@@ -281,7 +281,7 @@ class CashFlowLedger(models.Model):
 
 
 class stripeCharges(models.Model):
-    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.PROTECT)
+    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.CASCADE)
     stripeChargeID = models.CharField(max_length=300)
     stripeCustomerID = models.CharField(max_length=400)
     stripePaymentMethodID = models.CharField(max_length=400, default='None', blank=True)
@@ -298,8 +298,8 @@ class stripeCharges(models.Model):
 
 
 class creatorSubscription(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    shopID = models.ForeignKey(Shop, on_delete=models.PROTECT, null=True)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE, null=True)
     subscriptionName = models.CharField(max_length=300)
     subscriptionDescription = models.CharField(max_length=500)
     amount = models.IntegerField(default=0)
@@ -311,8 +311,8 @@ class creatorSubscription(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
 class Subscribers(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    shopID = models.ForeignKey(Shop, on_delete=models.PROTECT, null=True)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE, null=True)
     customerID = models.CharField(max_length=400)
     priceID = models.CharField(max_length=400)
     subscriptionID = models.CharField(max_length=400)
@@ -838,7 +838,7 @@ class Social(models.Model):
         return 'metauserID: %s -- Account On Status: %s' % (self.metauserID, self.account_active)
 
 class MetaUserSocial(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     followers = ArrayField(
                             ArrayField(
                                         models.CharField(blank=True, max_length=255)
@@ -849,7 +849,7 @@ class MetaUserSocial(models.Model):
 
 
 class bodegaSocial(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     followers = ArrayField(
                             ArrayField(
                                         models.CharField(blank=True, max_length=255)
@@ -890,7 +890,7 @@ class bodegaSocial(models.Model):
 
 
 class Collection(models.Model):
-    ##metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    ##metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='default collection')
     description = models.CharField(max_length=400, default='default collection description')
     coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
@@ -903,7 +903,7 @@ class Collection(models.Model):
 
 
 class ProductCollection(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='default collection')
     description = models.CharField(max_length=400, default='default collection description')
     coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
@@ -935,7 +935,7 @@ def get_sentinel_productCollection_id():
 
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    collectionID = models.ForeignKey(ProductCollection, on_delete=models.PROTECT)
+    collectionID = models.ForeignKey(ProductCollection, on_delete=models.CASCADE)
     productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
     discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
@@ -993,7 +993,7 @@ def get_sentinel_productInventory_id():
 # Creating ProductMetaData model - how does a product look like? what are the traits?
 
 class ProductMetaData(models.Model):
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
     numberoflikes = models.IntegerField(default=0)
     numberofdislikes = models.IntegerField(default=0)
     numberofcomments = models.IntegerField(default=0)
@@ -1048,9 +1048,9 @@ class Collaboration(models.Model):
 
 
 class yerrrCollaboration(models.Model):
-    collaboratorMetaUserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    collaboratorMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     ownerMetaUserID = models.IntegerField(default=0)
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
     campaignName = models.CharField(max_length=255, default='Your Campaign Name')
     campaignDescription = models.CharField(max_length=600, default='Why you want to collaborate on this product?')
     campaignCoverImage = models.FileField(upload_to='yerrrCoverImage/campaignCoverImage', default="https://projectbodegadb.blob.core.windows.net/media/yerrrCoverImage.gif")
@@ -1125,7 +1125,7 @@ class ShoppingCartItem(models.Model):
 # A Tee and A Dildo can be order number 5566 for user name xyz - fucking modular. less risks of falling
 class OrderDetail(models.Model):
     total_amount = models.FloatField(default=0.0)
-    payment_info = models.ForeignKey(UserPayment, on_delete=models.PROTECT)
+    payment_info = models.ForeignKey(UserPayment, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -1138,9 +1138,9 @@ class OrderDetail(models.Model):
 # Here, we are accounting for each and every product purchased and bundling them.
 # Because payment is done in arrays and then added up to the total amount. Duh lol
 class OrderItem(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
-    product_ID = models.ForeignKey(Product, on_delete=models.PROTECT)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
@@ -1152,8 +1152,8 @@ class OrderItem(models.Model):
 #Order Success table model
 
 class OrderSuccess(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     stripeChargeID = models.TextField(blank=True)
     orderCompleted = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
@@ -1168,8 +1168,8 @@ class OrderSuccess(models.Model):
 #Order Failure Table Model
 
 class OrderFailure(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     stripeChargeID = models.TextField(blank=True)
     orderCompleted = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
@@ -1182,10 +1182,10 @@ class OrderFailure(models.Model):
 #OrderLedger Table for all Orders
 
 class OrderLedger(models.Model):
-    customerMetauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    merchantStripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
-    userAddress = models.ForeignKey(UserAddress, on_delete=models.PROTECT)
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    customerMetauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    merchantStripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.CASCADE)
+    userAddress = models.ForeignKey(UserAddress, on_delete=models.CASCADE)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
     generateTrackingLabel = models.BooleanField(default=False)
     customTrackingLabel = models.TextField(blank=True, null=True)
     orderStatus = models.TextField(choices=[
@@ -1220,9 +1220,9 @@ class ShopPayout(models.Model):
 
 # Creating SysOps Agent & Repository Models - PROTECT - Can never be deleted
 class SysOpsAgent(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
-    departmentID = models.ForeignKey(BodegaDept, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    levelID = models.ForeignKey(Level, on_delete=models.CASCADE)
+    departmentID = models.ForeignKey(BodegaDept, on_delete=models.CASCADE)
     agent_hashkey = models.TextField(
         default=agent_hashkey_generator, unique=True)
     bio = models.TextField(default='I am Bodega')
@@ -1241,8 +1241,8 @@ class SysOpsAgent(models.Model):
 
 class SysOpsAgentRepo(models.Model):
     # SysOps Agent Repo Design Structure
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    sysops_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    sysops_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.CASCADE)
     project_hashkey = JSONField(null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
@@ -1257,10 +1257,10 @@ class SysOpsAgentRepo(models.Model):
 
 class SysOpsProject(models.Model):
     # SysOps Project Design
-    owner_metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    owner_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.PROTECT)
-    levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
-    divisionID = models.ForeignKey(BodegaDept, on_delete=models.PROTECT)
+    owner_metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    owner_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.CASCADE)
+    levelID = models.ForeignKey(Level, on_delete=models.CASCADE)
+    divisionID = models.ForeignKey(BodegaDept, on_delete=models.CASCADE)
     name = models.TextField(default='Project Name')
     problem_statement = models.CharField(
         default='140 Characters', max_length=300)
@@ -1294,9 +1294,9 @@ class SysOpsProject(models.Model):
 
 class SysOpsSupplyNode(models.Model):
     # table for all creators who CREATE SHIT
-    supply_metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    supply_shopID = models.ForeignKey(Shop, on_delete=models.PROTECT)
-    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.PROTECT)
+    supply_metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    supply_shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.CASCADE)
     opsec_agent_hashkey = models.TextField(default='AGENT HASHKEY')
     name = models.TextField(default='JOHN')
     location = models.TextField(default='New York BABY')
@@ -1342,7 +1342,7 @@ class SysOpsSupplyNode(models.Model):
 
 class SysOpsDemandNode(models.Model):
     # table for all creators who CAN SELL SHIT
-    demand_metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    demand_metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     opsec_agent_hashkey = models.TextField(default='AGENT HASHKEY')
     name = models.TextField(default='JOHN')
     location = models.TextField(default='New York BABY')
@@ -1376,7 +1376,7 @@ class SysOpsDemandNode(models.Model):
     # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
     sysops_solution_hypothesis = JSONField(null=True, blank=True)
     additional_notes = JSONField(null=True, blank=True)
-    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.PROTECT)
+    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -1403,7 +1403,7 @@ class SysOpsDemandNode(models.Model):
 #New Shop model with only imp information and auto-create
 
 class Notifications(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     text = models.CharField(max_length=400)
     image = models.CharField(default=None, max_length=255)
     created_at = models.DateField(auto_now_add=True)
@@ -1414,7 +1414,7 @@ class Notifications(models.Model):
 
 
 class bodegaSupport(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     category = models.TextField(max_length=255, default="ORDER STATUS")
     message = models.CharField(max_length=500, default="PROBLEM STATEMENT")
     ticketActive = models.BooleanField(default=True)
@@ -1540,7 +1540,7 @@ def get_sentinel_contentPage_id():
 
 #collectionPage which will be displaying products filtered by collectionID
 class collectionPage(models.Model):
-    collectionID = models.ForeignKey(ProductCollection, on_delete=models.PROTECT)
+    collectionID = models.ForeignKey(ProductCollection, on_delete=models.CASCADE)
     collectionCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionPage/coverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionImage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     backgroundColor = models.TextField(default='TRANSPARENT')
@@ -1622,7 +1622,7 @@ class websiteSiteMapConfig(models.Model):
     contentPageID = models.ForeignKey(contentPage, on_delete=models.SET(get_sentinel_contentPage), default=get_sentinel_contentPage_id)
     navigationBarID = models.ForeignKey(navigationBar, on_delete=models.SET(get_sentinel_navBar), default=get_sentinel_navBar_id)
     footerBarID = models.ForeignKey(footerBar, on_delete=models.SET(get_sentinel_footerBar), default=get_sentinel_footerBar_id)
-    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     collectionButtonID1 = models.IntegerField(default=0)
     collectionButtonID2 = models.IntegerField(default=0)
     collectionButtonID3 = models.IntegerField(default=0)
@@ -1647,7 +1647,7 @@ class MunchiesPage(models.Model):
 
 #Creating Munchies Tabel
 class MunchiesVideo(models.Model):
-    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.PROTECT)
+    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.CASCADE)
     munchiesVideo = models.FileField(upload_to='munchies/videos')
     munchiesCaption = models.CharField(max_length=200)
     munchiesVideoTags = models.CharField(max_length=200)
