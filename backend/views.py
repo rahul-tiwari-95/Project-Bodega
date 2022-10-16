@@ -3116,3 +3116,23 @@ def filterBodegaFollowersByOwnerMetaUserID(request):
     except BodegaFollowers.DoesNotExist:
         return Response(status=404)
         
+
+
+#API Endpoints for SuperFire and ClapClap
+
+class SuperFireList(generics.ListCreateAPIView):
+    queryset = SuperFire.objects.all()
+    serializer_class = SuperFireSerializer
+
+class SuperFireDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SuperFire.objects.all()
+    serializer_class = SuperFireSerializer
+
+
+class ClapClapLis(generics.ListCreateAPIView):
+    queryset = ClapClap.objects.all()
+    serializer_class = ClapClapSerializer
+
+class ClapClapDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ClapClap.objects.all()
+    serializer_class = ClapClapSerializer

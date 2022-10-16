@@ -565,3 +565,15 @@ class MetaUserNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaUser
         fields = ['meta_username']
+        
+
+class SuperFireSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SuperFire
+        fields = '__all__'
+
+
+class ClapClapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClapClap
+        fields = '__all__'

@@ -417,5 +417,11 @@ urlpatterns = [
     path('bodegaCreators/bodegaFollowers/<int:pk>/', views.BodegaFollowersDetail.as_view()),
 
     path('bodegaCreators/filterBodegaFollowersByMetaUserID', views.filterBodegaFollowersByOwnerMetaUserID),
+    
+    path('superFire/', views.SuperFireList.as_view()),
+    path('superFire/<int:pk>/', views.SuperFireDetail.as_view()),
+    
+    path('clapClap/', views.SuperFireList.as_view()),
+    path('clapClap/<int:pk>/', views.SuperFireDetail.as_view()),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
