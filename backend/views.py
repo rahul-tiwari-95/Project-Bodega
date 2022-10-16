@@ -3129,7 +3129,7 @@ class SuperFireDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SuperFireSerializer
 
 
-class ClapClapLis(generics.ListCreateAPIView):
+class ClapClapList(generics.ListCreateAPIView):
     queryset = ClapClap.objects.all()
     serializer_class = ClapClapSerializer
 

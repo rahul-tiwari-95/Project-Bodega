@@ -421,7 +421,7 @@ urlpatterns = [
     path('superFire/', views.SuperFireList.as_view()),
     path('superFire/<int:pk>/', views.SuperFireDetail.as_view()),
     
-    path('clapClap/', views.SuperFireList.as_view()),
-    path('clapClap/<int:pk>/', views.SuperFireDetail.as_view()),
+    path('clapClap/', views.ClapClapList.as_view()),
+    path('clapClap/<int:pk>/', views.ClapClapDetail.as_view()),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
