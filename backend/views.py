@@ -3128,6 +3128,16 @@ class SuperFireDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SuperFire.objects.all()
     serializer_class = SuperFireSerializer
 
+#Filtering SuperFire by ProductID
+@api_view(['POST'])
+def filterSuperFireByProductID(request):
+    try:
+        instance = SuperFire.objects.filter(productID=request.data['productID'])
+        serializer = SuperFireSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except SuperFire.DoesNotExist:
+        return Response(status=404) 
+
 
 class ClapClapList(generics.ListCreateAPIView):
     queryset = ClapClap.objects.all()
@@ -3136,3 +3146,14 @@ class ClapClapList(generics.ListCreateAPIView):
 class ClapClapDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ClapClap.objects.all()
     serializer_class = ClapClapSerializer
+    
+    
+#Filtering ClapClap By productID
+@api_view(['POST'])
+def filterClapClapByProductID(request):
+    try:
+        instance = ClapClap.objects.filter(productID=request.data['productID'])
+        serializer = ClapClapSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except ClapClap.DoesNotExist:
+        return Response(status=404)
