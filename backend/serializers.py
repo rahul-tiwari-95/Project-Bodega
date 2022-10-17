@@ -567,13 +567,13 @@ class MetaUserNameSerializer(serializers.ModelSerializer):
         fields = ['meta_username']
         
 
-class SuperFireSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SuperFire
-        fields = '__all__'
+# class SuperFireSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = SuperFire
+#         fields = '__all__'
 
 
-class ClapClapSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ClapClap
-        fields = '__all__'
+# class ClapClapSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ClapClap
+#         fields = '__all__'

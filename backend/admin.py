@@ -12,8 +12,7 @@ admin.site.register(Shop)
 admin.site.register(stripeAccountInfo)
 admin.site.register(stripeAccountBalance)
 admin.site.register(stripeCharges)
-admin.site.register(SuperFire)
-admin.site.register(ClapClap)
+
 
 
 

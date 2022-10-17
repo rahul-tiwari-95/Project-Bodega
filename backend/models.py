@@ -1703,17 +1703,17 @@ class BodegaFollowers(models.Model):
 #Now, we will be programming the last piece of the Bodega application
 #which is SuperFire and ClapClap
 
-class SuperFire(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
-    SuperFireClicked = models.BooleanField(default=False)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
+# class SuperFire(models.Model):
+#     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+#     productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+#     SuperFireClicked = models.BooleanField(default=False)
+#     created_at = models.DateField(auto_now_add=True)
+#     modified_at =models.DateTimeField(auto_now_add=True)
 
-class ClapClap(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
-    ClapClapClicked = models.BooleanField(default=False)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
+# class ClapClap(models.Model):
+#     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+#     productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+#     ClapClapClicked = models.BooleanField(default=False)
+#     created_at = models.DateField(auto_now_add=True)
+#     modified_at =models.DateTimeField(auto_now_add=True)
     

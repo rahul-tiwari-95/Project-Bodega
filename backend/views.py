@@ -1483,6 +1483,17 @@ class ProductMetaDataList(generics.ListCreateAPIView):
 class ProductMetaDataDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductMetaData.objects.all()
     serializer_class = ProductMetaDataSerializer
+    
+#Filter ProductMetaData By product_ID
+@api_view(['POST'])
+def filterProductMetaDataByProductID(request):
+    try:
+        instance = ProductMetaData.objects.filter(productID=request.data['productID'])
+        serializer = ProductMetaDataSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except ProductMetaData.DoesNotExist:
+        return Response(status=404)
+
 
 
 #Product Generic Views 
@@ -3118,42 +3129,42 @@ def filterBodegaFollowersByOwnerMetaUserID(request):
         
 
 
-#API Endpoints for SuperFire and ClapClap
+# #API Endpoints for SuperFire and ClapClap
 
-class SuperFireList(generics.ListCreateAPIView):
-    queryset = SuperFire.objects.all()
-    serializer_class = SuperFireSerializer
+# class SuperFireList(generics.ListCreateAPIView):
+#     queryset = SuperFire.objects.all()
+#     serializer_class = SuperFireSerializer
 
-class SuperFireDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = SuperFire.objects.all()
-    serializer_class = SuperFireSerializer
+# class SuperFireDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = SuperFire.objects.all()
+#     serializer_class = SuperFireSerializer
 
-#Filtering SuperFire by ProductID
-@api_view(['POST'])
-def filterSuperFireByProductID(request):
-    try:
-        instance = SuperFire.objects.filter(productID=request.data['productID'])
-        serializer = SuperFireSerializer(instance, many=True)
-        return Response(serializer.data, status=200)
-    except SuperFire.DoesNotExist:
-        return Response(status=404) 
+# #Filtering SuperFire by ProductID
+# @api_view(['POST'])
+# def filterSuperFireByProductID(request):
+#     try:
+#         instance = SuperFire.objects.filter(productID=request.data['productID'])
+#         serializer = SuperFireSerializer(instance, many=True)
+#         return Response(serializer.data, status=200)
+#     except SuperFire.DoesNotExist:
+#         return Response(status=404) 
 
 
-class ClapClapList(generics.ListCreateAPIView):
-    queryset = ClapClap.objects.all()
-    serializer_class = ClapClapSerializer
+# class ClapClapList(generics.ListCreateAPIView):
+#     queryset = ClapClap.objects.all()
+#     serializer_class = ClapClapSerializer
 
-class ClapClapDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ClapClap.objects.all()
-    serializer_class = ClapClapSerializer
+# class ClapClapDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = ClapClap.objects.all()
+#     serializer_class = ClapClapSerializer
     
     
-#Filtering ClapClap By productID
-@api_view(['POST'])
-def filterClapClapByProductID(request):
-    try:
-        instance = ClapClap.objects.filter(productID=request.data['productID'])
-        serializer = ClapClapSerializer(instance, many=True)
-        return Response(serializer.data, status=200)
-    except ClapClap.DoesNotExist:
-        return Response(status=404)
+# #Filtering ClapClap By productID
+# @api_view(['POST'])
+# def filterClapClapByProductID(request):
+#     try:
+#         instance = ClapClap.objects.filter(productID=request.data['productID'])
+#         serializer = ClapClapSerializer(instance, many=True)
+#         return Response(serializer.data, status=200)
+#     except ClapClap.DoesNotExist:
+#         return Response(status=404)

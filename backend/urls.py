@@ -195,6 +195,8 @@ urlpatterns = [
     # Product Metadata Endpoint
     path('bodega-api/product_metadata/', views.ProductMetaDataList.as_view()),
     path('bodega-api/product_metadata/<int:pk>/', views.ProductMetaDataDetail.as_view()),
+    path('bodega-api/filterProductMetaData/', views.filterProductMetaDataByProductID),
+    
     path('bodega-api/searchProduct/', views.searchProductByName),
     # Product Model Endpoint by ProductID
     path('bodega-api/product/', views.ProductList.as_view()),
@@ -418,10 +420,10 @@ urlpatterns = [
 
     path('bodegaCreators/filterBodegaFollowersByMetaUserID', views.filterBodegaFollowersByOwnerMetaUserID),
     
-    path('superFire/', views.SuperFireList.as_view()),
-    path('superFire/<int:pk>/', views.SuperFireDetail.as_view()),
+    # path('superFire/', views.SuperFireList.as_view()),
+    # path('superFire/<int:pk>/', views.SuperFireDetail.as_view()),
     
-    path('clapClap/', views.ClapClapList.as_view()),
-    path('clapClap/<int:pk>/', views.ClapClapDetail.as_view()),
+    # path('clapClap/', views.ClapClapList.as_view()),
+    # path('clapClap/<int:pk>/', views.ClapClapDetail.as_view()),
 ]
 urlpatterns=format_suffix_patterns(urlpatterns)
