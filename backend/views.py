@@ -1,5 +1,6 @@
 
 import asyncio
+from tempfile import TemporaryFile
 from rest_framework import status, generics, mixins, request, viewsets
 
 from rest_framework.decorators import api_view
@@ -3128,7 +3129,20 @@ def filterBodegaFollowersByOwnerMetaUserID(request):
         return Response(status=404)
         
 
+#API Endpoint for Products
+@api_view(['POST'])
+def reverseProductFilter(request):
+    try: 
+        instance = Product.objects.all().reverse()
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(status=404)
 
+
+
+
+#Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username', 'messageMedia')
 # #API Endpoints for SuperFire and ClapClap
 
 # class SuperFireList(generics.ListCreateAPIView):

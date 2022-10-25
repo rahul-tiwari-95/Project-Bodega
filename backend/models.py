@@ -739,6 +739,8 @@ class ProductCategory(models.Model):
         ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
         ('ENTERTAINMENT', 'ENTERTAINMENT'),
         ('CREATORS', 'CREATORS'),
+        ('INFLUENCERS', 'INFLUENCERS'),
+        ('PHYSCIAL-PRODUCTS', 'PHYSCIAL-PRODUCTS'),
     ])
     created_at = models.DateField(auto_now_add=True)  # when was it created
     modified_at =models.DateTimeField(auto_now_add=True)  # when was it last modfied
