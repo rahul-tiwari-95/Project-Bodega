@@ -415,6 +415,8 @@ urlpatterns = [
 
     path('MUPA/', views.productHashkeyByMetaUser),
     path('reverseProductFilter/', views.reverseProductFilter),
+    path('reverseBodegaShopFilter/', views.reverseBodegaShopFilter),
+    
 
     path('bodegaCreators/bodegaFollowers', views.BodegaFollowersList.as_view()),
     path('bodegaCreators/bodegaFollowers/<int:pk>/', views.BodegaFollowersDetail.as_view()),

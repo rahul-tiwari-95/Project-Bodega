@@ -92,10 +92,8 @@ class MetaUserAuth(generics.ListCreateAPIView):
 def metauserauth(request, pk):
     instance = MetaUser.objects.get(meta_username=pk)
     instanceID = str(instance.id)
-    metausercredentials = "ID: " + instanceID + " " + " meta_username: " + instance.meta_username
     serializer = MetaUserAuthSerializer(instance)
-    #print(request.data['passcode'])
-    if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey']:
+    if instance.passcode == request.data['passcode']:
         print("Authentication successful")
         return Response(serializer.data,status=200)
     else:
@@ -3135,6 +3133,16 @@ def reverseProductFilter(request):
     try: 
         instance = Product.objects.all().reverse()
         serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(status=404)
+
+#API Endpoint for Products
+@api_view(['POST'])
+def reverseBodegaShopFilter(request):
+    try: 
+        instance = contentPage.objects.all().reverse()
+        serializer = contentPageSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     except:
         return Response(status=404)

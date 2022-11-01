@@ -725,23 +725,7 @@ class NewsletterSubscribers(models.Model):
 
 # Product Category Definition - How are the products/assets categorized / segmented?
 class ProductCategory(models.Model):
-    category_name = models.TextField(choices=[
-        ('SHIRTS', 'SHIRTS'),
-        ('BOTTOMS', 'BOTTOMS'),
-        ('SNEAKERS', 'SNEAKERS'),
-        ('THERMALS', 'THERMALS'),
-        ('SHORTS', 'SHORTS'),
-        ('HOME-DECOR', 'HOME-DECOR'),
-        ('DIGITAL-ART', 'DIGITAL-ART'),
-        ('MUSIC-FILE', 'MUSIC-FILE'),
-        ('COLLECTIBLES', 'COLLECTIBLES'),
-        ('DIGITAL-COLLECTIBLES', 'DIGITAL-COLLECTIBLES'),
-        ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
-        ('ENTERTAINMENT', 'ENTERTAINMENT'),
-        ('CREATORS', 'CREATORS'),
-        ('INFLUENCERS', 'INFLUENCERS'),
-        ('PHYSCIAL-PRODUCTS', 'PHYSCIAL-PRODUCTS'),
-    ])
+    category_name = models.TextField()
     created_at = models.DateField(auto_now_add=True)  # when was it created
     modified_at =models.DateTimeField(auto_now_add=True)  # when was it last modfied
     def __str__(self):
@@ -1415,13 +1399,7 @@ class Notifications(models.Model):
         return 'Notification Text: %s ' % (self.text)
 
 
-class bodegaSupport(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    category = models.TextField(max_length=255, default="ORDER STATUS")
-    message = models.CharField(max_length=500, default="PROBLEM STATEMENT")
-    ticketActive = models.BooleanField(default=True)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
+
 
 
 #Models for bdgdao public link URLs
@@ -1666,6 +1644,7 @@ class MunchiesVideo(models.Model):
 
 
 class BodegaAnnouncementBanner(models.Model):
+    covermedia1 = models.FileField(upload_to='BodegaAnnouncementBanner/covermedia1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media1 = models.FileField(upload_to='BodegaAnnouncementBanner/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media2 = models.FileField(upload_to='BodegaAnnouncementBanner/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     media3 = models.FileField(upload_to='BodegaAnnouncementBanner/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
@@ -1698,6 +1677,15 @@ class BodegaFollowers(models.Model):
     ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     followerMetaUserID = models.IntegerField(blank=True)
     followerMetaUserName = models.TextField(blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+    
+
+class bodegaSupport(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    category = models.TextField(max_length=255, default="ORDER STATUS")
+    message = models.CharField(max_length=500, default="PROBLEM STATEMENT")
+    ticketActive = models.BooleanField(default=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
