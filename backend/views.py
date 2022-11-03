@@ -1,6 +1,6 @@
 
-from dataclasses import fields
-from locale import currency
+import asyncio
+from tempfile import TemporaryFile
 from rest_framework import status, generics, mixins, request, viewsets
 
 from rest_framework.decorators import api_view
@@ -13,7 +13,6 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 import datetime
 from django.utils import timezone
-from .forms import UserAddressFormSet
 import requests
 from rest_framework.request import Request
 from django.urls import reverse, reverse_lazy
@@ -21,7 +20,10 @@ from django.views.generic import ListView, CreateView, DetailView, TemplateView
 from django.conf import settings
 import stripe
 import json
-
+import httpie
+import shippo
+from trill.genesiskey import *
+from django.db import IntegrityError
 
 
 
@@ -54,12 +56,10 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'backend/contact_us.html')
 
+def privacyPolicy(request):
+    return render(request, 'backend/privacyPolicy.html')
 
-def metauserauth(request):
-    #this will be linked to the authorization view on any frontend 
-    #this will be the template for any auth needed across any of our platforms  
-    
-    return (request)
+
 
 
 #MetaUser Generic Views  
@@ -78,42 +78,46 @@ class MetaUserAuth(generics.ListCreateAPIView):
     queryset = MetaUser.objects.all()
     serializer_class = MetaUserAuthSerializer
 
-# @csrf_exempt
-# def MetaUserAuthHashkey(request):
-#     #GET,PUT,DELETE request for metauser{id}
-    
-#     if request.method == 'POST':
-#         data = JSONParser().parse(request)
-#         serializer = MetaUserLoginSerializer(data=data)
-#         if serializer.is_valid():
-#             return JsonResponse(serializer.data, status=201)
-#         return JsonResponse(serializer.errors)
+#MetaUser Change Passcode API endpoint
+@api_view(['POST'])
+def changePasscode(request):
+    try: 
+        
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        instance.passcode = request.data['passcode']
+        instance.save()
+        return Response(data="Passcode changed successfully", status=status.HTTP_200_OK)
+    except IntegrityError as e:
+        if e :
+            return Response(data="Duplicate Passcode", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(data="User does not exist", status=status.HTTP_404_NOT_FOUND)
+   
+        
 
 @api_view(['POST'])    
 def metauserauth(request, pk):
     instance = MetaUser.objects.get(meta_username=pk)
     instanceID = str(instance.id)
-    metausercredentials = "ID: " + instanceID + " " + " meta_username: " + instance.meta_username
     serializer = MetaUserAuthSerializer(instance)
-    #print(request.data['passcode'])
-    if instance.passcode == request.data['passcode'] and instance.public_hashkey == request.data['public_hashkey']:
+    if instance.passcode == request.data['passcode']:
         print("Authentication successful")
         return Response(serializer.data,status=200)
     else:
         print("Authentication failed")
         return Response(data='Authentication Failed',status=404)
 
-#For searching metauser by their metausername 
+#Edit MetaUserName
 @api_view(['POST'])
-def searchMetaUserByName(request):
-    try :
+def editMetaUserName(request):
+    try:
         instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
-        serializer = MetaUserSerializer(instance)
-        return Response(serializer.data, status=200)
-
-
+        instance.meta_username = request.data['new_meta_username']
+        instance.save()
+        serializer = MetaUserNameSerializer(instance)
+        return Response(serializer.data,status=200)
     except MetaUser.DoesNotExist:
-        return Response(status=404, data= request.data['meta_username']+ ' MetaUser not found.')
+        return Response(status=404)
 
 
 
@@ -335,12 +339,12 @@ def sentino_item_classification_list(request):
     #GET, POST request for sentino_item_classification model
     if request.method == 'GET':
         sentino_item_classification = SentinoItemClassification.objects.all()
-        serializer = SentinoItemClassficationSerializer(sentino_item_classification, many=True)
+        serializer = SentinoItemClassificationSerializer(sentino_item_classification, many=True)
         return JsonResponse(serializer.data, safe=False)
     
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = SentinoItemClassficationSerializer(data=data)
+        serializer = SentinoItemClassificationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -357,11 +361,11 @@ def sentino_item_classification_detail(request, pk):
         return JsonResponse(status=404)
 
     if request.method == 'GET':
-        serializer = SentinoItemClassficationSerializer(sentino_item_classification)
+        serializer = SentinoItemClassificationSerializer(sentino_item_classification)
         return JsonResponse(serializer.data)
     
     elif request.method == 'PUT':
-        serializer = SentinoItemClassficationSerializer(sentino_item_classification, data=JSONParser().parse(request))
+        serializer = SentinoItemClassificationSerializer(sentino_item_classification, data=JSONParser().parse(request))
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
@@ -871,23 +875,23 @@ def address_detail(request, pk):
 
 
 
-#For Searching ChatRoom by names
+#For Searching BodegaServer by names
 @api_view(['POST'])
-def searchChatRoomByName(request):
+def searchBodegaServerByName(request):
     try:
-        instance = ChatRoom.objects.filter(name=request.data['name'])
-        serializer = ChatRoomSerializer(instance, many=True)
+        instance = BodegaServer.objects.filter(name=request.data['name'])
+        serializer = BodegaServerSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     
-    except ChatRoom.DoesNotExist:
-        return Response(data="No ChatRoom Found.", status=404)
+    except BodegaServer.DoesNotExist:
+        return Response(data="No BodegaServer Found.", status=404)
 
 
-#Filtering Messages by ChatRoom IDs
+#Filtering Messages by BodegaServer IDs
 @api_view(['POST'])
-def messagesByChatRoomID(request):
+def messagesByBodegaServerID(request):
     try:
-        instance = Message.objects.filter(chat_room_ID=request.data['chatRoomID'])
+        instance = Message.objects.filter(chat_room_ID=request.data['BodegaServerID'])
         serializer = MessageSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     except Message.DoesNotExist:
@@ -939,7 +943,6 @@ def cartbymetauser(request, pk):
     return Response(serializer.data, status=200)
 
 
-
 #Fetch Shop data by metauserID
 @api_view(['POST'])
 def FetchShopByMetaUserID(request):
@@ -961,22 +964,36 @@ def FetchOrderItemsByMetaUserID(request):
 #Fetch Collaboration / Yerrr items by metauserID - User's all past collaborations
 @api_view(['POST'])
 def FetchCollaborationByMetaUserID(request):
-    instance = Collaboration.objects.filter(metauserID=request.data['metauserID'])
+    instance = yerrrCollaboration.objects.filter(metauserID=request.data['metauserID'])
     serializer = CollaborationSerializer(instance, many=True)
     return Response(serializer.data, status=200)
 
-#Fetch all ChatRooms by MetaUser ID
+#Fetch all BodegaServers Participant by MetaUser ID
 @api_view(['POST'])
 def FetchParticipantByMetaUserID(request):
-    instance = Participant.objects.filter(metauserID=request.data.get)
-    serializer = ParticipantSerializer(instance, many=True)
-    return Response(serializer.data, status=200)
+    try:
+        instance = BodegaServerParticipant.objects.filter(metauserID=request.data['metauserID'])
+        serializer = ParticipantSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServerParticipant.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Fetch all BodegaServers Participant by chat_room_ID
+@api_view(['POST'])
+def FetchParticipantByChatRoomID(request):
+    try:
+        instance = BodegaServerParticipant.objects.filter(bodegaServerID=request.data['bodegaServerID'])
+        serializer = ParticipantSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServerParticipant.DoesNotExist:
+        return Response(data="Not Found", status=404)
 
 #Authenticate New Participant by Room Hashkey
 @api_view(['POST'])
 def AuthenticateParticipantByRoomHashkey(request, pk):
-    instance = ChatRoom.objects.filter(pk=pk)
-    serializer = ChatRoomSerializer(instance, many=True)
+    instance = BodegaServer.objects.filter(pk=pk)
+    serializer = BodegaServerSerializer(instance, many=True)
     
     if instance.room_hashkey == request.data.get('room_hashkey'):
         print("Authentication Successful")
@@ -1002,6 +1019,12 @@ def productsByMetaUser(request):
 #Sample views testing the Stripe integration [TEST MODE]
 #Comment these views when you go to production mode with SWIFT as the Frontend.
 
+#     elif request.method == 'POST':
+#         serializer = ProductOwnershipLedgerSerializer(data=JSONParser().parse(request))
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse(serializer.data, status=201)
+#         return JsonResponse(serializer.errors, status=400)
 
 @csrf_exempt
 def message_list(request):
@@ -1013,6 +1036,8 @@ def message_list(request):
 
 
 
+# @csrf_exempt
+# def product_ownershipLedger_detail(request, pk):
 
 
 
@@ -1026,6 +1051,17 @@ class MetaUserTagsList(generics.ListCreateAPIView):
 class MetaUserTagsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = MetaUserTags.objects.all()
     serializer_class = MetaUserTagsSerializer
+
+
+#Filtering MetaUser Tags by metauserID
+@api_view(['POST'])
+def filterTagsByMetaUserID(request):
+    try:
+        instance = MetaUserTags.objects.filter(metauserID=request.data['metauserID'])
+        serializer = MetaUserTagsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except MetaUser.DoesNotExist:
+        return Response(data="No MetaUser Found", status=404)
 
 
 #Level Generics Views 
@@ -1083,6 +1119,10 @@ class SentinoItemClassificationDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SentinoItemClassification.objects.all()
     serializer_class = SentinoItemClassificationSerializer
 
+#@csrf_exempt
+class BLAScoreDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BLAScore.objects.all()
+    serializer_class = BLASerializer
 
 #Sentino Inventory Model Generic Views 
 #@csrf_exempt
@@ -1106,7 +1146,6 @@ class SentinoDescriptionList(generics.ListCreateAPIView):
 class SentinoDescriptionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SentinoSelfDescription.objects.all()
     serializer_class = SentinoDescriptionSerializer
-
 
 #Sentino Profile Generic Views
 #@csrf_exempt
@@ -1178,6 +1217,86 @@ class BodegaCognitiveInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BodegaCognitiveInventory.objects.all()
     serializer_class = BodegaCognitiveInventorySerializer
 
+#Sentino Profile Generic Views
+#@csrf_exempt
+class SentinoProfileList(generics.ListCreateAPIView):
+    queryset = SentinoProfile.objects.all()
+    serializer_class = SentinoProfileSerializer
+
+#@csrf_exempt
+class SentinoProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SentinoProfile.objects.all()
+    serializer_class = SentinoProfileSerializer
+
+#Bodega Vision Generic Views
+#@csrf_exempt
+class BodegaVisionList(generics.ListCreateAPIView):
+    queryset = BodegaVision.objects.all()
+    serializer_class = BodegaVisionSerializer
+
+#@csrf_exempt
+class BodegaVisionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaVision.objects.all()
+    serializer_class = BodegaVisionSerializer
+
+
+#Bodega Face Generic Views
+#@csrf_exempt
+class BodegaFaceList(generics.ListCreateAPIView):
+    queryset = BodegaFace.objects.all()
+    serializer_class = BodegaFaceSerializer
+
+#@csrf_exempt
+class BodegaFaceDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaFace.objects.all()
+    serializer_class = BodegaFaceSerializer
+
+
+#Bodega Personalizer Generic Views
+#@csrf_exempt
+class BodegaPersonalizerList(generics.ListCreateAPIView):
+    queryset = BodegaPersonalizer.objects.all()
+    serializer_class = BodegaPersonalizerSerializer
+
+#@csrf_exempt
+class BodegaPersonalizerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaPersonalizer.objects.all()
+    serializer_class = BodegaPersonalizerSerializer
+
+
+#Bodega Cognitive Item Generic Views 
+#@csrf_exempt
+class BodegaCognitiveItemList(generics.ListCreateAPIView):
+    queryset = BodegaCognitiveItem.objects.all()
+    serializer_class = BodegaCongnitiveItemSerializer
+
+#@csrf_exempt
+class BodegaCognitiveItemDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitiveItem.objects.all()
+    serializer_class = BodegaCongnitiveItemSerializer
+    
+
+#Bodega Cognitive Inventory Generic Views
+#@csrf_exempt
+class BodegaCognitiveInventoryList(generics.ListCreateAPIView):
+    queryset = BodegaCognitiveInventory.objects.all()
+    serializer_class = BodegaCognitiveInventorySerializer
+
+#@csrf_exempt
+class BodegaCognitiveInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitiveInventory.objects.all()
+    serializer_class = BodegaCognitiveInventorySerializer
+
+#Bodega Cognitive Person Generic Views
+#@csrf_exempt
+class BodegaCognitivePersonList(generics.ListCreateAPIView):
+    queryset = BodegaCognitivePerson.objects.all()
+    serializer_class = BodegaCognitivePersonSerializer
+
+#@csrf_exempt
+class BodegaCognitivePersonDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCognitivePerson.objects.all()
+    serializer_class = BodegaCognitivePersonSerializer
 
 #Bodega Cognitive Person Generic Views
 #@csrf_exempt
@@ -1226,6 +1345,11 @@ class UserPaymentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserPayment.objects.all()
     serializer_class = UserPaymentSerializer
 
+#User Type Generic Views
+#@csrf_exempt
+class UserTypeList(generics.ListCreateAPIView):
+    queryset = UserType.objects.all()
+    serializer_class = UserTypeSerializer
 
 #User Type Generic Views
 #@csrf_exempt
@@ -1241,27 +1365,36 @@ class UserTypeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 #Chat Room Generic Views
 #@csrf_exempt
-class ChatRoomList(generics.ListCreateAPIView):
-    queryset = ChatRoom.objects.all()
-    serializer_class = ChatRoomSerializer
+class BodegaServerList(generics.ListCreateAPIView):
+    queryset = BodegaServer.objects.all()
+    serializer_class = BodegaServerSerializer
 
 #@csrf_exempt
-class ChatRoomDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ChatRoom.objects.all()
-    serializer_class = ChatRoomSerializer
-
+class BodegaServerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaServer.objects.all()
+    serializer_class = BodegaServerSerializer
 
 #Particpant Generic Views
 #@csrf_exempt
 class ParticipantList(generics.ListCreateAPIView):
-    queryset = Participant.objects.all()
+    queryset = BodegaServerParticipant.objects.all()
     serializer_class = ParticipantSerializer
 
 #@csrf_exempt
 class ParticpiantDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Participant.objects.all()
+    queryset = BodegaServerParticipant.objects.all()
     serializer_class = ParticipantSerializer
 
+#Message Generic Views 
+#@csrf_exempt
+class MessageList(generics.ListCreateAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+#@csrf_exempt
+class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
 
 #Message Generic Views 
 #@csrf_exempt
@@ -1287,6 +1420,11 @@ class ProductCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer 
 
+#Product Theme Generic Views
+#@csrf_exempt
+class BoostTagsList(generics.ListCreateAPIView):
+    queryset = BoostTags.objects.all()
+    serializer_class = BoostTagsSerializer
 
 #Product Theme Generic Views
 #@csrf_exempt
@@ -1323,6 +1461,11 @@ class SocialDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Social.objects.all()
     serializer_class = SocialSerializer
 
+#Shop Generic Views
+#@csrf_exempt
+class ShopList(generics.ListCreateAPIView):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
 
 #Shop Generic Views
 #@csrf_exempt
@@ -1346,6 +1489,17 @@ class ProductMetaDataList(generics.ListCreateAPIView):
 class ProductMetaDataDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductMetaData.objects.all()
     serializer_class = ProductMetaDataSerializer
+    
+#Filter ProductMetaData By product_ID
+@api_view(['POST'])
+def filterProductMetaDataByProductID(request):
+    try:
+        instance = ProductMetaData.objects.filter(productID=request.data['productID'])
+        serializer = ProductMetaDataSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except ProductMetaData.DoesNotExist:
+        return Response(status=404)
+
 
 
 #Product Generic Views 
@@ -1358,6 +1512,27 @@ class ProductList(generics.ListCreateAPIView):
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+
+class ProductInventoryList(generics.ListCreateAPIView):
+    queryset = ProductInventory.objects.all()
+    serializer_class = ProductInventorySerializer
+
+#@csrf_exempt
+class ProductInventoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductInventory.objects.all()
+    serializer_class = ProductInventorySerializer
+
+#Filter Products by ProductInventorID
+@api_view(['POST'])
+def filterProductInventoryByProductID(request):
+    try:
+        instance = ProductInventory.objects.filter(productID=request.data['productID'])
+        serializer = ProductInventorySerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except ProductInventory.DoesNotExist:
+        return Response(data="Not Found", status=404)
 
 #MunchiesPage Generics Views
 class MunchiesPageList(generics.ListCreateAPIView):
@@ -1372,6 +1547,11 @@ class MunchiesPageDetail(generics.RetrieveUpdateDestroyAPIView):
     from .serializers import MunchiesPageSerializer
     serializer_class = MunchiesPageSerializer
 
+#Shopping Session Generic Views 
+#@csrf_exempt
+class ShoppingSessionList(generics.ListCreateAPIView):
+    queryset = ShoppingSession.objects.all()
+    serializer_class = ShoppingSessionSerializer
 
 class MunchiesVideoList(generics.ListCreateAPIView):
     from .models import MunchiesVideo
@@ -1392,12 +1572,12 @@ class MunchiesVideoDetail(generics.RetrieveUpdateDestroyAPIView):
 #Collaboration Generic Views
 #@csrf_exempt
 class CollaborationList(generics.ListCreateAPIView):
-    queryset = Collaboration.objects.all()
+    queryset = yerrrCollaboration.objects.all()
     serializer_class = CollaborationSerializer
 
 #@csrf_exempt
 class CollaborationDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Collaboration.objects.all()
+    queryset = yerrrCollaboration.objects.all()
     serializer_class = CollaborationSerializer
 
 
@@ -1466,6 +1646,48 @@ class OrderFailureDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderFailureSerializer
 
 
+class OrderLedgerList(generics.ListCreateAPIView):
+    queryset = OrderLedger.objects.all()
+    serializer_class = OrderLedgerSerializer
+
+class OrderLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OrderLedger.objects.all()
+    serializer_class = OrderLedgerSerializer
+
+
+#Filtering Order Ledger by CustomerMetaUserID
+@api_view(['POST'])
+def filterOrderLedgerByMetauserID(request):
+    try:
+        instance = OrderLedger.objects.filter(customerMetauserID=request.data['customerMetauserID'])
+        serializer = OrderLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except OrderLedger.DoesNotExist:
+        return Response(data="OrderLedger Not Found", status=404)
+
+#Filtering Order Ledger by merchantStripeAccountInfoID
+@api_view(['POST'])
+def filterOrderLedgerByStripeaccountID(request):
+    try:
+        instance = OrderLedger.objects.filter(merchantStripeAccountInfoID=request.data['merchantStripeAccountInfoID'])
+        serializer = OrderLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except OrderLedger.DoesNotExist:
+        return Response(data="OrderLedger Not Found", status=404)
+
+
+#Filtering Orders on the basis of ProductID - Number of times the product was sold.
+@api_view(['POST'])
+def filterOrderLedgerByProductID(request):
+    try:
+        instance = OrderLedger.objects.filter(productID=request.data['productID'])
+        serializer = OrderLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except OrderLedger.DoesNotExist:
+        return Response(status=404)
+
+
+
 #SysOps Agnet Generic Views
 #@csrf_exempt
 class SysOpsAgentList(generics.ListCreateAPIView):
@@ -1477,6 +1699,7 @@ class SysOpsAgentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SysOpsAgent.objects.all()
     serializer_class = SysOpsAgentSerializer
 
+#Stripe Integration Viewset
 
 #SysOps Agent Repo Generic View
 #@csrf_exempt
@@ -1500,6 +1723,7 @@ class SysOpsAgentProjectList(generics.ListCreateAPIView):
 class SysOpsAgentProjectDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = SysOpsProject.objects.all()
     serializer_class = SysOpsProjectSerializer
+
 
 
 #SysOps Demand Node Generic Views 
@@ -1529,10 +1753,13 @@ class SysOpsSupplyNodeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 #Stripe Integration Viewset
 
-stripe.api_key='sk_test_51L08MiHqfk1hk8aABrqHYR0aGbxNY3YkKdSmX8VRRSKEVUTmYnvfxert4KnNnAh1R2qSbyRpKiohlYpG8Nfk89vB00W13HuLdg'
+stripe.api_key= STRIPE_PUBLISHABLE_KEY
+# shippoToken = "shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5"
+# shippo.api_key='shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5'
+# shippo.config.api_key="shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5"
 
-
-
+# shippo.api_key='shippo_live_79ecabfa4edce08becb2103856af6f3a587ec0f5'
+shippo.config.api_key=SHIPPO_TEST_KEY
 
 #Create a New Stripe Account Endpoint - For Digital Services
 @api_view(['POST'])
@@ -1540,10 +1767,70 @@ def createStripeAccount(request):
     newStripeAccount = stripe.Account.create(type="express", 
                                             country=request.data['country'], 
                                             email=request.data['email'],
-                                            )
+                                            business_profile = {
+                                                "name" :request.data['businessName'],
+                                                "product_description": request.data['businessDescription'],
+                                                "support_address":{
+                                                    "city": request.data['city'],
+                                                    "country": request.data['country'],
+                                                    "line1": request.data['addressLine1'],
+                                                    "line2": request.data['addressLine2'],
+                                                    "postal_code": request.data['postalCode'],
+                                                    "state": request.data['state']
+                                                },
+                                                "support_phone": request.data['support_phone'],
+                                                "support_url": request.data['support_url'],
+                                            })
+    
+    #Store the following data into StripeAccountInfo Table and Shop Table
+    try:
+        stripeAccountInfo.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    stripeAccountID = newStripeAccount.id,
+                                    businessType = request.data['businessType'],
+                                    businessName = request.data['businessName'],
+                                    businessDescription = request.data['businessDescription'],
+                                    businessCity = request.data['city'],
+                                    businessCountry = request.data['country'],
+                                    businessLine1 = request.data['addressLine1'],
+                                    businessLine2 = request.data['addressLine2'],
+                                    businessPostalCode = request.data['postalCode'],
+                                    businessEmail = request.data['email'],
+                                    businessPhone =request.data['support_phone'],
+                                    businessURL = request.data['support_url'],
+
+
+        )
+        Shop.objects.create(
+                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                        name = request.data['businessName'],
+                        description = request.data['businessDescription'],
+                        address_line1 = request.data['addressLine1'],
+                        address_line2 = request.data['addressLine2'],
+                        city = request.data['city'],
+                        state = request.data['state'],
+                        postal_code = request.data['postalCode'],
+                        country = request.data['country'],
+                        uniquesellingprop =request.data['uniquesellingprop'],
+                        data_mining_status = True                        
+        )
+        UserAddress.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    address_line1 = request.data['addressLine1'],
+                                    address_line2 = request.data['addressLine2'],
+                                    address_state = request.data['state'],
+                                    city = request.data['city'],
+                                    postal_code = request.data['postalCode'],
+                                    country = request.data['country'],
+                                    
+        )
+        return Response(newStripeAccount, status=200)
+    except:
+        return Response(data="TRY AGAIN IN 10 Seconds.", status=404)
+
     
 
-    return Response(newStripeAccount, status=200)
+    
 
     
 
@@ -1553,8 +1840,8 @@ def createStripeAccount(request):
 def authenticateStripeAccount(request):
     stripeAuthLink = stripe.AccountLink.create(
                                             account=request.data['stripeAccountID'],
-                                            refresh_url="https://example.com/reauth",
-                                            return_url="https://example.com/return",
+                                            refresh_url="https://bodegaproduction.azurewebsites.net/home/",
+                                            return_url="https://bodegaproduction.azurewebsites.net/home/",
                                             type="account_onboarding")
 
     return Response(stripeAuthLink.url, status=200)
@@ -1565,29 +1852,63 @@ def authenticateStripeAccount(request):
 @api_view(['POST'])
 def retreiveStripeAccount(request):
     stripeAccount = stripe.Account.retrieve(request.data['stripeAccountID'])
+    
 
-
-    if stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") == 'active':
+    try:
+        existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
+             
+    except stripeAccountInfo.DoesNotExist:
+        return Response(data="WRONG or INVALID CREDENTIALS", status=404)
+        
+    if  stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID']) and stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers")   == 'active':
 
         #Check if the StripeAccount already exisst or not?
-        try:
-            existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
-            stripeAccountAuth = "Existing Austhorized Bodega Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
-            return Response(data=stripeAccountAuth, status=200)
-        except:
-            stripeAccountInfo.objects.create(
-            metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
-            stripeAccountID = stripeAccount.id, 
-            accountPaymentStatus = True,
-            accountTransfersStatus = True, 
-        )
-            stripeAccountAuth = "New Authorized Bodega Account ID: "+ stripeAccount.id + " | Payout Status: Active"
-            return Response(data=stripeAccountAuth, status=200)
+        # try:
+        #      existingStripeAccount = stripeAccountInfo.objects.get(stripeAccountID=request.data['stripeAccountID'])
+             
+        # except stripeAccountInfo.DoesNotExist:
+        #     return Response(data="WRONG or INVALID CREDENTIALS", status=404)
 
         
-
+        stripeAccountAuth = "Authorized Project-Bodega Member Account ID: "+ existingStripeAccount.stripeAccountID + " | Payout Status: Active"
+        metauser=request.data['metauserID']
+        return Response(data=stripeAccountAuth, status=200)
+    
+    elif stripeAccount.capabilities.get("card_payments") and stripeAccount.capabilities.get("transfers") == 'inactive':
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "Project-Bodega Member Update: Your documents are still pending verification. Give it 3-5 business days", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/1995685.png"
+        )
+        return Response(data="Restricted Project-Bodega Member Account ID:  "+ existingStripeAccount.stripeAccountID + " | Payout Status: Pending Verification" , status=200)
     else:
-        return Response(data='Project-Bodega Creator Status: INELIGIBLE FOR PAYOUTS', status=200)
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "ERROR: You haven't submitted your Project-Bodega Member Application.", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/1995685.png"
+        )
+        return Response(data="Project-Bodega Merchant Account Not Found | Payout Status: INELIGIBLE", status=404)
+    
+
+
+
+        
+            
+        
+
+    # else:
+    #     return Response(data='Project-Bodega Creator Status: INELIGIBLE FOR PAYOUTS', status=200)
+
+
+#Fetching StripeAccountInfo Data via MetaUserID 
+@api_view(['POST'])
+def fetchStripeAccountInfoByMetaUserID(request):
+    try:
+        instance = stripeAccountInfo.objects.filter(metauserID=request.data['metauserID'])
+        serializer = stripeAccountInfoSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except stripeAccountInfo.DoesNotExist:
+        return Response(data="No StripeAccountInfo Found", status=404)
 
 
 #Generic Views for stripeAccountInfo model instance.
@@ -1605,7 +1926,8 @@ class StripeAccountInfoDetail(generics.RetrieveUpdateDestroyAPIView):
 #Transfer funds to Bodega Merchants via stripeAccountID
 @api_view(['POST'])
 def payoutStripeAccount(request):
-    transferFunds = stripe.Transfer.create(
+    try:
+        transferFunds = stripe.Transfer.create(
         amount=request.data['payoutAmount'], 
         currency=request.data['currency'], 
         destination=request.data['stripeAccountID'],
@@ -1613,16 +1935,157 @@ def payoutStripeAccount(request):
     )
 
 
-    stripeAccountTransfer.objects.create(
+        stripeAccountTransfer.objects.create(
                                         stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['stripeAccountInfoID']),
                                         transactionID = transferFunds.id, 
                                         payoutAmount = transferFunds.amount,
                                         payoutOrderInfo = transferFunds.transfer_group,
 
     )
+        Notifications.objects.create(
+                                metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                text = "CASH IN!: Funds Successfully transfered to your bank account.", 
+                                image = "https://projectbodegadb.blob.core.windows.net/media/2489756.png"
+    )
 
-    return Response(data="Successfull. TransactionID: "+ transferFunds.id, status=200 )
-    #return Response(data=transferFunds, status=200)
+        return Response(data="Payout Successfull. TransactionID: "+ transferFunds.id, status=200 )
+    except:
+        return Response(data="Payout UnSuccessfull. Try again later", status=404)
+
+
+
+#API Endpoint for Yerr Based Payments on Commmission % on sales.
+@api_view(['POST'])
+def yerrrCommissionPayout(request):
+    #No Need to capture the payment - its automatically sent when a customer buys the Yerrr Product
+    transferFundsOwner = stripe.Transfer.create(
+        amount=request.data['ownerPayoutAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['ownerStripeAccountID'],
+        transfer_group = request.data['productName'],
+    )
+    transferFundsCollaborator = stripe.Transfer.create(
+        amount=request.data['collaboratorPayoutAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['collaboratorStripeAccountID'],
+        transfer_group = request.data['productName'],
+    )
+    try:
+        #Owner Creation Algorithms
+        stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['ownerStripeAccountInfoID']),
+                                        transactionID = transferFundsOwner.id, 
+                                        payoutAmount = transferFundsOwner.amount,
+                                        payoutOrderInfo = transferFundsOwner.transfer_group,
+
+    )
+       #Collaborator Creation Algorithms
+        stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['collaboratorStripeAccountInfoID']),
+                                        transactionID = transferFundsCollaborator.id, 
+                                        payoutAmount = transferFundsCollaborator.amount,
+                                        payoutOrderInfo = transferFundsCollaborator.transfer_group,
+
+    )
+        
+        
+        # #Fetch MetaUserID via bodegaCustomerID
+        # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
+        # #Push Realtime Notifications
+        #Owner Notifications 
+        ownerPayoutAmount = int(request.data['ownerPayoutAmount'])/100
+        collaboratorPayoutAmount = int(request.data['collaboratorPayoutAmount'])/100
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['ownerMetauserID']),
+                                        text = "New Yerrr Sale for " + str(ownerPayoutAmount), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/283-2836870_community-icon-transparent-background-png-download-transparent-transparent.png.jpeg"
+        )
+        #Collaborator Notifications
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['collaboratorMetauserID']),
+                                        text = "New Yerrr Sale for " + str(collaboratorPayoutAmount), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/283-2836870_community-icon-transparent-background-png-download-transparent-transparent.png.jpeg"
+        )
+
+        #Owner Cash Ledger Function 
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['ownerStripeAccountInfoID']),
+                                                    amount = float(request.data['ownerPayoutAmount']),
+                                                    description = "Yerrr Payout Automatically Captured!"
+        )
+        #Collaborator Cash Ledger Function
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['collaboratorStripeAccountInfoID']),
+                                                    amount = float(request.data['collaboratorPayoutAmount']),
+                                                    description = "Yerrr Payout Automatically Captured!"
+        )
+        return Response(data="Yerrr Payout Successfull", status=200)
+
+    except:
+        return Response(data="Yerrr Payout Failed", status=404)
+
+
+        
+#API Endpoint for Yerrr Fixed Payment Functions
+@api_view(['POST'])
+def yerrrFixedPayout(request):
+    #We will charge the owner's credit card and send the money to the Collaborator
+
+    #Charge the Owner of the Yerrr Product 
+    stripeCharge = stripe.PaymentIntent.create(
+                                        amount=request.data['fixedAmount'], 
+                                        currency=request.data['currency'], 
+                                        #source='tok_visa,
+                                        payment_method_types=["card"],
+                                        description=request.data['productName'],
+                                        customer=request.data['ownerCustomerID'],
+                                        payment_method= request.data['ownerPaymentMethodID']
+    )
+    captureCharge = stripe.PaymentIntent.confirm(stripeCharge.id)
+    try:
+        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = customerPayment.objects.get(pk=request.data['ownerBodegaCustomerID']), 
+                                                        amount=request.data['fixedAmount'], 
+                                                        currency=request.data['currency'],
+                                                        description=request.data['productName'],
+                                                        stripeChargeID = stripeCharge.id, 
+                                                        paymentStatus=True, 
+                                                        capturedStatus=True, 
+                                                        stripeCustomerID = request.data['ownerCustomerID'],
+                                                        stripePaymentMethodID = request.data['ownerPaymentMethodID'])
+        #Send the earnings to Collaborator's ledger.
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['ownerBodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['collaboratorStripeAccountInfoID']),
+                                                    amount = float(request.data['fixedAmount']),
+                                                    description = "Yerrr Fixed Payout Automatically Captured"
+        )
+        fixedAmount = int(request.data['fixedAmount'])/100
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['collaboratorMetauserID']),
+                                        text = "New Yerrr Payout for " + str(fixedAmount), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
+        )
+
+        #Now, transfer the captured funds to the Collaborator
+        transferFundsCollaborator = stripe.Transfer.create(
+        amount=request.data['fixedAmount'], 
+        currency=request.data['currency'], 
+        destination=request.data['collaboratorStripeAccountID'],
+        transfer_group = request.data['productName'],
+        )
+        stripeAccountTransfer.objects.create(
+                                        stripeAccountInfoID =  stripeAccountInfo.objects.get(pk = request.data['collaboratorStripeAccountInfoID']),
+                                        transactionID = transferFundsCollaborator.id, 
+                                        payoutAmount = transferFundsCollaborator.amount,
+                                        payoutOrderInfo = transferFundsCollaborator.transfer_group,
+
+        )
+        return Response(data="Yerrr Fixed Payout Successfull", status=200)
+    except:
+        return Response(data="Yerrr Fixed Payout Failure", status=404)
+
 
 
 #Generic views for Stripe Account Transfer Model  Instance
@@ -1690,7 +2153,7 @@ def createCharge(request):
     captureCharge = stripe.PaymentIntent.confirm(stripeCharge.id)
 
     try:
-        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = bodegaCustomer.objects.get(pk=request.data['bodegaCustomerID']), 
+        chargeObject=stripeCharges.objects.create(      bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']), 
                                                         amount=request.data['amount'], 
                                                         currency=request.data['currency'],
                                                         description=request.data['description'],
@@ -1699,11 +2162,29 @@ def createCharge(request):
                                                         capturedStatus=True, 
                                                         stripeCustomerID = request.data['customerID'],
                                                         stripePaymentMethodID = request.data['paymentMethodID'])
+        
+        #Send the earnings to Merchant's ledger.
+        CashFlowLedger.objects.create( 
+                                                    bodegaCustomerID = customerPayment.objects.get(pk=request.data['bodegaCustomerID']),
+                                                    stripeAccountInfoID = stripeAccountInfo.objects.get(pk=request.data['stripeAccountInfoID']),
+                                                    amount = float(request.data['amount']),
+                                                    description = request.data['description']
+        )
+        
+        # #Fetch MetaUserID via bodegaCustomerID
+        # customerInstance = customerPayment.objects.get(pk=request.data['bodegaCustomerID'])
+        # #Push Realtime Notifications
+        amount = (int(request.data['amount'])/100)
+        Notifications.objects.create(
+                                        metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                        text = "New Purchase for $" + str(amount), 
+                                        image = "https://projectbodegadb.blob.core.windows.net/media/339-3394897_cartoon-money-png-for-cartoon-money-with-wings.png.jpeg"
+        )
                                                         
         serializer = stripeChargesSerializer(chargeObject)
         return Response (serializer.data, status=200)
     except:
-        return Response(data=serializer.errors, status=404)
+        return Response(data="ERROR CHARGING CUSTOMER", status=404)
 
 #Generic Views for stripeCHarges model instance.
 
@@ -1714,6 +2195,40 @@ class StripeChargesList(generics.ListCreateAPIView):
 class StripeChargesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = stripeCharges.objects.all()
     serializer_class = stripeChargesSerializer
+
+
+#Views for Merchant Cash Flow Ledger model instance
+class CashFlowLedgerList(generics.ListCreateAPIView):
+    queryset = CashFlowLedger.objects.all()
+    serializer_class = cashFlowLedgerSerializer
+
+
+class CashFlowLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CashFlowLedger.objects.all()
+    serializer_class = cashFlowLedgerSerializer
+
+
+#Fetch CashFlowLedger by stripeAccountInfoID 
+@api_view(['POST'])
+def fetchCashFlowLedger(request):
+    try: 
+        instance = CashFlowLedger.objects.filter(stripeAccountInfoID=request.data['stripeAccountInfoID'])
+        serializer = cashFlowLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except CashFlowLedger.DoesNotExist:
+        return Response(data="INVALID REQUEST", status=404)
+
+#Fetch CashFlowLedger by bodegaCustomerID 
+@api_view(['POST'])
+def fetchCashFlowLedgerBodegaCustomer(request):
+    try: 
+        instance = CashFlowLedger.objects.filter(bodegaCustomerID=request.data['bodegaCustomerID'])
+        serializer = cashFlowLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except CashFlowLedger.DoesNotExist:
+        return Response(data="INVALID REQUEST", status=404)
+
+
 
 
 
@@ -1754,12 +2269,17 @@ def createStripeCustomer(request):
                                                 
     )
     try:
-        customerObject = bodegaCustomer.objects.create(
+        customerObject = customerPayment.objects.create(
                                                         metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
                                                         name = request.data['name'],
                                                         email = request.data['email'],
                                                         customerID = customer.id,
                                                         paymentMethodID = paymentMethod.id
+        )
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
+                                    text = "Your Card was successfully added. It's securely stored with Stripe Inc.",
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/609415.png"
         )
         serializer = bodegaCustomerSerializer(customerObject)
         return Response(serializer.data, status=200)
@@ -1767,14 +2287,45 @@ def createStripeCustomer(request):
         return Response(data="Payment Method Failed", status=404)
 
 
+#Delete Customer's Payment Methods
+@api_view(['POST'])
+def deleteStripeCustomer(request):
+    try:
+        deleteCustomer = stripe.Customer.delete(request.data['metauserID'])
+        instance = customerPayment.objects.get(metauserID=request.data['customerID'])
+        instance.delete()
+        return Response(data="Payment Method Deleted", status=200)
+        
+    except:
+        return Response(data="Unable to Delete Customer Payment Details.Try Again", status=200)
+
 #Views for bodegaCustomer Data 
 class bodegaCustomerList(generics.ListCreateAPIView):
-    queryset = bodegaCustomer.objects.all()
+    queryset = customerPayment.objects.all()
     serializer_class = bodegaCustomerSerializer
 
 class bodegaCustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = bodegaCustomer.objects.all()
+    queryset = customerPayment.objects.all()
     serializer_class = bodegaCustomerSerializer
+
+class bodegaSupportList(generics.ListCreateAPIView):
+    queryset = bodegaSupport.objects.all()
+    serializer_class = bodegaSupportSerializer
+
+class bodegaSupportDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = bodegaSupport.objects.all()
+    serializer_class = bodegaSupportSerializer
+
+#Filter Bodega support by metauserID
+@api_view(['POST'])
+def filterBodegaSupportByMetaUserID(request):
+    try:
+        instance = bodegaSupport.objects.filter(metauserID=request.data['metauserID'])
+        serializer = bodegaSupportSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except bodegaSupport.DoesNotExist:
+        return Response(data="INVALID REQUEST", status=404)
+
 
 
 
@@ -1809,6 +2360,11 @@ def createStripeSubscriptionProduct(request):
                                                                         stripeProductID = stripeProduct.id, 
                                                                         stripePriceID = stripePrice.id
         )
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                    text = "Woohoo!, Your Subscription Product was created successfully", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/3997719.png"
+        )
         serializer = creatorSubscriptionSerializer(creatorSubscriptionObject)
         return Response(serializer.data, status=200)
     
@@ -1824,6 +2380,15 @@ class creatorSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = creatorSubscription.objects.all()
     serializer_class = creatorSubscriptionSerializer
 
+#Filter merchant subscriptions by metauserID
+@api_view(['POST'])
+def filterCreatorSubscriptionsByMetaUser(request):
+    try:
+        instance = creatorSubscription.objects.filter(metauserID = request.data['metauserID'])
+        serializer = creatorSubscriptionSerializer(instance, many=True) 
+        return Response(serializer.data, status=200)
+    except creatorSubscription.DoesNotExist:
+        return Response(data="INVALID MetaUserID", status=404)
 
 
 #2/2 - second part of subscription design process
@@ -1858,6 +2423,11 @@ def subscribe(request):
                                                         invoiceID = stripeSubscription.latest_invoice,
                                                         status = stripeSubscription.status
         )
+        Notifications.objects.create(
+                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']), 
+                                    text = "Knock Knock!, You have a new Subscriber.", 
+                                    image = "https://projectbodegadb.blob.core.windows.net/media/3997719.png"
+        )
         serializer = subscribersSerializer(subscribersObject)
         return Response(serializer.data, status=200)
     
@@ -1865,6 +2435,41 @@ def subscribe(request):
         return Response(data="Unable to Subscribe", status=404)
 
 
+class subscribersList(generics.ListCreateAPIView):
+    queryset = Subscribers.objects.all()
+    serializer_class = subscribersSerializer
+
+
+class subscribersDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Subscribers.objects.all()
+    serializer_class = subscribersSerializer
+
+
+#filtering customer subscriptions by metauserID
+@api_view(['POST'])
+def filterCustomerSubscriptionsByMetaUser(request):
+    try:
+        instance = Subscribers.objects.filter(metauserID=request.data['metauserID'])
+        serializer = subscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Subscribers.DoesNotExist:
+        return Response(data="INVALID MetaUserID", status=404)
+
+
+#Unsunscribe Functions --------------------------------
+@api_view(['POST'])
+def unsubscribe(request):
+    try:
+        stripe.Subscription.delete(
+            request.data['subscriptionID'], 
+        )
+        instance = Subscribers.objects.get(subscriptionID = request.data['subscriptionID'])
+        instance.delete()
+        return Response(data="Subscription Cancelled", status=200)
+    except:
+        return Response(data="SERVER ERROR. TRY AGAINST", status=404)
+
+        
 
 
 #Notification View Settings
@@ -1876,13 +2481,737 @@ class notificationsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Notifications.objects.all()
     serializer_class = notificationsSerializer
 
-
+    
 
 @api_view(['POST'])
 def FetchNotificationsByMetaUserID(request):
     try: 
-        instance = Notifications.objects.filter(metauserID=request.data['metauserID'])
+        instance = Notifications.objects.filter(metauserID=request.data['metauserID']).order_by('modified_at').reverse()
         serializer = notificationsSerializer(instance, many=True)
         return Response(serializer.data, status=200)
     except Notifications.DoesNotExist:
         return Response(data="No Notifications Found", status=404)
+
+
+
+#Fetch Products by BoostTagsID
+@api_view(['POST'])
+def FetchBoostTagsByProductID(request):
+    try:
+        instance = Product.objects.filter(boostTagsID=request.data['boostTagsID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response (serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="Product not found", status=404)
+
+
+@api_view(['POST'])
+def fetchMetaUserIDTest(request):
+    try:
+        instance = MetaUser.objects.get(pk=request.data['metauserID'])
+        serializer = MetaUserSerializer(instance)
+        return Response (serializer.data, status=200)
+    except MetaUser.DoesNotExist:
+        return Response (data="ERROR", status=404)
+
+
+
+#MetaUserSocial Serializer
+class metaUserSocialList(generics.ListCreateAPIView):
+    queryset = bodegaSocial.objects.all()
+    serializer_class = bodegaSocialSerializer
+
+class metaUserSocialDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = bodegaSocial.objects.all()
+    serializer_class = bodegaSocialSerializer
+
+#Filter MetaUserSocial by metauserID
+@api_view(['POST'])
+def fetchSocialByMetaUserID(request):
+    try:
+        instance = bodegaSocial.objects.filter(metauserID=request.data['metauserID'])
+        serializer = bodegaSocialSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except bodegaSocial.DoesNotExist:
+        return Response(data="No MetaUserSocial Found", status=404)
+
+
+
+
+#Shippo API Integration
+#Fetch Senders and Receivers address
+#Show options available 
+#Charge merchant credit card for shipping label.
+#Generate label for merchant 
+
+@api_view(['POST'])
+def generateLabel(request):
+
+    #Prepping POST Payload
+    address_from = {
+        "name": request.data['merchantName'],
+        "street1": request.data['merchantAddressLine1'],
+        "street2": request.data['merchantAddressLine2'],
+        "city": request.data['merchantCity'],
+        "state": request.data['merchantState'],
+        "zip": request.data['merchantPostalCode'],
+        "country": request.data['merchantCountry']
+    }
+
+    address_to = {
+        "name": request.data['customerName'],
+        "street1": request.data['customerAddressLine1'],
+        "street2": request.data['customerAddressLine2'],
+        "city": request.data['customerCity'],
+        "state": request.data['customerState'],
+        "zip": request.data['customerPostalCode'],
+        "country": request.data['customerCountry']
+    }
+    parcel = {
+        "length":request.data['packageLength'],
+        "width":request.data['packageWidth'],
+        "height":request.data['packageHeight'],
+        "distance_unit": "in", 
+        "weight": request.data['packageWeight'],
+        "mass_unit": "lb"
+    }
+    shipment = shippo.Shipment.create(
+        address_from = address_from,
+        address_to = address_to,
+        parcels = [parcel],
+        asynchronous = False, 
+        provider = "USPS",
+
+    )
+    length = int(len(shipment.rates))
+
+    for x in range(length):
+        print(shipment.rates[x].provider)
+        if shipment.rates[x].attributes == ['FASTEST'] and request.data['labelAttributes'] == "FASTEST" and shipment.rates[x].provider == 'USPS':
+            rate = shipment.rates[x]
+            transaction = shippo.Transaction.create(
+            rate = rate.object_id,
+            label_file_type="PDF", 
+            asynchronous = False
+        )
+            labelResponse = json.loads("Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url)
+            return Response(data=labelResponse, status=200)
+
+        elif shipment.rates[x].attributes == ['CHEAPEST'] and request.data['labelAttributes'] == "CHEAPEST" and shipment.rates[x].provider == 'USPS':
+            rate = shipment.rates[x]
+            transaction = shippo.Transaction.create(
+            rate = rate.object_id,
+            label_file_type="PDF", 
+            asynchronous = False
+        )
+            return Response(data="Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url, status=200)
+        
+        elif shipment.rates[x].attributes == ['BESTVALUE'] and request.data['labelAttributes'] == "BESTVALUE" and shipment.rates[x].provider == 'USPS':
+            rate = shipment.rates[x]
+            transaction = shippo.Transaction.create(
+            rate = rate.object_id,
+            label_file_type="PDF", 
+            asynchronous = False
+        )
+            return Response(data="Tracking Number: "+ transaction.tracking_number + " Label URL: "+ transaction.label_url, status=200)
+        # else:
+        #     return Response(data="No Label found with your configuration. Please try again.", status=200)
+    
+    return Response(data="No Shipping Label found with your configuration. Please try again.", status=200)
+    
+
+
+
+#Website Builder APIs
+#General APIs
+
+#contentPage View
+class contentPageList(generics.ListCreateAPIView):
+    queryset = contentPage.objects.all()
+    serializer_class = contentPageSerializer
+
+class contentPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = contentPage.objects.all()
+    serializer_class = contentPageSerializer
+
+#collectionPage View
+class collectionPageList(generics.ListCreateAPIView):
+    queryset = collectionPage.objects.all()
+    serializer_class = collectionPageSerializer
+
+class collectionPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = collectionPage.objects.all()
+    serializer_class = collectionPageSerializer
+
+
+#textPage View
+class textPageList(generics.ListCreateAPIView):
+    queryset = textPage.objects.all()
+    serializer_class = textPageSerializer
+
+class textPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = textPage.objects.all()
+    serializer_class = textPageSerializer
+
+
+#navigationBar View
+class navigationBarList(generics.ListCreateAPIView):
+    queryset = navigationBar.objects.all()
+    serializer_class = navigationBarSerializer
+
+class navigationBarDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = navigationBar.objects.all()
+    serializer_class = navigationBarSerializer
+
+#footerBar View class
+class footerBarList(generics.ListCreateAPIView):
+    queryset = footerBar.objects.all()
+    serializer_class = footerBarSerializer
+
+class footerBarDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = footerBar.objects.all()
+    serializer_class = footerBarSerializer
+
+
+#websiteSiteMapConfig View
+class websiteSiteMapConfigList(generics.ListCreateAPIView):
+    queryset = websiteSiteMapConfig.objects.all()
+    serializer_class = websiteSiteMapConfigSerializer
+
+class websiteSiteMapConfigDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = websiteSiteMapConfig.objects.all()
+    serializer_class = websiteSiteMapConfigSerializer
+
+
+class collectionList(generics.ListCreateAPIView):
+    queryset = ProductCollection.objects.all()
+    serializer_class = collectionSerializer
+
+class collectionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductCollection.objects.all()
+    serializer_class = collectionSerializer
+
+
+
+
+#Adding filtering APIs for Frontend API
+
+#Filtering collectionPage by collectionID
+@api_view(['POST'])
+def filterCollectionPageByCollectionID(request):
+    try:
+        instance = collectionPage.objects.filter(collectionID=request.data['collectionID'])
+        serializer = collectionPageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="CollectionID INVALID", status=400)
+
+
+#Filtering websiteSiteMapConfig by OwnerMetauserIDs
+@api_view(['POST'])
+def websiteSiteMapConfigByMetaUserID(request):
+    try:
+        instance = websiteSiteMapConfig.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = websiteSiteMapConfigSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="MetaUserID Invalid")
+
+
+
+@api_view(['POST'])
+def filterProductCategory(request):
+    try:
+        instance = Product.objects.filter(productCategoryID=request.data['productCategoryID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ProductCategory ID Invalid")
+
+
+#Filter Products by productCollectionID
+
+@api_view(['POST'])
+def filterProductsByCollectionID(request):
+    try:
+        instance = Product.objects.filter(collectionID=request.data['collectionID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="Invalid CollectionID", status=404)
+
+
+class MetaUserAccountStatusList(generics.ListCreateAPIView):
+    queryset = MetaUserAccountStatus.objects.all()
+    serializer_class = MetaUserAccountStatusSerializer
+
+class MetaUserAccountStatusDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MetaUserAccountStatus.objects.all()
+    serializer_class = MetaUserAccountStatusSerializer
+
+#Filter websiteSiteMapConfig by metauserID
+
+@api_view(['POST'])
+def filterSiteMapByContentPageID(request):
+    try:
+        instance = websiteSiteMapConfig.objects.filter(contentPageID=request.data['contentPageID'])
+        serializer = websiteSiteMapConfigSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except websiteSiteMapConfig.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+
+#Filtering Yerrr by collaboratorMetauserID
+@api_view(['POST'])
+def filterYerrrByCollaborator(request):
+    try:
+        instance = yerrrCollaboration.objects.filter(collaboratorMetaUserID=request.data['collaboratorMetaUserID'])
+        serializer = CollaborationSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except yerrrCollaboration.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#Filtering Yerrr by ownerMetaUserID
+@api_view(['POST'])
+def filterYerrrByOwner(request):
+    try:
+        instance = yerrrCollaboration.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = CollaborationSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except yerrrCollaboration.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#Filtering contentPage by ownerMetaUserID
+@api_view(['POST'])
+def filterContentPageByMetaUserID(request):
+    try:
+        instance = contentPage.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = contentPageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
+
+#Filtering MetaUserAccountStatus by metauserID
+@api_view(['POST'])
+def filterMetaUserAccountStatusByMetaUserID(request):
+    try:
+        instance = MetaUserAccountStatus.objects.filter(metauserID=request.data['metauserID'])
+        serializer = MetaUserAccountStatusSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
+
+
+
+#Filtering Collections by metauserIDs
+@api_view(['POST'])
+def filterCollectionByMetaUserID(request):
+    try:
+        instance = ProductCollection.objects.filter(metauserID=request.data['metauserID'])
+        serializer = collectionSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except ProductCollection.DoesNotExist:
+        return Response(data="INVALID Collection ID",status=404)
+
+
+
+#Filtering UserAddress by metauserIDs
+@api_view(['POST'])
+def filterUserAddressByMetaUserID(request):
+    try:
+        instance = UserAddress.objects.filter(metauserID=request.data['metauserID'])
+        serializer = UserAddressSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except UserAddress.DoesNotExist:
+        return Response(data="Not Found",status=404)
+
+
+
+
+#Filtering BodegaServer by metauserIDs
+@api_view(['POST'])
+def filterBodegaServerByMetaUserID(request):
+    try:
+        instance = BodegaServer.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = BodegaServerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServer.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#Filtering Messages in reverse order by BodegaServerID
+@api_view(['POST'])
+def filterMessagesReverseLookup(request):
+    try:
+        instance = Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username', 'messageMedia')
+        serializer = ReverseMessageSerializer(instance, many=True)
+        return Response (serializer.data, status=200)
+    except:
+        return Response(data="INVALID CHAT ROOM ", status=404)
+
+#Filter Messages by metauserID 
+@api_view(['POST'])
+def filterMessageByMetaUser(request):
+    try:
+        instance = Message.objects.filter(metauserID=request.data['metauserID'])
+        serializer = MessageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Message.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Filtering Newsletter by owner metauserID
+@api_view(['POST'])
+def filterNewsLetterByMetaUserID(request):
+    try:
+        instance = Newsletter.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = NewsletterSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Newsletter.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+
+#Filtering NewsletterSubscribers by newsletterID 
+@api_view(['POST'])
+def filterNewsletterSubscriberByNewsletterID(request):
+    try:
+        instance = NewsletterSubscribers.objects.filter(newsletterID =request.data['newsletterID'])
+        serializer = NewsletterSubscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except NewsletterSubscribers.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Filtering NewsletterSubscribers by metauserIDs
+@api_view(['POST'])
+def filterNewsletterSubscriberByMetaUserID(request):
+    try:
+        instance = NewsletterSubscribers.objects.filter(metauserID=request.data['metauserID'])
+        serializer = NewsletterSubscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except NewsletterSubscribers.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+class NewsletterList(generics.ListCreateAPIView):
+    queryset = Newsletter.objects.all()
+    serializer_class = NewsletterSerializer
+
+class NewsletterDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Newsletter.objects.all()
+    serializer_class = NewsletterSerializer
+
+
+class NewsletterSubscribersList(generics.ListCreateAPIView):
+    queryset = NewsletterSubscribers.objects.all()
+    serializer_class = NewsletterSubscribersSerializer
+
+class NewsletterSubscribersDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = NewsletterSubscribers.objects.all()
+    serializer_class = NewsletterSubscribersSerializer
+
+
+#Search Functions for Bodega 
+
+#Product Search Functions
+@api_view(['POST'])
+def searchProductName(request):
+    try:
+        instance = Product.objects.filter(productName = request.data['productName'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+#For searching metauser by their metausername 
+@api_view(['POST'])
+def searchMetaUserByName(request):
+    try :
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        serializer = MetaUserSerializer(instance)
+        return Response(serializer.data, status=200)
+
+    except MetaUser.DoesNotExist:
+        return Response(status=404, data= "Not Found")
+
+
+#Search MetaUserName via Public Hashkey
+@api_view(['POST'])
+def searchMetaUserByPublicHashkey(request):
+    try:
+        instance = MetaUser.objects.filter(public_hashkey=request.data['public_hashkey'])
+        serializer = MetaUserSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except MetaUser.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Search BoostTags by tags name
+@api_view(['POST'])
+def searchBoostTagsByName(request):
+    try:
+        instance = BoostTags.objects.filter(tags=request.data['tags'])
+        serializer = BoostTagsSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BoostTags.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+#Search BodegaServer by name
+@api_view(['POST'])
+def searchBodegaServerByName(request):
+    try:
+        instance = BodegaServer.objects.filter(name=request.data['BodegaServerName'])
+        serializer = BodegaServerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaServer.DoesNotExist:
+        return Response(data="Not Found", status=404)
+
+
+
+#Filter creatorSubscription by priceID
+@api_view(['POST'])
+def filterCreatorSubscriptionByPriceID(request):
+    try:
+        instance = creatorSubscription.objects.filter(stripePriceID=request.data['stripePriceID'])
+        serializer = creatorSubscriptionSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
+
+#Filter Subscribers by ShopID
+@api_view(['POST'])
+def filterSubscribersByShopID(request):
+    try:
+        instance = Subscribers.objects.filter(priceID = request.data['priceID'])
+        serializer = subscribersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
+
+
+#Filter OrderItems by OrderID
+@api_view(['POST'])
+def filterOrderItemsByOrderID(request):
+    try:
+        instance = OrderItem.objects.filter(order_ID=request.data['order_ID'])
+        serializer = OrderItemSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="Not Found", status=404)
+
+
+#Filtering Customer Payments by metauserID
+@api_view(['POST'])
+def filterCustomerPaymentByMetaUserID(request):
+    try:
+        instance = customerPayment.objects.filter(metauserID=request.data['metauserID'])
+        serializer = bodegaCustomerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except customerPayment.DoesNotExist:
+        return Response(data="Not Found", status=200)
+
+
+
+
+#Bodega CreditCardLedger 
+class BodegaCreditCardLedgerList(generics.ListCreateAPIView):
+    queryset = BodegaCreditCardLedger.objects.all()
+    serializer_class = BodegaCreditCardLedgerSerializer
+
+class BodegaCreditCardLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaCreditCardLedger.objects.all()
+    serializer_class = BodegaCreditCardLedgerSerializer
+
+
+#Filter BodegaCreditCardLedger by MetaUserID
+@api_view(['POST'])
+def filterCreditCardLedgerByMetaUserID(request):
+    try:
+        instance = BodegaCreditCardLedger.objects.filter(metauserID=request.data['metauserID'])
+        serializer = BodegaCreditCardLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR",status=404)
+
+
+
+
+#BodegaSubscriberLedger 
+class BodegaSubscriberLedgerList(generics.ListCreateAPIView):
+    queryset = BodegaSubscriberLedger.objects.all()
+    serializer_class = BodegaSubscriberLedgerSerializer
+
+class BodegaSubscriberLedgerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaSubscriberLedger.objects.all()
+    serializer_class = BodegaSubscriberLedgerSerializer
+
+#Filter BodegaSubscriberLedger by metauserIDs
+@api_view(['POST'])
+def filterSubscriberLedgerByMetaUserID(request):
+    try:
+        instance = BodegaSubscriberLedger.objects.filter(metauserID=request.data['metauserID'])
+        serializer = BodegaSubscriberLedgerSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR", status=404)
+
+
+
+#BodegaPublicURL
+class BodegaPublicURLList(generics.ListCreateAPIView):
+    queryset = BodegaPublicURL.objects.all()
+    serializer_class = BodegaPublicURLSerializer
+
+class BodegaPublicURLDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaPublicURL.objects.all()
+    serializer_class = BodegaPublicURLSerializer
+
+#Filter BodegaPublicURL by metauserIDs
+@api_view(['POST'])
+def filterBodegaPublicURLByMetaUserID(request):
+    try:
+        instance = BodegaPublicURL.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = BodegaPublicURLSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR", status=404)
+
+
+#FIlter BodegaPublicURL by metausername 
+@api_view(['POST'])
+def filterBodegaPublicURLByMetaUserName(request):
+    try:
+        instance = BodegaPublicURL.objects.filter(metausername=request.data['metausername'])
+        serializer = BodegaPublicURLSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="METAUSER NOT FOUND", status=404)
+
+
+#Memories
+
+class MemoriesList(generics.ListCreateAPIView):
+    queryset = Memories.objects.all()
+    serializer_class = MemoriesSerializer
+
+class MemoriesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Memories.objects.all()
+    serializer_class = MemoriesSerializer
+
+#Filter Memories by MetaUserID
+@api_view(['POST'])
+def filterMemoriesByMetaUserID(request):
+    try:
+        instance = Memories.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = MemoriesSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(data="ERROR", status=404)
+
+
+
+#Fetch all ProductHashkey data from metauserID 
+@api_view(['POST'])
+def productHashkeyByMetaUser(request):
+    try:
+        instance = Product.objects.filter(metauserID=request.data['metauserID'])
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except Product.DoesNotExist:
+        return Response(data="ERROR",status=404)
+
+
+
+class BodegaFollowersList(generics.ListCreateAPIView):
+    queryset = BodegaFollowers.objects.all()
+    serializer_class = BodegaFollowersSerializer
+
+class BodegaFollowersDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaFollowers.objects.all()
+    serializer_class = BodegaFollowersSerializer
+
+
+#Filter Bodega Followers by ownerMetaUserID
+@api_view(['POST'])
+def filterBodegaFollowersByOwnerMetaUserID(request):
+    try:
+        instance = BodegaFollowers.objects.filter(ownerMetaUserID=request.data['ownerMetaUserID'])
+        serializer = BodegaFollowersSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except BodegaFollowers.DoesNotExist:
+        return Response(status=404)
+        
+
+#API Endpoint for Products
+@api_view(['POST'])
+def reverseProductFilter(request):
+    try: 
+        instance = Product.objects.all().reverse()
+        serializer = ProductSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(status=404)
+
+#API Endpoint for Products
+@api_view(['POST'])
+def reverseBodegaShopFilter(request):
+    try: 
+        instance = contentPage.objects.all().reverse()
+        serializer = contentPageSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except:
+        return Response(status=404)
+
+
+#Bodega Announcement Banner code
+class BodegaAnnouncementBannerList(generics.ListCreateAPIView):
+    queryset = BodegaAnnouncementBanner.objects.all()
+    serializer_class = BodegaAnnouncementBannerSerializer
+
+class BodegaAnnouncementBannerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaAnnouncementBanner.objects.all()
+    serializer_class = BodegaAnnouncementBannerSerializer
+
+
+#Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username', 'messageMedia')
+# #API Endpoints for SuperFire and ClapClap
+
+# class SuperFireList(generics.ListCreateAPIView):
+#     queryset = SuperFire.objects.all()
+#     serializer_class = SuperFireSerializer
+
+# class SuperFireDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = SuperFire.objects.all()
+#     serializer_class = SuperFireSerializer
+
+# #Filtering SuperFire by ProductID
+# @api_view(['POST'])s
+# def filterSuperFireByProductID(request):
+#     try:
+#         instance = SuperFire.objects.filter(productID=request.data['productID'])
+#         serializer = SuperFireSerializer(instance, many=True)
+#         return Response(serializer.data, status=200)
+#     except SuperFire.DoesNotExist:
+#         return Response(status=404) 
+
+
+# class ClapClapList(generics.ListCreateAPIView):
+#     queryset = ClapClap.objects.all()
+#     serializer_class = ClapClapSerializer
+
+# class ClapClapDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = ClapClap.objects.all()
+#     serializer_class = ClapClapSerializer
+    
+    
+# #Filtering ClapClap By productID
+# @api_view(['POST'])
+# def filterClapClapByProductID(request):
+#     try:
+#         instance = ClapClap.objects.filter(productID=request.data['productID'])
+#         serializer = ClapClapSerializer(instance, many=True)
+#         return Response(serializer.data, status=200)
+#     except ClapClap.DoesNotExist:
+#         return Response(status=404)

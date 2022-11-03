@@ -87,7 +87,7 @@ class MetaUser(models.Model):
     passcode = models.TextField(unique=True)
     private_hashkey = models.TextField(default=private_metauser_hashkey_generator, unique=True)
     public_hashkey = models.TextField( default=public_metauser_hashkey_generator, unique=True)
-    discord_username = models.TextField()
+    discord_username = models.TextField(blank=True)
     created_at = models.DateField(auto_now_add=True)  
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -95,23 +95,47 @@ class MetaUser(models.Model):
         # returns username & modified_at
         return 'username: %s -- ID: %s' % (self.meta_username, self.id)
 
+def get_sentinel_MetaUser():
+    return MetaUser.objects.get_or_create(meta_username='rahultiwari', passcode='rahul@userone', discord_username='maeve22')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_MetaUser_id():
+    return get_sentinel_MetaUser().id
+
 # Creating MetaUser Tags for Profile 
 class MetaUserTags(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    metauserStatus = models.CharField(default="ACTIVE GUEST CREATOR", max_length=255)
-    trophiesAllocated = models.TextField(default="BABYSTEPS REVOLUTIONARY")
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    metauserStatus = models.CharField(default="ACTIVE BODEGA1k", max_length=255)
+    trophiesAllocated = models.TextField(default="BODEGA100 REVOLUTIONARY")
     projectBodegaLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
     metauserProfileLogo = models.ImageField(default="https://bdgdaostorage.blob.core.windows.net/media/bodegaLogoBackend.jpeg")
+    coverBodegaImage = models.ImageField(default="https://projectbodegadb.blob.core.windows.net/media/coverImage.gif")
+    coverBio1 = models.TextField(max_length=80, default="Hello, My name is Dolores Abernathy")
+    coverBio2 = models.TextField(max_length=40, default="Fashion Designer | NYU Grad")
     subscribersNumber = models.IntegerField(default=0)
     followersNumber = models.IntegerField(default=0)
     subscriptionActive = models.BooleanField(default=False)
-    accessLevelClearance = models.FloatField(default=3.5)
+    accessLevelClearance = models.FloatField(default=5.0)
     isProfilePrivate = models.BooleanField(default=False)
 
     def __str__(self):
         return "MetaUser Tags for metauser: %s" % (self.metauserID)
 
-
+class MetaUserAccountStatus(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    isPaidSubscriber = models.BooleanField(default=False)
+    rookieSubscriber = models.BooleanField(default=False)
+    creatorSubscriber = models.BooleanField(default=False)
+    influencerSubscriber = models.BooleanField(default=False)
+    isAccountLocked = models.BooleanField(default=False)
+    referralCode = models.TextField(unique=True)
+    referralCount = models.IntegerField(default=0)
+    referralStatus = models.BooleanField(default=False)
+    activatePaywall = models.BooleanField(default=False)
+    notificationStatus = models.BooleanField(default=False)
+    notificationMessage = models.TextField(default='Welcome to Project-Bodega')
+    created_at = models.DateField(auto_now_add=True, null=True)
+    modified_at =models.DateTimeField(auto_now_add=True, null=True)
 
 
 
@@ -121,8 +145,8 @@ class MetaUserTags(models.Model):
 # 5.0 scale
 # everyone starts at 3.0
 class Level(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    number = models.FloatField(default=3.0)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    number = models.FloatField(default=5.0)
 
     def __str__(self):
         # returns level number and userID
@@ -133,8 +157,8 @@ class Level(models.Model):
 class BLAScore(models.Model):
     # Solomon Model to be created later on for now  - pass
     # Possible Values: 3.0, 2.5,(Level 3+) 1.0,(Level 1) 0.0 (Level 0)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    levelID = models.ForeignKey(Level, on_delete=models.CASCADE)
     ReviewCycleNo = models.FloatField(default=1.0)
     current_score = models.FloatField(default=3.0)
     predicted_score = models.FloatField(
@@ -145,11 +169,51 @@ class BLAScore(models.Model):
     def __str__(self):
         return 'BLA Score: %s -- MetaUserID: %s ' % (self.current_score, self.metauserID)
 
+class Shop(models.Model):
+    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
+    all_products = JSONField(null=True, blank=True)
+    all_user_data = JSONField(null=True,blank=True)  # list of metauser IDs for your reference. no other data is shown here
+    name = models.TextField()
+    description = models.TextField()
+    logo = models.FileField(upload_to='shop-details/profile_picture')
+    cover_image = models.FileField(
+        upload_to='shop-details/profile_cover_image', default='EMPTY')
+    # Ask user if their Shop address is same as their own address for fucks sake.
+    address_line1 = models.TextField()
+    address_line2 = models.TextField()
+    address_state = models.TextField()
+    city = models.TextField()
+    state = models.TextField(default='NY')
+    postal_code = models.TextField()
+    country = models.TextField(max_length=6)  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
+    bodega_vision_tags = JSONField(null=True,
+                                   blank=True)  # loaded data from Azure Vision API - All tags stored here - Solomon_vision
+    bodega_customer_tags = JSONField(
+        null=True, blank=True)  # load tags on customers
+    uniquesellingprop = models.TextField(
+        default='Why your meta-shop is special than others?')
+    data_mining_status = models.BooleanField(default=False)
+    created_on = models.DateField(auto_now_add=True)
+    modified_on =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # returns Shop nane and metauserID
+        return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
+
+
+def get_sentinel_Shop():
+    return Shop.objects.get_or_create(name="FREE_DEFAULT_SHOP", description="DEFAULT SHOP DB ENTRY FOR FREE CUSTOMERS")[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_Shop_id():
+    return get_sentinel_Shop().id
+
+
 
 
 #STRIPE INTEGRATION CLASSES
 class stripeAccountInfo(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     stripeAccountID = models.CharField(unique=True, max_length=400)
     businessType = models.CharField(max_length=300, default='Digital Services')
     businessName = models.CharField(blank=True, max_length=255)
@@ -173,7 +237,7 @@ class stripeAccountInfo(models.Model):
 
 #Instance is created whenever a new transfer Stripe API is triggered.
 class stripeAccountTransfer(models.Model):
-    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.PROTECT)
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.CASCADE)
     transactionID = models.CharField(max_length=500)
     payoutAmount = models.FloatField(default=0.0)
     payoutOrderInfo = models.CharField(max_length=255)
@@ -191,8 +255,10 @@ class stripeAccountBalance(models.Model):
 
 
 
-class bodegaCustomer(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+
+
+class customerPayment(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     name = models.CharField(default='John Doe', max_length=255)
     email = models.CharField(default="johndoe@email.com", max_length=255)
     customerID = models.CharField(max_length=500)
@@ -201,10 +267,21 @@ class bodegaCustomer(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
 
+#Cash Register for Merchants
+#This table will be automatically filled as the charge is created on a product by a customer.
+#This ledger will show all earnings made via selling of products or via subscriptions
+class CashFlowLedger(models.Model):
+    stripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.CASCADE)
+    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.CASCADE)
+    amount = models.FloatField(default=0.0)
+    description = models.CharField(max_length=300, default='PRODUCT NAME')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
 
 
 class stripeCharges(models.Model):
-    bodegaCustomerID = models.ForeignKey(bodegaCustomer, on_delete=models.PROTECT)
+    bodegaCustomerID = models.ForeignKey(customerPayment, on_delete=models.CASCADE)
     stripeChargeID = models.CharField(max_length=300)
     stripeCustomerID = models.CharField(max_length=400)
     stripePaymentMethodID = models.CharField(max_length=400, default='None', blank=True)
@@ -221,7 +298,8 @@ class stripeCharges(models.Model):
 
 
 class creatorSubscription(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE, null=True)
     subscriptionName = models.CharField(max_length=300)
     subscriptionDescription = models.CharField(max_length=500)
     amount = models.IntegerField(default=0)
@@ -233,7 +311,8 @@ class creatorSubscription(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
 class Subscribers(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE, null=True)
     customerID = models.CharField(max_length=400)
     priceID = models.CharField(max_length=400)
     subscriptionID = models.CharField(max_length=400)
@@ -243,6 +322,30 @@ class Subscribers(models.Model):
     status = models.CharField(max_length=400)
     created_at = models.DateField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+
+
+
+# #Table for BodegaCreditCardLedger 
+class BodegaCreditCardLedger(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    amount = models.IntegerField(default=0)
+    currency = models.TextField(blank=False)
+    description = models.TextField(blank=True)
+    customerID = models.TextField(blank=False)
+    paymentMethodID = models.TextField(blank=False)
+    bodegaCustomerID = models.IntegerField(blank=False)
+    stripeAccountInfoID = models.IntegerField(blank=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+#Table for BodegaSubscriberLedger 
+class BodegaSubscriberLedger(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    customerID = models.TextField(blank=False)
+    stripePriceID = models.TextField(blank=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
 
 
 
@@ -523,28 +626,31 @@ class UserType(models.Model):
 
 class ChatRoom(models.Model):
     # Chat_Room ID will be created automatically by PostGre
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
     name = models.TextField(unique=True)
     desc = models.TextField(default='Why was this room created?')
     tags = models.TextField(default='#ROOM')
-    type_of_room = models.TextField(choices=[
-        # only people with meta_key can join the secure_room
-        ('CLOSED-SECURE-ROOM', 'CLOSED-SECURE-ROOM'),
-        # anyone can join the secure room
-        ('OPEN-SECURE-ROOM', 'OPEN-SECURE-ROOM'),
-        # leads ro the deletion of the room
-        ('INITIATE-ROOM-TERMINATION', 'INITIATE-ROOM-TERMINATION')
-    ])
+    type_of_room = models.TextField(default='Empty')
     isRoomPrivate = models.BooleanField(default=True)
-    room_hashkey = models.TextField(
-        default=chatroom_hashkey_generator, unique=True)
     modified_on =models.DateTimeField(auto_now_add=True)
     created_on = models.DateField(auto_now_add=True)
 
-    def __str__(self):
-        # returns room name and room status
 
-        return 'ROOM-NAME: %s -- ROOM-STATUS: %s' % (self.name, self.is_room_active)
+class BodegaServer(models.Model):
+    # Chat_Room ID will be created automatically by PostGre
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    name = models.TextField(unique=True)
+    desc = models.TextField(default='Why was this room created?')
+    tags = models.TextField(default='#ROOM')
+    isRoomPrivate = models.BooleanField(default=False)
+    modified_on =models.DateTimeField(auto_now_add=True)
+    created_on = models.DateField(auto_now_add=True)
 
+
+#BodegaServer Participant Model
+class BodegaServerParticipant(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    bodegaServerID = models.ForeignKey(BodegaServer, on_delete=models.CASCADE)
 
 # Who all with particpate in which rooms? - See secuirty can be fucking easy
 class Participant(models.Model):
@@ -564,55 +670,83 @@ class Participant(models.Model):
 # what a message will look like or what traits will it have
 class Message(models.Model):
     # message_ID will be automatically be generated
-    chat_room_ID = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    chat_room_ID = models.ForeignKey(BodegaServer, on_delete=models.CASCADE)
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    username = models.TextField(blank=True)
     message_body = models.TextField()
-    upload_file = models.FileField(
-        upload_to='user_meta_key/message/files', default=None)
+    messageMedia = models.FileField(upload_to='bodegaMessaging/message/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
-    hashkey = models.TextField(default=message_hashkey_generator, unique=True)
 
     def __str__(self):
         # returns chat_room_ID
         return 'Chat Room ID: %s ' % (self.chat_room_ID)
 
+class Newsletter(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    headingText = models.TextField(blank=True)
+    subheadingText = models.TextField(blank=True)
+    paragraphText = models.TextField(blank=True)
+    media1 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/newsletters/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    NewsletterCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/newsletter/NewsletterCoverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    isPrivate = models.BooleanField(default=False)
+    isSubscriptionPage = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+def get_sentinel_Newsletter():
+    return Newsletter.objects.get_or_create(headingText='newsletter')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_Newsletter_id():
+    return get_sentinel_Newsletter().id
+
+
+
+class NewsletterSubscribers(models.Model):
+    newsletterID = models.ForeignKey(Newsletter, on_delete=models.SET(get_sentinel_Newsletter), default=get_sentinel_Newsletter_id)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
 
 # Product Category Definition - How are the products/assets categorized / segmented?
 class ProductCategory(models.Model):
-    category_name = models.TextField(choices=[
-        ('SHIRTS', 'SHIRTS'),
-        ('BOTTOMS', 'BOTTOMS'),
-        ('SNEAKERS', 'SNEAKERS'),
-        ('THERMALS', 'THERMALS'),
-        ('SHORTS', 'SHORTS'),
-        ('HOME-DECOR', 'HOME-DECOR'),
-        ('DIGITAL-ART', 'DIGITAL-ART'),
-        ('MUSIC-FILE', 'MUSIC-FILE'),
-        ('COLLECTIBLES', 'COLLECTIBLES'),
-        ('PHYSICAL-ACCESSORIES', 'PHYSICAL-ACCESSORIES'),
-        ('DIGITAL-ACCESSORIES', 'DIGITAL-ACCESSORIES'),
-        ('POTRAIT-VIDEO-FILE', 'POTRAIT-VIDEO-FILE'),
-    ])
-    category_desc = models.TextField(default='Describe your creation.')
+    category_name = models.TextField()
     created_at = models.DateField(auto_now_add=True)  # when was it created
     modified_at =models.DateTimeField(auto_now_add=True)  # when was it last modfied
-    category_image1 = models.FileField(
-        upload_to='category/category_image1')  # set default to Bodega's image
-    category_image2 = models.FileField(upload_to='category/category_image2')
-    category_image3 = models.FileField(upload_to='category/category_image3')
-
     def __str__(self):
         # returns Product Category
 
         return 'Product Category Name: %s ' % (self.category_name)
 
 
+def get_sentinel_ProductCategory():
+    return ProductCategory.objects.get_or_create(category_name='SHIRTS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_ProductCategory_id():
+    return get_sentinel_ProductCategory().id
+
+
 #BoostTags Model Instance
 class BoostTags(models.Model):
     
-    tags = models.CharField(max_length=11) #Name of BoostTags
-    created_by = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    tags = models.CharField(max_length=11, unique=True) #Name of BoostTags
+    created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE) 
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -621,15 +755,21 @@ class BoostTags(models.Model):
 
         return 'BoostTags Name: %s' % (self.tags)
 
+def get_sentinel_boostTags():
+    return BoostTags.objects.get_or_create(tags='CREATOR')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_boostTags_id():
+    return get_sentinel_discount().id
+
 
 # Product Discount definition - How much discount?
 class Discount(models.Model):
     name = models.TextField()
     description = models.TextField()
-    discount_percent = models.FloatField(default=0.0)
+    discount_percent = models.IntegerField(default=0)
     active_status = models.BooleanField(default=False)
-    created_by = models.ForeignKey(
-        MetaUser, on_delete=models.CASCADE)  # which user created this
+    created_by = models.ForeignKey(MetaUser, on_delete=models.CASCADE, default=get_sentinel_MetaUser_id)  # which user created this
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -637,7 +777,12 @@ class Discount(models.Model):
         # returns Discount code and Discount %
 
         return 'Code: %s' % (self.name)
+def get_sentinel_discount():
+    return Discount.objects.get_or_create(name='No Discount', description='No Discount / Promo available', discount_percent=0, active_status=True)[0]
+    #Create entry if it doesn't exist else just load a placeholder
 
+def get_sentinel_discount_id():
+    return get_sentinel_discount().id
 
 # creating base template for Bodega coins
 # in the beginning, bodega coins will be simply points you get on purchase
@@ -648,8 +793,7 @@ class Bodegacoins(models.Model):
 # Social Model - Key data weights on your social activity to be tracked for cluster-analysis - everything can be deleted
 
 class Social(models.Model):
-    metauserID = models.ForeignKey(MetaUser,
-                                   on_delete=models.CASCADE)  # we cant have metauserIDs deleted - its either ways not connected to their physical copies but STILL
+    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # we cant have metauserIDs deleted - its either ways not connected to their physical copies but STILL
     # bodegacoins_ID = models.ForeignKey(Bodegacoins, on_delete=models.CASCADE)
     # lists of MetametauserIDs of all people we follow
     following = JSONField(null=True, blank=True)
@@ -679,66 +823,121 @@ class Social(models.Model):
         # returns metauserID annd account_status
         return 'metauserID: %s -- Account On Status: %s' % (self.metauserID, self.account_active)
 
+class MetaUserSocial(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    followers = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    
 
-# Commerce Model - key data weights on your commerce activity to be tracked for cluster analysis
 
-class Shop(models.Model):
-    metauserID = models.ForeignKey(MetaUser,on_delete=models.CASCADE)  # Owner details - we will show metauserID.meta_username
-    all_products = JSONField(null=True, blank=True)
-    all_user_data = JSONField(null=True,blank=True)  # list of metauser IDs for your reference. no other data is shown here
-    name = models.TextField()
-    description = models.TextField()
-    logo = models.FileField(upload_to='shop-details/profile_picture')
-    cover_image = models.FileField(
-        upload_to='shop-details/profile_cover_image', default='EMPTY')
-    # Ask user if their Shop address is same as their own address for fucks sake.
-    address_line1 = models.TextField()
-    address_line2 = models.TextField()
-    address_state = models.TextField()
-    city = models.TextField()
-    state = models.TextField(default='NY')
-    postal_code = models.TextField()
-    country = models.TextField(choices=[
-        ('INDIA', 'IN'),
-        ('USA', 'US'),
-    ])  # Before deployment -> use this link for data: https://github.com/hampusborgos/country-flags/blob/main/countries.json
-    bodega_vision_tags = JSONField(null=True,
-                                   blank=True)  # loaded data from Azure Vision API - All tags stored here - Solomon_vision
-    bodega_customer_tags = JSONField(
-        null=True, blank=True)  # load tags on customers
-    uniquesellingprop = models.TextField(
-        default='Why your meta-shop is special than others?')
-    data_mining_status = models.BooleanField(default=False)
+
+class bodegaSocial(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    followers = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    following = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    likes = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    comments = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    productsClickedOn = ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
+    unfollows= ArrayField(
+                            ArrayField(
+                                        models.CharField(blank=True, max_length=255)
+                            ),
+    )
     created_on = models.DateField(auto_now_add=True)
     modified_on =models.DateTimeField(auto_now_add=True)
 
+
+# Commerce Model - key data weights on your commerce activity to be tracked for cluster analysis
+
+
+
+
+class Collection(models.Model):
+    ##metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, default='default collection')
+    description = models.CharField(max_length=400, default='default collection description')
+    coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        # returns Shop nane and metauserID
-        return 'Shop name is: %s -- User ID is: %s' % (self.name, self.metauserID)
+        return 'CollectionID: %s ' % (self.id)
 
 
-#Creator Merchant Model
+
+class ProductCollection(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, default='default collection')
+    description = models.CharField(max_length=400, default='default collection description')
+    coverImage = models.FileField(upload_to='collection/coverImage/', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'CollectionID: %s ' % (self.id)
+
+def get_sentinel_productCollection():
+    return ProductCollection.objects.get_or_create(name='Maeve Collection')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_productCollection_id():
+    return get_sentinel_product().id
+
+# def get_sentinel_collection():
+#     return Collection.objects.get_or_create(name='deleted')[0]
+#     #Create entry if it doesn't exist else just load a placeholder
+
+# def get_sentinel_collection_id():
+#     return get_sentinel_collection().id
+
+
+
+
 
 
 
 class Product(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
-    product_categoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
+    collectionID = models.ForeignKey(ProductCollection, on_delete=models.CASCADE)
+    productCategoryID = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     boostTagsID = models.ForeignKey(BoostTags, on_delete=models.CASCADE)
-    discount_ID = models.ForeignKey(Discount, on_delete=models.CASCADE)
-    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    productName = models.TextField(max_length=15, unique=True)
-    producDescription = models.CharField(max_length=300)
+    discountID = models.ForeignKey(Discount, on_delete=models.CASCADE)
+    shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    #productInventoryID = models.ForeignKey(ProductInventory, on_delete=models.SET(get_sentinel_productInventory), default=get_sentinel_productInventory_id)
+    productName = models.TextField(max_length=140, unique=True)
+    producDescription = models.TextField(blank=True)
     sellingPrice = models.FloatField(default=0.0)
-    discounted_price = models.FloatField(default=0.0)
-    quantity = models.IntegerField(default=0)
     subscriptionProduct = models.BooleanField(default=False)
     privateProduct = models.BooleanField(default=False)
-    size_chart = models.FileField(upload_to='product/size_chart', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image1 = models.FileField(upload_to='product/product_image1', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image2 = models.FileField(upload_to='product/product_image2', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image3 = models.FileField( upload_to='product/product_image3', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
-    product_image4 = models.FileField(upload_to='product/product_image4', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    isPhysicalProduct = models.BooleanField(default=False)
+    size_chart = models.FileField(upload_to='product/size_chart', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image1 = models.FileField(upload_to='product/product_image1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image2 = models.FileField(upload_to='product/product_image2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image3 = models.FileField( upload_to='product/product_image3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    product_image4 = models.FileField(upload_to='product/product_image4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
     productHashkey = models.TextField(default=product_hashkey_generator, unique=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
@@ -748,11 +947,39 @@ class Product(models.Model):
 
         return 'Product Name: %s -- Meta-Key: %s' % (self.productName, self.productHashkey)
 
+def get_sentinel_product():
+    return Product.objects.get_or_create(productName='BlitzDjango')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_product_id():
+    return get_sentinel_product().id
+
+#Creating Product Inventory Table which includes Product Variant option 
+
+class ProductInventory(models.Model):
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    quantity = models.IntegerField(default=0)
+    productVariant = models.TextField(default='OS') #OS stands for One Sized Product
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Quantity: %s -- Variant: %s' % (self.quantity, self.productVariant)
+
+def get_sentinel_productInventory():
+    return ProductInventory.objects.get_or_create(quantity=1, productVariant='OS')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_productInventory_id():
+    return get_sentinel_productInventory().id
+
+
+
 
 # Creating ProductMetaData model - how does a product look like? what are the traits?
 
 class ProductMetaData(models.Model):
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
     numberoflikes = models.IntegerField(default=0)
     numberofdislikes = models.IntegerField(default=0)
     numberofcomments = models.IntegerField(default=0)
@@ -772,49 +999,6 @@ class ProductMetaData(models.Model):
         return 'Product Meta Data '
 
 
-class MunchiesPage(models.Model):
-    munchiesPageName = models.CharField(max_length=255)
-    munchiesCoverImage = models.FileField(upload_to = 'munchies/coverImage')
-    munchiesPageViews = models.IntegerField(default=0)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Munchies Page Name: %s -- Total Views: %s' %(self.munchiesPageName, self.munchiesPageViews)
-
-
-
-#Creating Munchies Tabel
-class MunchiesVideo(models.Model):
-    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.PROTECT)
-    munchiesVideo = models.FileField(upload_to='munchies/videos')
-    munchiesCaption = models.CharField(max_length=200)
-    munchiesVideoTags = models.CharField(max_length=200)
-    munchiesDislikes = models.IntegerField(default=0)
-    munchiesVideoViews = models.IntegerField(default=0)
-    created_at = models.DateField(auto_now_add=True)
-    modified_at =models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Munchies Video: %s -- Total Views: %s' %(self.munchiesVideo, self.munchiesVideoViews)
-
-
-
-#Model for storing Product Ownership Data
-class ProductOwnershipLedger(models.Model):
-    productID = models.ForeignKey(Product, on_delete=models.PROTECT)
-    metauserLedger = JSONField(null=True, blank=True) #contains metauser public hashkey IDs in JSON and we will show it sequentially on the front-end
-    bidPriceHistory = JSONField(null=True, blank=True) #contains all price history for that productID and we will show that in chart on the front end
-    created_at = models.DateField()
-    modified_at = models.DateTimeField()
-    
-    def __str__(self):
-        #returns nothing  
-        return 'Product Ownership Ledger for P.ID: %s' % (self.productID)
-    
-    
-    
-
 
 # Collaboration model allows all types of users to collaborate on any asset on the TRILL ecosystem and do business
 # many creators can collaborate with many products. but one product / asset at one time can have only one ownership / collab ID
@@ -829,11 +1013,8 @@ class Collaboration(models.Model):
     ])
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
 
-    product_ID = models.ForeignKey(Product,
-                                   on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
-
-    shop_ID = models.ForeignKey(Shop, on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
-
+    product_ID = models.ForeignKey(Product,on_delete=models.CASCADE)  # creators can paste the hashkey to add the product ID
+    shop_ID = models.ForeignKey(Shop,on_delete=models.CASCADE)  # add a search feature on Front-End - for People to search by Shop name
     # product_shop_ID should be EQUAL to shop_ID to verify identity that both metauserIDs are same.
     creator_pitch = models.TextField()
     bid_type = models.TextField(choices=[  # the bid from the creator's side - because freedom of choice
@@ -850,6 +1031,36 @@ class Collaboration(models.Model):
     def __str__(self):
         # returns collab type & collab status
         return 'User ID: %s -- Shop ID: %s' % (self.metauserID, self.shop_ID)
+
+
+class yerrrCollaboration(models.Model):
+    collaboratorMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    ownerMetaUserID = models.IntegerField(default=0)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    campaignName = models.CharField(max_length=255, default='Your Campaign Name')
+    campaignDescription = models.CharField(max_length=600, default='Why you want to collaborate on this product?')
+    campaignCoverImage = models.FileField(upload_to='yerrrCoverImage/campaignCoverImage', default="https://projectbodegadb.blob.core.windows.net/media/yerrrCoverImage.gif")
+    media1 = models.FileField(upload_to='yerrr/media1', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption1 = models.CharField(max_length=255, default='Caption for Media 1')
+    media2 = models.FileField(upload_to='yerrr/media2', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption2 = models.CharField(max_length=255, default='Caption for Media 2')
+    media3 = models.FileField(upload_to='yerrr/media3', default='https://projectbodegadb.blob.core.windows.net/media/8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption3 = models.CharField(max_length=255, default='Caption for Media 3')
+    collaborationType = models.TextField(choices=[ 
+        ('FIXED-ONE-TIME-PAYMENT', 'FIXED-ONE-TIME-PAYMENT'),
+        ('COMMISSION-%-ON-SALES', 'COMMISSION-%-ON-SALES'),
+        ('FREE-HELP-FROM-THE-COMMUNITY', 'FREE-HELP-FROM-THE-COMMUNITY')
+    ])
+    campaignRules = models.CharField(max_length=255, default='Product Owner can list rules for the campaign.')
+    collaboratorFixedPaymentAmount = models.IntegerField(default=0)
+    collaboratorCommissionPercentageAmount = models.IntegerField(default=0)
+    yerrrStatus = models.BooleanField(default=False)
+    ownerAcceptBid = models.BooleanField(default=False)
+    collaboratorAcceptBid = models.BooleanField(default=False)
+    #Either the owner or the collaborator goes False on the bid then yerrrStatus goes False as well.
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
 
 
 # Create temp table for Shopping Session - We will store this data and analyze behaviour.
@@ -900,7 +1111,7 @@ class ShoppingCartItem(models.Model):
 # A Tee and A Dildo can be order number 5566 for user name xyz - fucking modular. less risks of falling
 class OrderDetail(models.Model):
     total_amount = models.FloatField(default=0.0)
-    payment_info = models.ForeignKey(UserPayment, on_delete=models.PROTECT)
+    payment_info = models.ForeignKey(UserPayment, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -913,9 +1124,9 @@ class OrderDetail(models.Model):
 # Here, we are accounting for each and every product purchased and bundling them.
 # Because payment is done in arrays and then added up to the total amount. Duh lol
 class OrderItem(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
-    product_ID = models.ForeignKey(Product, on_delete=models.PROTECT)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
+    product_ID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
@@ -927,8 +1138,8 @@ class OrderItem(models.Model):
 #Order Success table model
 
 class OrderSuccess(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     stripeChargeID = models.TextField(blank=True)
     orderCompleted = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
@@ -943,8 +1154,8 @@ class OrderSuccess(models.Model):
 #Order Failure Table Model
 
 class OrderFailure(models.Model):
-    order_ID = models.ForeignKey(OrderDetail, on_delete=models.PROTECT)
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    order_ID = models.ForeignKey(OrderDetail, on_delete=models.CASCADE)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     stripeChargeID = models.TextField(blank=True)
     orderCompleted = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
@@ -952,6 +1163,34 @@ class OrderFailure(models.Model):
 
     def __str__(self):
         return 'Stripe Charge ID: %s -- Order ID: %s' % (self.stripeChargeID, self.order_ID)
+
+
+#OrderLedger Table for all Orders
+
+class OrderLedger(models.Model):
+    customerMetauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    merchantStripeAccountInfoID = models.ForeignKey(stripeAccountInfo, on_delete=models.CASCADE)
+    userAddress = models.ForeignKey(UserAddress, on_delete=models.CASCADE)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    generateTrackingLabel = models.BooleanField(default=False)
+    customTrackingLabel = models.TextField(blank=True, null=True)
+    orderStatus = models.TextField(choices=[
+        ('PENDING', 'PENDING'),
+        ('CANCELLED', 'CANCELLED'),
+        ('FULFILLED', 'FULFILLED'),
+        ('REFUNDED', 'REFUNDED')
+    ])
+    paymentCaptured = models.BooleanField(default=False)
+    customerReceived = models.BooleanField(default=False)
+    merchantDelivered = models.BooleanField(default=False)
+    orderAmount = models.FloatField(default=0.0)
+    productVariant = models.TextField(blank=True)
+    quantity = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+ 
 
 # Create models for Vendor payouts if needed
 # maybe Shop_Payout Table
@@ -967,9 +1206,9 @@ class ShopPayout(models.Model):
 
 # Creating SysOps Agent & Repository Models - PROTECT - Can never be deleted
 class SysOpsAgent(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
-    departmentID = models.ForeignKey(BodegaDept, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    levelID = models.ForeignKey(Level, on_delete=models.CASCADE)
+    departmentID = models.ForeignKey(BodegaDept, on_delete=models.CASCADE)
     agent_hashkey = models.TextField(
         default=agent_hashkey_generator, unique=True)
     bio = models.TextField(default='I am Bodega')
@@ -988,8 +1227,8 @@ class SysOpsAgent(models.Model):
 
 class SysOpsAgentRepo(models.Model):
     # SysOps Agent Repo Design Structure
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    sysops_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    sysops_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.CASCADE)
     project_hashkey = JSONField(null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
@@ -1004,10 +1243,10 @@ class SysOpsAgentRepo(models.Model):
 
 class SysOpsProject(models.Model):
     # SysOps Project Design
-    owner_metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    owner_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.PROTECT)
-    levelID = models.ForeignKey(Level, on_delete=models.PROTECT)
-    divisionID = models.ForeignKey(BodegaDept, on_delete=models.PROTECT)
+    owner_metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    owner_agentID = models.ForeignKey(SysOpsAgent, on_delete=models.CASCADE)
+    levelID = models.ForeignKey(Level, on_delete=models.CASCADE)
+    divisionID = models.ForeignKey(BodegaDept, on_delete=models.CASCADE)
     name = models.TextField(default='Project Name')
     problem_statement = models.CharField(
         default='140 Characters', max_length=300)
@@ -1041,9 +1280,9 @@ class SysOpsProject(models.Model):
 
 class SysOpsSupplyNode(models.Model):
     # table for all creators who CREATE SHIT
-    supply_metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
-    supply_shopID = models.ForeignKey(Shop, on_delete=models.PROTECT)
-    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.PROTECT)
+    supply_metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    supply_shopID = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.CASCADE)
     opsec_agent_hashkey = models.TextField(default='AGENT HASHKEY')
     name = models.TextField(default='JOHN')
     location = models.TextField(default='New York BABY')
@@ -1089,7 +1328,7 @@ class SysOpsSupplyNode(models.Model):
 
 class SysOpsDemandNode(models.Model):
     # table for all creators who CAN SELL SHIT
-    demand_metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    demand_metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     opsec_agent_hashkey = models.TextField(default='AGENT HASHKEY')
     name = models.TextField(default='JOHN')
     location = models.TextField(default='New York BABY')
@@ -1123,7 +1362,7 @@ class SysOpsDemandNode(models.Model):
     # How can we fulfill their needs by collab with folks who work at Bodega? whats stopping them from reaching their maximu potential?
     sysops_solution_hypothesis = JSONField(null=True, blank=True)
     additional_notes = JSONField(null=True, blank=True)
-    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.PROTECT)
+    bla_ScoreID = models.ForeignKey(BLAScore, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
@@ -1150,13 +1389,324 @@ class SysOpsDemandNode(models.Model):
 #New Shop model with only imp information and auto-create
 
 class Notifications(models.Model):
-    metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     text = models.CharField(max_length=400)
-    image = models.FileField(upload_to='notifications/image_metadata', default='https://bdgdaostorage.blob.core.windows.net/media/product/product_image1/white-transparent-bdga.png')
+    image = models.CharField(default=None, max_length=255)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'Notification Text: %s ' % (self.text)
 
-        
+
+
+
+
+#Models for bdgdao public link URLs
+class BodegaPublicURL(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    metausername = models.TextField(blank=True)
+    bioCaption = models.TextField(blank=True)
+    subscriptionButton = models.BooleanField(default=False)
+    yerrrButton = models.BooleanField(default=False)
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    profileImage =  models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/profileImage/media', blank=True)
+    coverMedia = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media1 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media5 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media6 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media7 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media7', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media8 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media8', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media9 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media9', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media10 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media10', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media11 = models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media11', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media12= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media12', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media13= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media13', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media14= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media14', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media15= models.FileField(upload_to='bodegaMerchant/bodegaPublicURL/contentPage/media15', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    altText1 = models.TextField(blank=True)
+    altText2 = models.TextField(blank=True)
+    altText3 = models.TextField(blank=True)
+    altText4 = models.TextField(blank=True)
+    altText5 = models.TextField(blank=True)
+    altText6 = models.TextField(blank=True)
+    altText7 = models.TextField(blank=True)
+    altText8 = models.TextField(blank=True)
+    altText9 = models.TextField(blank=True)
+    altText10 = models.TextField(blank=True)
+    altText11 = models.TextField(blank=True)
+    altText12 = models.TextField(blank=True)
+    altText13 = models.TextField(blank=True)
+    altText14 = models.TextField(blank=True)
+    altText15 = models.TextField(blank=True)
+    caption1 = models.URLField( blank=True)
+    caption2 = models.URLField( blank=True)
+    caption3 = models.URLField( blank=True)
+    caption4 = models.URLField( blank=True)
+    caption5 = models.URLField( blank=True)
+    caption6 = models.URLField( blank=True)
+    caption7 = models.URLField( blank=True)
+    caption8 = models.URLField( blank=True)
+    caption9 = models.URLField( blank=True)
+    caption10 = models.URLField( blank=True)
+    caption11 = models.URLField( blank=True)
+    caption12 = models.URLField( blank=True)
+    caption13 = models.URLField( blank=True)
+    caption14 = models.URLField( blank=True)
+    caption15 = models.URLField( blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+class Memories(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    memoriesMedia = models.FileField(upload_to='bodegaMerchant/memories/media', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    memoriesCaption = models.TextField(blank=True)
+    expirationCondition = models.TextField(choices=[
+        ('5MINS', '5MINS'),
+        ('30MINS', '30MINS'),
+        ('24HOURS', '24HOURS'),
+        ('NEVER', 'NEVER')])
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+    
+
+
+#Models for Merchant Website Configuration
+
+#contentPage -- HomePage for Merchant Website
+class contentPage(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.SET(get_sentinel_MetaUser), default=get_sentinel_MetaUser_id)
+    media1 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media5 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media6 = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    caption1 = models.CharField(max_length=255, default='null')
+    caption2 = models.CharField(max_length=255, default='null')
+    caption3 = models.CharField(max_length=255, default='null')
+    caption4 = models.CharField(max_length=255, default='null')
+    caption5 = models.CharField(max_length=255, default='null')
+    caption6 = models.CharField(max_length=255, default='null')
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    buttonText5 = models.CharField(max_length=255, default='null')
+    buttonText6 = models.CharField(max_length=255, default='null')
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    headingText = models.CharField(max_length=300, default='null')
+    subheadingText = models.CharField(max_length=300, default='null')
+    libraryCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/contentPage/libraryCoverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    isPrivate = models.BooleanField(default=False)
+    isSubscriptionPage = models.BooleanField(default=False)
+    swiftTemplateID = models.IntegerField(default=0)
+    fontStyle = models.TextField(default='null')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+def get_sentinel_contentPage():
+    return contentPage.objects.get_or_create(caption1='deleted')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_contentPage_id():
+    return get_sentinel_contentPage().id
+
+#collectionPage which will be displaying products filtered by collectionID
+class collectionPage(models.Model):
+    collectionID = models.ForeignKey(ProductCollection, on_delete=models.CASCADE)
+    collectionCoverImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionPage/coverImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundImage = models.FileField(upload_to='bodegaMerchant/webshop/collectionImage/backgroundImage', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    backgroundColor = models.TextField(default='TRANSPARENT')
+    fontStyle = models.TextField(default='null')
+    isPrivate = models.BooleanField(default=False)
+    isSubscriptionPage = models.BooleanField(default=False)
+    swiftTemplateID = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+class textPage(models.Model):
+    media1 = models.FileField(upload_to='bodegaMerchant/webshop/textPage/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='bodegaMerchant/webshop/textPage/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    body = models.TextField(default='null')
+    headingText = models.TextField(default='null')
+    subheadingText = models.TextField(default='null')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+
+#Creating navigationBar and FooterBar database models
+class navigationBar(models.Model):
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    buttonText5 = models.CharField(max_length=255, default='null')
+    buttonText6 = models.CharField(max_length=255, default='null')
+    buttonText7 = models.CharField(max_length=255, default='null')
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    collectionButtonID5 = models.IntegerField(default=0)
+    collectionButtonID6 = models.IntegerField(default=0)
+    collectionButtonID7 = models.IntegerField(default=0)
+    brandLogo = models.FileField(upload_to='bodegaMerchant/webshop/navigationBar/brandLogo', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    bannerText = models.TextField(default='null')
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+def get_sentinel_navBar():
+    return navigationBar.objects.get_or_create(bannerText='DEFAULT_DB_ENTRY')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_navBar_id():
+    return get_sentinel_navBar().id
+
+class footerBar(models.Model):
+    buttonText1 = models.CharField(max_length=255, default='null')
+    buttonText2 = models.CharField(max_length=255, default='null')
+    buttonText3 = models.CharField(max_length=255, default='null')
+    buttonText4 = models.CharField(max_length=255, default='null')
+    buttonText5 = models.CharField(max_length=255, default='null')
+    buttonText6 = models.CharField(max_length=255, default='null')
+    buttonText7 = models.CharField(max_length=255, default='null')
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    collectionButtonID5 = models.IntegerField(default=0)
+    collectionButtonID6 = models.IntegerField(default=0)
+    collectionButtonID7 = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+def get_sentinel_footerBar():
+    return footerBar.objects.get_or_create(buttonText1='DEFAULT_DB_ENTRY')[0]
+    #Create entry if it doesn't exist else just load a placeholder
+
+def get_sentinel_footerBar_id():
+    return get_sentinel_footerBar().id
+
+class websiteSiteMapConfig(models.Model):
+    isGenesisBlock = models.BooleanField(default=False)
+    contentPageID = models.ForeignKey(contentPage, on_delete=models.SET(get_sentinel_contentPage), default=get_sentinel_contentPage_id)
+    navigationBarID = models.ForeignKey(navigationBar, on_delete=models.SET(get_sentinel_navBar), default=get_sentinel_navBar_id)
+    footerBarID = models.ForeignKey(footerBar, on_delete=models.SET(get_sentinel_footerBar), default=get_sentinel_footerBar_id)
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    collectionButtonID1 = models.IntegerField(default=0)
+    collectionButtonID2 = models.IntegerField(default=0)
+    collectionButtonID3 = models.IntegerField(default=0)
+    collectionButtonID4 = models.IntegerField(default=0)
+    collectionButtonID5 = models.IntegerField(default=0)
+    collectionButtonID6 = models.IntegerField(default=0)
+
+
+#MuchiesVideo and MunchiesPage will become a video-only website page which creators can use to upload videos content
+#Lets not release this now - we can release this later if there is demand.
+class MunchiesPage(models.Model):
+    munchiesPageName = models.CharField(max_length=255)
+    munchiesCoverImage = models.FileField(upload_to = 'munchies/coverImage')
+    munchiesPageViews = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Munchies Page Name: %s -- Total Views: %s' %(self.munchiesPageName, self.munchiesPageViews)
+
+
+
+#Creating Munchies Tabel
+class MunchiesVideo(models.Model):
+    munchiesPageID = models.ForeignKey(MunchiesPage, on_delete=models.CASCADE)
+    munchiesVideo = models.FileField(upload_to='munchies/videos')
+    munchiesCaption = models.CharField(max_length=200)
+    munchiesVideoTags = models.CharField(max_length=200)
+    munchiesDislikes = models.IntegerField(default=0)
+    munchiesVideoViews = models.IntegerField(default=0)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Munchies Video: %s -- Total Views: %s' %(self.munchiesVideo, self.munchiesVideoViews)
+
+
+#Marketing Tables
+
+
+class BodegaAnnouncementBanner(models.Model):
+    covermedia1 = models.FileField(upload_to='BodegaAnnouncementBanner/covermedia1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media1 = models.FileField(upload_to='BodegaAnnouncementBanner/media1', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media2 = models.FileField(upload_to='BodegaAnnouncementBanner/media2', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media3 = models.FileField(upload_to='BodegaAnnouncementBanner/media3', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media4 = models.FileField(upload_to='BodegaAnnouncementBanner/media4', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media5 = models.FileField(upload_to='BodegaAnnouncementBanner/media5', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media6 = models.FileField(upload_to='BodegaAnnouncementBanner/media6', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media7 = models.FileField(upload_to='BodegaAnnouncementBanner/media7', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media8 = models.FileField(upload_to='BodegaAnnouncementBanner/media8', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media9 = models.FileField(upload_to='BodegaAnnouncementBanner/media9', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    media10 = models.FileField(upload_to='BodegaAnnouncementBanner/media10', default='8954256a-cc48-4d73-a863-5c8ebe3c426c.jpeg')
+    swiftURL1 = models.TextField(blank=True)
+    swiftURL2 = models.TextField(blank=True)
+    swiftURL3 = models.TextField(blank=True)
+    swiftURL4 = models.TextField(blank=True)
+    swiftURL5 = models.TextField(blank=True)
+    swiftURL6 = models.TextField(blank=True)
+    swiftURL7 = models.TextField(blank=True)
+    swiftURL8 = models.TextField(blank=True)
+    swiftURL9 = models.TextField(blank=True)
+    swiftURL10 = models.TextField(blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+
+
+
+#FOLLOW BUTTON
+class BodegaFollowers(models.Model):
+    ownerMetaUserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    followerMetaUserID = models.IntegerField(blank=True)
+    followerMetaUserName = models.TextField(blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+    
+
+class bodegaSupport(models.Model):
+    metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
+    category = models.TextField(max_length=255, default="ORDER STATUS")
+    customerMessage = models.TextField(blank=True)
+    customerMessageMedia = models.FileField(upload_to='bodegaSupport/customerMessageMedia', blank=True)
+    bodegaReply = models.TextField(blank=True)
+    bodegaReplyMedia = models.FileField(upload_to='bodegaSupport/bodegaReplyMedia', blank=True)
+    ticketActive = models.BooleanField(default=True)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at =models.DateTimeField(auto_now_add=True)
+
+
+#Now, we will be programming the last piece of the Bodega application
+#which is SuperFire and ClapClap
+
+# class SuperFire(models.Model):
+#     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+#     productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+#     SuperFireClicked = models.BooleanField(default=False)
+#     created_at = models.DateField(auto_now_add=True)
+#     modified_at =models.DateTimeField(auto_now_add=True)
+
+# class ClapClap(models.Model):
+#     metauserID = models.ForeignKey(MetaUser, on_delete=models.PROTECT)
+#     productID = models.ForeignKey(Product, on_delete=models.PROTECT)
+#     ClapClapClicked = models.BooleanField(default=False)
+#     created_at = models.DateField(auto_now_add=True)
+#     modified_at =models.DateTimeField(auto_now_add=True)
+    

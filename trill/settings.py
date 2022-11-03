@@ -12,34 +12,43 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-from backend.custom_azure import AzureMediaStorage, AzureStaticStorage
+from backend.azure_blob import AzureMediaStorage, AzureStaticStorage
+#from genesiskey import *
+from .genesiskey import *
 
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.bdgdao.azurewebsites.net'
+    'https://*./bodegaproduction.azurewebsites.net',
+    'https://*.mybdga.com'
 ]
-# hello
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g5mid7ca(k)m94_hw$zdl*!y$ol&86py-c@@h=+nz+q*@ag=pj'
-
-# SECURITY WARNING: don't run with debug turned on in production!
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = False
+SECRET_KEY = SECRET_KEY
 DEBUG = True
+SUDO_DEPLOY=SUDO_DEPLOY
 
-if DEBUG:
-    STRIPE_PUBLISHABLE_KEY = 'test_publishable_key'
-    STRIPE_SECRET_KEY = 'test_secret_key'
+if DEBUG is False and SUDO_DEPLOY is True:
+    STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
+
+    SUDO25 = STRIPE_RAHUL_KEY
+elif DEBUG is True and SUDO_DEPLOY is False:
+    STRIPE_PUBLISHABLE_KEY=STRIPE_TEST_KEY
+
+elif DEBUG is True and SUDO_DEPLOY is True:
+    STRIPE_PUBLISHABLE_KEY = STRIPE_LIVE_KEY
+
+
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'https://bdgdao.azurewebsites.net'
+    'https://bodegaproduction.azurewebsites.net'
+    'https://mybdga.com'
 ]
 
 
@@ -53,9 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'corsheaders',
-
     'storages',
     'rest_framework',
     'stripe'
@@ -65,7 +72,7 @@ INSTALLED_APPS = [
 ]
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 100
 }
 
 SERVER_EMAIL = [
@@ -82,7 +89,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware'
 ]
@@ -124,7 +130,7 @@ ASGI_APPLICATION = 'trill.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'testdb',
+        'NAME': 'bodegalocaldb',
         'USER': 'postgres',
         'PASSWORD': '043074',
         'HOST': '127.0.0.1',
@@ -177,19 +183,6 @@ USE_TZ = True
 #STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-DEFAULT_FILE_STORAGE = 'backend.custom_azure.AzureMediaStorage'
-STATICFILES_STORAGE = 'backend.custom_azure.AzureStaticStorage'
-
-
-STATIC_LOCATION = "static"
-MEDIA_LOCATION = "media"
-
-
-AZURE_ACCOUNT_NAME = "bdgdaostorage"
-AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
-STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
-MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
-
 
 
 
@@ -200,10 +193,12 @@ STATICFILES_STORAGE = 'backend.azure_blob.AzureStaticStorage'
 STATIC_LOCATION = "static"
 MEDIA_LOCATION = "media"
 
-AZURE_ACCOUNT_NAME = 'bdgdaostorage'
+AZURE_ACCOUNT_NAME = 'projectbodegadb'
 AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
 STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+
+
 
 
 
