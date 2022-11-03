@@ -1684,7 +1684,10 @@ class BodegaFollowers(models.Model):
 class bodegaSupport(models.Model):
     metauserID = models.ForeignKey(MetaUser, on_delete=models.CASCADE)
     category = models.TextField(max_length=255, default="ORDER STATUS")
-    message = models.CharField(max_length=500, default="PROBLEM STATEMENT")
+    customerMessage = models.TextField(blank=True)
+    customerMessageMedia = models.FileField(upload_to='bodegaSupport/customerMessageMedia', blank=True)
+    bodegaReply = models.TextField(blank=True)
+    bodegaReplyMedia = models.FileField(upload_to='bodegaSupport/bodegaReplyMedia', blank=True)
     ticketActive = models.BooleanField(default=True)
     created_at = models.DateField(auto_now_add=True)
     modified_at =models.DateTimeField(auto_now_add=True)

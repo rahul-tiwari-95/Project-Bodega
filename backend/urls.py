@@ -89,10 +89,12 @@ urlpatterns = [
     # METAUSER API ENDPOINTS
     path('bodega-api/metauser/', views.MetaUserList.as_view()),
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
+    
 
      #METAUSER API ENDPOINTS via passcode=pk
      path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
      path('bodega-api/editMetaUserName/', views.editMetaUserName),
+     path('bodega-api/changePasscode/', views.changePasscode),
 
 
 
@@ -422,6 +424,17 @@ urlpatterns = [
     path('bodegaCreators/bodegaFollowers/<int:pk>/', views.BodegaFollowersDetail.as_view()),
 
     path('bodegaCreators/filterBodegaFollowersByMetaUserID', views.filterBodegaFollowersByOwnerMetaUserID),
+    
+    
+    #Bodega Support API 
+    path('bodegaSupport/', views.bodegaSupportList.as_view()),
+    path('bodegaSupport/<int:pk>/', views.bodegaSupportDetail.as_view()),
+    path('bodegaSupport/metauserfilter/', views.filterBodegaSupportByMetaUserID),
+    
+    #Bodega Announcement Banner APIs
+    path('bodegaAnnouncement/', views.BodegaAnnouncementBannerList.as_view()),
+    path('bodegaAnnouncement/<int:pk>/', views.BodegaAnnouncementBannerDetail.as_view()),
+    
     
     # path('superFire/', views.SuperFireList.as_view()),
     # path('superFire/<int:pk>/', views.SuperFireDetail.as_view()),

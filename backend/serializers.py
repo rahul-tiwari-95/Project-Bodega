@@ -469,6 +469,10 @@ class bodegaSupportSerializer(serializers.ModelSerializer):
     class Meta:
         model = bodegaSupport
         fields = '__all__'
+class BodegaAnnouncementBannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodegaAnnouncementBanner
+        fields = '__all__'
 
 
 class contentPageSerializer(serializers.ModelSerializer):

@@ -23,6 +23,7 @@ import json
 import httpie
 import shippo
 from trill.genesiskey import *
+from django.db import IntegrityError
 
 
 
@@ -77,16 +78,22 @@ class MetaUserAuth(generics.ListCreateAPIView):
     queryset = MetaUser.objects.all()
     serializer_class = MetaUserAuthSerializer
 
-# @csrf_exempt
-# def MetaUserAuthHashkey(request):
-#     #GET,PUT,DELETE request for metauser{id}
-    
-#     if request.method == 'POST':
-#         data = JSONParser().parse(request)
-#         serializer = MetaUserLoginSerializer(data=data)
-#         if serializer.is_valid():
-#             return JsonResponse(serializer.data, status=201)
-#         return JsonResponse(serializer.errors)
+#MetaUser Change Passcode API endpoint
+@api_view(['POST'])
+def changePasscode(request):
+    try: 
+        
+        instance = MetaUser.objects.get(meta_username=request.data['meta_username'])
+        instance.passcode = request.data['passcode']
+        instance.save()
+        return Response(data="Passcode changed successfully", status=status.HTTP_200_OK)
+    except IntegrityError as e:
+        if e :
+            return Response(data="Duplicate Passcode", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(data="User does not exist", status=status.HTTP_404_NOT_FOUND)
+   
+        
 
 @api_view(['POST'])    
 def metauserauth(request, pk):
@@ -2309,6 +2316,16 @@ class bodegaSupportDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = bodegaSupport.objects.all()
     serializer_class = bodegaSupportSerializer
 
+#Filter Bodega support by metauserID
+@api_view(['POST'])
+def filterBodegaSupportByMetaUserID(request):
+    try:
+        instance = bodegaSupport.objects.filter(metauserID=request.data['metauserID'])
+        serializer = bodegaSupportSerializer(instance, many=True)
+        return Response(serializer.data, status=200)
+    except bodegaSupport.DoesNotExist:
+        return Response(data="INVALID REQUEST", status=404)
+
 
 
 
@@ -3148,6 +3165,14 @@ def reverseBodegaShopFilter(request):
         return Response(status=404)
 
 
+#Bodega Announcement Banner code
+class BodegaAnnouncementBannerList(generics.ListCreateAPIView):
+    queryset = BodegaAnnouncementBanner.objects.all()
+    serializer_class = BodegaAnnouncementBannerSerializer
+
+class BodegaAnnouncementBannerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BodegaAnnouncementBanner.objects.all()
+    serializer_class = BodegaAnnouncementBannerSerializer
 
 
 #Message.objects.filter(chat_room_ID=request.data['chat_room_ID']).order_by('modified_at').reverse().values('id', 'message_body', 'modified_at', 'username', 'messageMedia')
@@ -3162,7 +3187,7 @@ def reverseBodegaShopFilter(request):
 #     serializer_class = SuperFireSerializer
 
 # #Filtering SuperFire by ProductID
-# @api_view(['POST'])
+# @api_view(['POST'])s
 # def filterSuperFireByProductID(request):
 #     try:
 #         instance = SuperFire.objects.filter(productID=request.data['productID'])
