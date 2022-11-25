@@ -93,7 +93,7 @@ class MetaUser(models.Model):
 
     def __str__(self):
         # returns username & modified_at
-        return 'username: %s -- ID: %s' % (self.meta_username, self.id)
+        return '%s' % (self.id)
 
 def get_sentinel_MetaUser():
     return MetaUser.objects.get_or_create(meta_username='rahultiwari', passcode='rahul@userone', discord_username='maeve22')[0]

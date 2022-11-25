@@ -22,6 +22,7 @@ import stripe
 import json
 import httpie
 import shippo
+import random
 from trill.genesiskey import *
 from django.db import IntegrityError
 
@@ -118,7 +119,19 @@ def editMetaUserName(request):
         return Response(serializer.data,status=200)
     except MetaUser.DoesNotExist:
         return Response(status=404)
+    
 
+#API endpoint which returns 30 random metauser IDs 
+@api_view(['POST'])
+def random30MetaUsers(request):
+    metausers = MetaUser.objects.all()
+    for m in metausers:
+        if m < MetaUser.objects.get(pk=random.randrange(30)):
+            instance = MetaUser.objects.get(pk=m)
+            serializer = MetaUserSerializer(instance, many=True)
+        else:
+            continue
+    return Response(serializer.data,status=200)
 
 
 @csrf_exempt
@@ -1770,16 +1783,6 @@ def createStripeAccount(request):
                                             business_profile = {
                                                 "name" :request.data['businessName'],
                                                 "product_description": request.data['businessDescription'],
-                                                "support_address":{
-                                                    "city": request.data['city'],
-                                                    "country": request.data['country'],
-                                                    "line1": request.data['addressLine1'],
-                                                    "line2": request.data['addressLine2'],
-                                                    "postal_code": request.data['postalCode'],
-                                                    "state": request.data['state']
-                                                },
-                                                "support_phone": request.data['support_phone'],
-                                                "support_url": request.data['support_url'],
                                             })
     
     #Store the following data into StripeAccountInfo Table and Shop Table
@@ -1787,17 +1790,9 @@ def createStripeAccount(request):
         stripeAccountInfo.objects.create(
                                     metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
                                     stripeAccountID = newStripeAccount.id,
-                                    businessType = request.data['businessType'],
                                     businessName = request.data['businessName'],
                                     businessDescription = request.data['businessDescription'],
-                                    businessCity = request.data['city'],
-                                    businessCountry = request.data['country'],
-                                    businessLine1 = request.data['addressLine1'],
-                                    businessLine2 = request.data['addressLine2'],
-                                    businessPostalCode = request.data['postalCode'],
                                     businessEmail = request.data['email'],
-                                    businessPhone =request.data['support_phone'],
-                                    businessURL = request.data['support_url'],
 
 
         )
@@ -1805,25 +1800,10 @@ def createStripeAccount(request):
                         metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
                         name = request.data['businessName'],
                         description = request.data['businessDescription'],
-                        address_line1 = request.data['addressLine1'],
-                        address_line2 = request.data['addressLine2'],
-                        city = request.data['city'],
-                        state = request.data['state'],
-                        postal_code = request.data['postalCode'],
                         country = request.data['country'],
-                        uniquesellingprop =request.data['uniquesellingprop'],
                         data_mining_status = True                        
         )
-        UserAddress.objects.create(
-                                    metauserID = MetaUser.objects.get(pk=request.data['metauserID']),
-                                    address_line1 = request.data['addressLine1'],
-                                    address_line2 = request.data['addressLine2'],
-                                    address_state = request.data['state'],
-                                    city = request.data['city'],
-                                    postal_code = request.data['postalCode'],
-                                    country = request.data['country'],
-                                    
-        )
+        
         return Response(newStripeAccount, status=200)
     except:
         return Response(data="TRY AGAIN IN 10 Seconds.", status=404)

@@ -90,6 +90,9 @@ urlpatterns = [
     path('bodega-api/metauser/', views.MetaUserList.as_view()),
     path('bodega-api/metauser/<int:pk>/', views.MetaUserDetail.as_view()),
     
+    #return 30 random MetaUserIDs API endpoint
+    path('bodega-api/randomMetaUsers/', views.random30MetaUsers),
+    
 
      #METAUSER API ENDPOINTS via passcode=pk
      path('bodega-api/metauserauth/<str:pk>/', views.metauserauth),
